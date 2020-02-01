@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ZH-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=gb2312"/>
+    <title>rtmp streamer example</title>
+    <script src="/husky/static/js/require.js"></script>
+</head>
+<body style="text-align: center;">
+
+rtmp address:
+<input id="url" type="text" style="width: 400px;" value="rtmp://10.1.29.250:41649/live" title="url">
+<input id="stream-name" type="text" style="width: 150px;" value="stream" title="stream-name">
+
+<h2>Streamer</h2>
+<object>
+    <embed id="rtmp-streamer" src="/husky/static/js/RtmpStreamer.swf" bgcolor="#999999" quality="high"
+           width="320" height="240" allowScriptAccess="sameDomain" type="application/x-shockwave-flash" />
+</object>
+<br>
+<button id="publish"> push</button>
+<button id="streamer-disconnect"> disconnect</button>
+
+<hr>
+
+<h2>Player1</h2>
+<object>
+    <embed id="rtmp-player" src="/husky/static/js/RtmpStreamer.swf" bgcolor="#999999" quality="high"
+           width="320" height="240" allowScriptAccess="sameDomain" type="application/x-shockwave-flash" />
+</object>
+<br>
+<button id="play"> play</button>
+<button id="player-disconnect"> disconnect</button>
+
+</body>
+</html>

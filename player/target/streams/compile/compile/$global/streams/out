@@ -1,0 +1,29 @@
+[0m[[0m[33mwarn[0m] [0m[0m/Users/chenzhishuai/IdeaProjects/VideoMeeting/player/src/main/scala/org/seekloud/VideoMeeting/player/core/ImageActor.scala:72:28: postfix operator millis should be enabled[0m
+[0m[[0m[33mwarn[0m] [0m[0mby making the implicit value scala.language.postfixOps visible.[0m
+[0m[[0m[33mwarn[0m] [0m[0mThis can be achieved by adding the import clause 'import scala.language.postfixOps'[0m
+[0m[[0m[33mwarn[0m] [0m[0mor by setting the compiler option -language:postfixOps.[0m
+[0m[[0m[33mwarn[0m] [0m[0mSee the Scaladoc for value scala.language.postfixOps for a discussion[0m
+[0m[[0m[33mwarn[0m] [0m[0mwhy the feature should be explicitly enabled.[0m
+[0m[[0m[33mwarn[0m] [0m[0m        (1000 / frameRate) millis //interval between two frames[0m
+[0m[[0m[33mwarn[0m] [0m[0m                           ^[0m
+[0m[[0m[33mwarn[0m] [0m[0m/Users/chenzhishuai/IdeaProjects/VideoMeeting/player/src/main/scala/org/seekloud/VideoMeeting/player/core/ImageActor.scala:108:30: postfix operator millis should be enabled[0m
+[0m[[0m[33mwarn[0m] [0m[0mby making the implicit value scala.language.postfixOps visible.[0m
+[0m[[0m[33mwarn[0m] [0m[0m          (1000 / frameRate) millis[0m
+[0m[[0m[33mwarn[0m] [0m[0m                             ^[0m
+[0m[[0m[33mwarn[0m] [0m[0m/Users/chenzhishuai/IdeaProjects/VideoMeeting/player/src/main/scala/org/seekloud/VideoMeeting/player/core/PlayerGrabber.scala:271:19: postfix operator millis should be enabled[0m
+[0m[[0m[33mwarn[0m] [0m[0mby making the implicit value scala.language.postfixOps visible.[0m
+[0m[[0m[33mwarn[0m] [0m[0m                5 millis[0m
+[0m[[0m[33mwarn[0m] [0m[0m                  ^[0m
+[0m[[0m[33mwarn[0m] [0m[0m/Users/chenzhishuai/IdeaProjects/VideoMeeting/player/src/main/scala/org/seekloud/VideoMeeting/player/core/PlayerGrabber.scala:290:65: postfix operator millis should be enabled[0m
+[0m[[0m[33mwarn[0m] [0m[0mby making the implicit value scala.language.postfixOps visible.[0m
+[0m[[0m[33mwarn[0m] [0m[0m              timer.startSingleTimer(GRAB_AUDIO_TIMER_KEY, m, 5 millis)[0m
+[0m[[0m[33mwarn[0m] [0m[0m                                                                ^[0m
+[0m[[0m[33mwarn[0m] [0m[0m/Users/chenzhishuai/IdeaProjects/VideoMeeting/player/src/main/scala/org/seekloud/VideoMeeting/player/core/SoundActor.scala:62:41: postfix operator millisecond should be enabled[0m
+[0m[[0m[33mwarn[0m] [0m[0mby making the implicit value scala.language.postfixOps visible.[0m
+[0m[[0m[33mwarn[0m] [0m[0m        (1000 * nbSamples / sampleRate) millisecond[0m
+[0m[[0m[33mwarn[0m] [0m[0m                                        ^[0m
+[0m[[0m[33mwarn[0m] [0m[0m/Users/chenzhishuai/IdeaProjects/VideoMeeting/player/src/main/scala/org/seekloud/VideoMeeting/player/core/SoundActor.scala:98:43: postfix operator millisecond should be enabled[0m
+[0m[[0m[33mwarn[0m] [0m[0mby making the implicit value scala.language.postfixOps visible.[0m
+[0m[[0m[33mwarn[0m] [0m[0m          (1000 * nbSamples / sampleRate) millisecond[0m
+[0m[[0m[33mwarn[0m] [0m[0m                                          ^[0m
+[0m[[0m[33mwarn[0m] [0m[0m6 warnings found[0m

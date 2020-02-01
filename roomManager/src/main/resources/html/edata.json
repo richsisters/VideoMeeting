@@ -1,0 +1,1148 @@
+{
+  "grinning": {
+    "keywords": ["face", "smile", "happy", "joy", ":D", "grin"],
+    "char": "😀",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "grimacing": {
+    "keywords": ["face", "grimace", "teeth"],
+    "char": "😬",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "grin": {
+    "keywords": ["face", "happy", "smile", "joy", "kawaii"],
+    "char": "😁",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "joy": {
+    "keywords": ["face", "cry", "tears", "weep", "happy", "happytears", "haha"],
+    "char": "😂",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "rofl": {
+    "keywords": ["face", "rolling", "floor", "laughing", "lol", "haha"],
+    "char": "🤣",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "smiley": {
+    "keywords": ["face", "happy", "joy", "haha", ":D", ":)", "smile", "funny"],
+    "char": "😃",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "smile": {
+    "keywords": ["face", "happy", "joy", "funny", "haha", "laugh", "like", ":D", ":)"],
+    "char": "😄",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "sweat_smile": {
+    "keywords": ["face", "hot", "happy", "laugh", "sweat", "smile", "relief"],
+    "char": "😅",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "laughing": {
+    "keywords": ["happy", "joy", "lol", "satisfied", "haha", "face", "glad", "XD", "laugh"],
+    "char": "😆",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "innocent": {
+    "keywords": ["face", "angel", "heaven", "halo"],
+    "char": "😇",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "wink": {
+    "keywords": ["face", "happy", "mischievous", "secret", ";)", "smile", "eye"],
+    "char": "😉",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "blush": {
+    "keywords": ["face", "smile", "happy", "flushed", "crush", "embarrassed", "shy", "joy"],
+    "char": "😊",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "slightly_smiling_face": {
+    "keywords": ["face", "smile"],
+    "char": "🙂",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "upside_down_face": {
+    "keywords": ["face", "flipped", "silly", "smile"],
+    "char": "🙃",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "relaxed": {
+    "keywords": ["face", "blush", "massage", "happiness"],
+    "char": "☺️",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "yum": {
+    "keywords": ["happy", "joy", "tongue", "smile", "face", "silly", "yummy", "nom", "delicious", "savouring"],
+    "char": "😋",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "relieved": {
+    "keywords": ["face", "relaxed", "phew", "massage", "happiness"],
+    "char": "😌",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "heart_eyes": {
+    "keywords": ["face", "love", "like", "affection", "valentines", "infatuation", "crush", "heart"],
+    "char": "😍",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "kissing_heart": {
+    "keywords": ["face", "love", "like", "affection", "valentines", "infatuation", "kiss"],
+    "char": "😘",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "kissing": {
+    "keywords": ["love", "like", "face", "3", "valentines", "infatuation", "kiss"],
+    "char": "😗",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "kissing_smiling_eyes": {
+    "keywords": ["face", "affection", "valentines", "infatuation", "kiss"],
+    "char": "😙",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "kissing_closed_eyes": {
+    "keywords": ["face", "love", "like", "affection", "valentines", "infatuation", "kiss"],
+    "char": "😚",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "stuck_out_tongue_winking_eye": {
+    "keywords": ["face", "prank", "childish", "playful", "mischievous", "smile", "wink", "tongue"],
+    "char": "😜",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "zany": {
+    "keywords": ["face", "goofy", "crazy"],
+    "char": "🤪",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "raised_eyebrow": {
+    "keywords": ["face", "distrust", "scepticism", "disapproval", "disbelief", "surprise"],
+    "char": "🤨",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "monocle": {
+    "keywords": ["face", "stuffy", "wealthy"],
+    "char": "🧐",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "stuck_out_tongue_closed_eyes": {
+    "keywords": ["face", "prank", "playful", "mischievous", "smile", "tongue"],
+    "char": "😝",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "stuck_out_tongue": {
+    "keywords": ["face", "prank", "childish", "playful", "mischievous", "smile", "tongue"],
+    "char": "😛",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "money_mouth_face": {
+    "keywords": ["face", "rich", "dollar", "money"],
+    "char": "🤑",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "nerd_face": {
+    "keywords": ["face", "nerdy", "geek", "dork"],
+    "char": "🤓",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "sunglasses": {
+    "keywords": ["face", "cool", "smile", "summer", "beach", "sunglass"],
+    "char": "😎",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "star_struck": {
+    "keywords": ["face", "smile", "starry", "eyes", "grinning"],
+    "char": "🤩",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "clown_face": {
+    "keywords": ["face"],
+    "char": "🤡",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "cowboy_hat_face": {
+    "keywords": ["face", "cowgirl", "hat"],
+    "char": "🤠",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "hugs": {
+    "keywords": ["face", "smile", "hug"],
+    "char": "🤗",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "smirk": {
+    "keywords": ["face", "smile", "mean", "prank", "smug", "sarcasm"],
+    "char": "😏",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "no_mouth": {
+    "keywords": ["face", "hellokitty"],
+    "char": "😶",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "neutral_face": {
+    "keywords": ["indifference", "meh", ":|", "neutral"],
+    "char": "😐",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "expressionless": {
+    "keywords": ["face", "indifferent", "-_-", "meh", "deadpan"],
+    "char": "😑",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "unamused": {
+    "keywords": ["indifference", "bored", "straight face", "serious", "sarcasm", "unimpressed", "skeptical", "dubious", "side_eye"],
+    "char": "😒",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "roll_eyes": {
+    "keywords": ["face", "eyeroll", "frustrated"],
+    "char": "🙄",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "thinking": {
+    "keywords": ["face", "hmmm", "think", "consider"],
+    "char": "🤔",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "lying_face": {
+    "keywords": ["face", "lie", "pinocchio"],
+    "char": "🤥",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "hand_over_mouth": {
+    "keywords": ["face", "whoops", "shock", "surprise"],
+    "char": "🤭",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "shushing": {
+    "keywords": ["face", "quiet", "shhh"],
+    "char": "🤫",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "symbols_over_mouth": {
+    "keywords": ["face", "swearing", "cursing", "cussing", "profanity", "expletive"],
+    "char": "🤬",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "exploding_head": {
+    "keywords": ["face", "shocked", "mind", "blown"],
+    "char": "🤯",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "flushed": {
+    "keywords": ["face", "blush", "shy", "flattered"],
+    "char": "😳",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "disappointed": {
+    "keywords": ["face", "sad", "upset", "depressed", ":("],
+    "char": "😞",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "worried": {
+    "keywords": ["face", "concern", "nervous", ":("],
+    "char": "😟",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "angry": {
+    "keywords": ["mad", "face", "annoyed", "frustrated"],
+    "char": "😠",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "rage": {
+    "keywords": ["angry", "mad", "hate", "despise"],
+    "char": "😡",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "pensive": {
+    "keywords": ["face", "sad", "depressed", "upset"],
+    "char": "😔",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "confused": {
+    "keywords": ["face", "indifference", "huh", "weird", "hmmm", ":/"],
+    "char": "😕",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "slightly_frowning_face": {
+    "keywords": ["face", "frowning", "disappointed", "sad", "upset"],
+    "char": "🙁",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "frowning_face": {
+    "keywords": ["face", "sad", "upset", "frown"],
+    "char": "☹",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "persevere": {
+    "keywords": ["face", "sick", "no", "upset", "oops"],
+    "char": "😣",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "confounded": {
+    "keywords": ["face", "confused", "sick", "unwell", "oops", ":S"],
+    "char": "😖",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "tired_face": {
+    "keywords": ["sick", "whine", "upset", "frustrated"],
+    "char": "😫",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "weary": {
+    "keywords": ["face", "tired", "sleepy", "sad", "frustrated", "upset"],
+    "char": "😩",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "triumph": {
+    "keywords": ["face", "gas", "phew", "proud", "pride"],
+    "char": "😤",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "open_mouth": {
+    "keywords": ["face", "surprise", "impressed", "wow", "whoa", ":O"],
+    "char": "😮",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "scream": {
+    "keywords": ["face", "munch", "scared", "omg"],
+    "char": "😱",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "animal-cut":{
+    "keywords": ["face", "munch", "scared", "omg"],
+    "char":"animal-cut",
+    "fitzpatrick_scale": false,
+    "category": "people"
+  },
+  "dog": {
+    "keywords": ["animal", "friend", "nature", "woof", "puppy", "pet", "faithful"],
+    "char": "🐶",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "cat": {
+    "keywords": ["animal", "meow", "nature", "pet", "kitten"],
+    "char": "🐱",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "mouse": {
+    "keywords": ["animal", "nature", "cheese_wedge", "rodent"],
+    "char": "🐭",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "hamster": {
+    "keywords": ["animal", "nature"],
+    "char": "🐹",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "rabbit": {
+    "keywords": ["animal", "nature", "pet", "spring", "magic", "bunny"],
+    "char": "🐰",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "fox_face": {
+    "keywords": ["animal", "nature", "face"],
+    "char": "🦊",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "bear": {
+    "keywords": ["animal", "nature", "wild"],
+    "char": "🐻",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "panda_face": {
+    "keywords": ["animal", "nature", "panda"],
+    "char": "🐼",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "koala": {
+    "keywords": ["animal", "nature"],
+    "char": "🐨",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "tiger": {
+    "keywords": ["animal", "cat", "danger", "wild", "nature", "roar"],
+    "char": "🐯",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "lion": {
+    "keywords": ["animal", "nature"],
+    "char": "🦁",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "cow": {
+    "keywords": ["beef", "ox", "animal", "nature", "moo", "milk"],
+    "char": "🐮",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "pig": {
+    "keywords": ["animal", "oink", "nature"],
+    "char": "🐷",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "pig_nose": {
+    "keywords": ["animal", "oink"],
+    "char": "🐽",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "frog": {
+    "keywords": ["animal", "nature", "croak", "toad"],
+    "char": "🐸",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "squid": {
+    "keywords": ["animal", "nature", "ocean", "sea"],
+    "char": "🦑",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "octopus": {
+    "keywords": ["animal", "creature", "ocean", "sea", "nature", "beach"],
+    "char": "🐙",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "shrimp": {
+    "keywords": ["animal", "ocean", "nature", "seafood"],
+    "char": "🦐",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "monkey_face": {
+    "keywords": ["animal", "nature", "circus"],
+    "char": "🐵",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "gorilla": {
+    "keywords": ["animal", "nature", "circus"],
+    "char": "🦍",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "see_no_evil": {
+    "keywords": ["monkey", "animal", "nature", "haha"],
+    "char": "🙈",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "hear_no_evil": {
+    "keywords": ["animal", "monkey", "nature"],
+    "char": "🙉",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "speak_no_evil": {
+    "keywords": ["monkey", "animal", "nature", "omg"],
+    "char": "🙊",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "monkey": {
+    "keywords": ["animal", "nature", "banana", "circus"],
+    "char": "🐒",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "chicken": {
+    "keywords": ["animal", "cluck", "nature", "bird"],
+    "char": "🐔",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "penguin": {
+    "keywords": ["animal", "nature"],
+    "char": "🐧",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "bird": {
+    "keywords": ["animal", "nature", "fly", "tweet", "spring"],
+    "char": "🐦",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "baby_chick": {
+    "keywords": ["animal", "chicken", "bird"],
+    "char": "🐤",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "hatching_chick": {
+    "keywords": ["animal", "chicken", "egg", "born", "baby", "bird"],
+    "char": "🐣",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "hatched_chick": {
+    "keywords": ["animal", "chicken", "baby", "bird"],
+    "char": "🐥",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "duck": {
+    "keywords": ["animal", "nature", "bird", "mallard"],
+    "char": "🦆",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "eagle": {
+    "keywords": ["animal", "nature", "bird"],
+    "char": "🦅",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "owl": {
+    "keywords": ["animal", "nature", "bird", "hoot"],
+    "char": "🦉",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "bat": {
+    "keywords": ["animal", "nature", "blind", "vampire"],
+    "char": "🦇",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "wolf": {
+    "keywords": ["animal", "nature", "wild"],
+    "char": "🐺",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "boar": {
+    "keywords": ["animal", "nature"],
+    "char": "🐗",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "horse": {
+    "keywords": ["animal", "brown", "nature"],
+    "char": "🐴",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "unicorn": {
+    "keywords": ["animal", "nature", "mystical"],
+    "char": "🦄",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "honeybee": {
+    "keywords": ["animal", "insect", "nature", "bug", "spring", "honey"],
+    "char": "🐝",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "bug": {
+    "keywords": ["animal", "insect", "nature", "worm"],
+    "char": "🐛",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "butterfly": {
+    "keywords": ["animal", "insect", "nature", "caterpillar"],
+    "char": "🦋",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "snail": {
+    "keywords": ["slow", "animal", "shell"],
+    "char": "🐌",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "beetle": {
+    "keywords": ["animal", "insect", "nature", "ladybug"],
+    "char": "🐞",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "ant": {
+    "keywords": ["animal", "insect", "nature", "bug"],
+    "char": "🐜",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "grasshopper": {
+    "keywords": ["animal", "cricket", "chirp"],
+    "char": "🦗",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "spider": {
+    "keywords": ["animal", "arachnid"],
+    "char": "🕷",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "scorpion": {
+    "keywords": ["animal", "arachnid"],
+    "char": "🦂",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "crab": {
+    "keywords": ["animal", "crustacean"],
+    "char": "🦀",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "snake": {
+    "keywords": ["animal", "evil", "nature", "hiss", "python"],
+    "char": "🐍",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "lizard": {
+    "keywords": ["animal", "nature", "reptile"],
+    "char": "🦎",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "t-rex": {
+    "keywords": ["animal", "nature", "dinosaur", "tyrannosaurus", "extinct"],
+    "char": "🦖",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "sauropod": {
+    "keywords": ["animal", "nature", "dinosaur", "brachiosaurus", "brontosaurus", "diplodocus", "extinct"],
+    "char": "🦕",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "turtle": {
+    "keywords": ["animal", "slow", "nature", "tortoise"],
+    "char": "🐢",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "tropical_fish": {
+    "keywords": ["animal", "swim", "ocean", "beach", "nemo"],
+    "char": "🐠",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "fish": {
+    "keywords": ["animal", "food", "nature"],
+    "char": "🐟",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "blowfish": {
+    "keywords": ["animal", "nature", "food", "sea", "ocean"],
+    "char": "🐡",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "dolphin": {
+    "keywords": ["animal", "nature", "fish", "sea", "ocean", "flipper", "fins", "beach"],
+    "char": "🐬",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "shark": {
+    "keywords": ["animal", "nature", "fish", "sea", "ocean", "jaws", "fins", "beach"],
+    "char": "🦈",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "whale": {
+    "keywords": ["animal", "nature", "sea", "ocean"],
+    "char": "🐳",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "whale2": {
+    "keywords": ["animal", "nature", "sea", "ocean"],
+    "char": "🐋",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "crocodile": {
+    "keywords": ["animal", "nature", "reptile", "lizard", "alligator"],
+    "char": "🐊",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "leopard": {
+    "keywords": ["animal", "nature"],
+    "char": "🐆",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "zebra": {
+    "keywords": ["animal", "nature", "stripes", "safari"],
+    "char": "🦓",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "fruit-cut": {
+    "keywords": ["animal", "nature", "stripes", "safari"],
+    "char": "fruit-cut",
+    "fitzpatrick_scale": false,
+    "category": "animals_and_nature"
+  },
+  "green_apple": {
+    "keywords": ["fruit", "nature"],
+    "char": "🍏",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "apple": {
+    "keywords": ["fruit", "mac", "school"],
+    "char": "🍎",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "pear": {
+    "keywords": ["fruit", "nature", "food"],
+    "char": "🍐",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "tangerine": {
+    "keywords": ["food", "fruit", "nature", "orange"],
+    "char": "🍊",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "lemon": {
+    "keywords": ["fruit", "nature"],
+    "char": "🍋",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "banana": {
+    "keywords": ["fruit", "food", "monkey"],
+    "char": "🍌",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "watermelon": {
+    "keywords": ["fruit", "food", "picnic", "summer"],
+    "char": "🍉",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "grapes": {
+    "keywords": ["fruit", "food", "wine"],
+    "char": "🍇",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "strawberry": {
+    "keywords": ["fruit", "food", "nature"],
+    "char": "🍓",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "melon": {
+    "keywords": ["fruit", "nature", "food"],
+    "char": "🍈",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "cherries": {
+    "keywords": ["food", "fruit"],
+    "char": "🍒",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "peach": {
+    "keywords": ["fruit", "nature", "food"],
+    "char": "🍑",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "pineapple": {
+    "keywords": ["fruit", "nature", "food"],
+    "char": "🍍",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "coconut": {
+    "keywords": ["fruit", "nature", "food", "palm"],
+    "char": "🥥",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "kiwi_fruit": {
+    "keywords": ["fruit", "food"],
+    "char": "🥝",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "avocado": {
+    "keywords": ["fruit", "food"],
+    "char": "🥑",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "broccoli": {
+    "keywords": ["fruit", "food", "vegetable"],
+    "char": "🥦",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "tomato": {
+    "keywords": ["fruit", "vegetable", "nature", "food"],
+    "char": "🍅",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "eggplant": {
+    "keywords": ["vegetable", "nature", "food", "aubergine"],
+    "char": "🍆",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "cucumber": {
+    "keywords": ["fruit", "food", "pickle"],
+    "char": "🥒",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "carrot": {
+    "keywords": ["vegetable", "food", "orange"],
+    "char": "🥕",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "hot_pepper": {
+    "keywords": ["food", "spicy", "chilli", "chili"],
+    "char": "🌶",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "potato": {
+    "keywords": ["food", "tuber", "vegatable", "starch"],
+    "char": "🥔",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "corn": {
+    "keywords": ["food", "vegetable", "plant"],
+    "char": "🌽",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "sweet_potato": {
+    "keywords": ["food", "nature"],
+    "char": "🍠",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "peanuts": {
+    "keywords": ["food", "nut"],
+    "char": "🥜",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "honey_pot": {
+    "keywords": ["bees", "sweet", "kitchen"],
+    "char": "🍯",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "croissant": {
+    "keywords": ["food", "bread", "french"],
+    "char": "🥐",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "bread": {
+    "keywords": ["food", "wheat", "breakfast", "toast"],
+    "char": "🍞",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "baguette_bread": {
+    "keywords": ["food", "bread", "french"],
+    "char": "🥖",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "pretzel": {
+    "keywords": ["food", "bread", "twisted"],
+    "char": "🥨",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "cheese": {
+    "keywords": ["food", "chadder"],
+    "char": "🧀",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "egg": {
+    "keywords": ["food", "chicken", "breakfast"],
+    "char": "🥚",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "bacon": {
+    "keywords": ["food", "breakfast", "pork", "pig", "meat"],
+    "char": "🥓",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "steak": {
+    "keywords": ["food", "cow", "meat", "cut", "chop", "lambchop", "porkchop"],
+    "char": "🥩",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "pancakes": {
+    "keywords": ["food", "breakfast", "flapjacks", "hotcakes"],
+    "char": "🥞",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "poultry_leg": {
+    "keywords": ["food", "meat", "drumstick", "bird", "chicken", "turkey"],
+    "char": "🍗",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "meat_on_bone": {
+    "keywords": ["good", "food", "drumstick"],
+    "char": "🍖",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "fried_shrimp": {
+    "keywords": ["food", "animal", "appetizer", "summer"],
+    "char": "🍤",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "fried_egg": {
+    "keywords": ["food", "breakfast", "kitchen", "egg"],
+    "char": "🍳",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "hamburger": {
+    "keywords": ["meat", "fast food", "beef", "cheeseburger", "mcdonalds", "burger king"],
+    "char": "🍔",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "fries": {
+    "keywords": ["chips", "snack", "fast food"],
+    "char": "🍟",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "stuffed_flatbread": {
+    "keywords": ["food", "flatbread", "stuffed", "gyro"],
+    "char": "🥙",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "hotdog": {
+    "keywords": ["food", "frankfurter"],
+    "char": "🌭",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "pizza": {
+    "keywords": ["food", "party"],
+    "char": "🍕",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "sandwich": {
+    "keywords": ["food", "lunch", "bread"],
+    "char": "🥪",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "canned_food": {
+    "keywords": ["food", "soup"],
+    "char": "🥫",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "spaghetti": {
+    "keywords": ["food", "italian", "noodle"],
+    "char": "🍝",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "taco": {
+    "keywords": ["food", "mexican"],
+    "char": "🌮",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "burrito": {
+    "keywords": ["food", "mexican"],
+    "char": "🌯",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "green_salad": {
+    "keywords": ["food", "healthy", "lettuce"],
+    "char": "🥗",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "shallow_pan_of_food": {
+    "keywords": ["food", "cooking", "casserole", "paella"],
+    "char": "🥘",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "ramen": {
+    "keywords": ["food", "japanese", "noodle", "chopsticks"],
+    "char": "🍜",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "stew": {
+    "keywords": ["food", "meat", "soup"],
+    "char": "🍲",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "fish_cake": {
+    "keywords": ["food", "japan", "sea", "beach", "narutomaki", "pink", "swirl", "kamaboko", "surimi", "ramen"],
+    "char": "🍥",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "fortune_cookie": {
+    "keywords": ["food", "prophecy"],
+    "char": "🥠",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "sushi": {
+    "keywords": ["food", "fish", "japanese", "rice"],
+    "char": "🍣",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "bento": {
+    "keywords": ["food", "japanese", "box"],
+    "char": "🍱",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "curry": {
+    "keywords": ["food", "spicy", "hot", "indian"],
+    "char": "🍛",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "rice": {
+    "keywords": ["food", "china", "asian"],
+    "char": "🍚",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "beer": {
+    "keywords": ["relax", "beverage", "drink", "drunk", "party", "pub", "summer", "alcohol", "booze"],
+    "char": "🍺",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "beers": {
+    "keywords": ["relax", "beverage", "drink", "drunk", "party", "pub", "summer", "alcohol", "booze"],
+    "char": "🍻",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  },
+  "clinking_glasses": {
+    "keywords": ["beverage", "drink", "party", "alcohol", "celebrate", "cheers", "wine", "champagne", "toast"],
+    "char": "🥂",
+    "fitzpatrick_scale": false,
+    "category": "food_and_drink"
+  }
+}

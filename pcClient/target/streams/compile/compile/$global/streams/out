@@ -1,0 +1,34 @@
+[0m[[0m[33mwarn[0m] [0m[0m/Users/chenzhishuai/IdeaProjects/VideoMeeting/pcClient/src/main/scala/org/seekloud/VideoMeeting/pcClient/core/player/VideoPlayer.scala:93:36: postfix operator millis should be enabled[0m
+[0m[[0m[33mwarn[0m] [0m[0mby making the implicit value scala.language.postfixOps visible.[0m
+[0m[[0m[33mwarn[0m] [0m[0mThis can be achieved by adding the import clause 'import scala.language.postfixOps'[0m
+[0m[[0m[33mwarn[0m] [0m[0mor by setting the compiler option -language:postfixOps.[0m
+[0m[[0m[33mwarn[0m] [0m[0mSee the Scaladoc for value scala.language.postfixOps for a discussion[0m
+[0m[[0m[33mwarn[0m] [0m[0mwhy the feature should be explicitly enabled.[0m
+[0m[[0m[33mwarn[0m] [0m[0m                (1000 / frameRate) millis[0m
+[0m[[0m[33mwarn[0m] [0m[0m                                   ^[0m
+[0m[[0m[33mwarn[0m] [0m[0m/Users/chenzhishuai/IdeaProjects/VideoMeeting/pcClient/src/main/scala/org/seekloud/VideoMeeting/pcClient/core/player/VideoPlayer.scala:102:36: postfix operator millis should be enabled[0m
+[0m[[0m[33mwarn[0m] [0m[0mby making the implicit value scala.language.postfixOps visible.[0m
+[0m[[0m[33mwarn[0m] [0m[0m                (1000 / frameRate) millis[0m
+[0m[[0m[33mwarn[0m] [0m[0m                                   ^[0m
+[0m[[0m[33mwarn[0m] [0m[0m/Users/chenzhishuai/IdeaProjects/VideoMeeting/pcClient/src/main/scala/org/seekloud/VideoMeeting/pcClient/core/player/VideoPlayer.scala:208:32: postfix operator millis should be enabled[0m
+[0m[[0m[33mwarn[0m] [0m[0mby making the implicit value scala.language.postfixOps visible.[0m
+[0m[[0m[33mwarn[0m] [0m[0m            (1000 / frameRate) millis[0m
+[0m[[0m[33mwarn[0m] [0m[0m                               ^[0m
+[0m[[0m[33mwarn[0m] [0m[0m/Users/chenzhishuai/IdeaProjects/VideoMeeting/pcClient/src/main/scala/org/seekloud/VideoMeeting/pcClient/core/player/VideoPlayer.scala:216:32: postfix operator millis should be enabled[0m
+[0m[[0m[33mwarn[0m] [0m[0mby making the implicit value scala.language.postfixOps visible.[0m
+[0m[[0m[33mwarn[0m] [0m[0m            (1000 / frameRate) millis[0m
+[0m[[0m[33mwarn[0m] [0m[0m                               ^[0m
+[0m[[0m[33mwarn[0m] [0m[0m/Users/chenzhishuai/IdeaProjects/VideoMeeting/pcClient/src/main/scala/org/seekloud/VideoMeeting/pcClient/scene/HostScene.scala:648:14: patterns after a variable pattern cannot match (SLS 8.1.1)[0m
+[0m[[0m[33mwarn[0m] [0m[0m        case i =>[0m
+[0m[[0m[33mwarn[0m] [0m[0m             ^[0m
+[0m[[0m[33mwarn[0m] [0m[0m/Users/chenzhishuai/IdeaProjects/VideoMeeting/pcClient/src/main/scala/org/seekloud/VideoMeeting/pcClient/scene/HostScene.scala:654:21: unreachable code due to variable pattern 'i' on line 648[0m
+[0m[[0m[33mwarn[0m] [0m[0m          List.empty[String][0m
+[0m[[0m[33mwarn[0m] [0m[0m                    ^[0m
+[0m[[0m[33mwarn[0m] [0m[0m/Users/chenzhishuai/IdeaProjects/VideoMeeting/pcClient/src/main/scala/org/seekloud/VideoMeeting/pcClient/scene/HostScene.scala:669:14: patterns after a variable pattern cannot match (SLS 8.1.1)[0m
+[0m[[0m[33mwarn[0m] [0m[0m        case i =>[0m
+[0m[[0m[33mwarn[0m] [0m[0m             ^[0m
+[0m[[0m[33mwarn[0m] [0m[0m/Users/chenzhishuai/IdeaProjects/VideoMeeting/pcClient/src/main/scala/org/seekloud/VideoMeeting/pcClient/scene/HostScene.scala:675:16: unreachable code due to variable pattern 'i' on line 669[0m
+[0m[[0m[33mwarn[0m] [0m[0m          List.empty[0m
+[0m[[0m[33mwarn[0m] [0m[0m               ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mthere was one deprecation warning; re-run with -deprecation for details[0m
+[0m[[0m[33mwarn[0m] [0m[0m9 warnings found[0m

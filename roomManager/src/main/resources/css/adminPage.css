@@ -1,0 +1,157 @@
+.adminContain{
+    display: flex;
+    justify-content:center;
+    flex-grow: 2;
+}
+.userContain{
+    width: 250px;
+    margin-top: 80px;
+}
+.sealed{
+    position: absolute;
+    right: 20px;
+    padding: 0 10px;
+    border: 1px solid #ef7d41;
+    color: #ef7d41;
+    cursor: pointer;
+
+}
+.sealed:hover{
+    background: rgba(239,125,65,.5);
+}
+.cancelSealed{
+    position: absolute;
+    right: 20px;
+    padding: 0 10px;
+    border: 1px solid #2b94ff;
+    color: #2b94ff;
+    cursor: pointer;
+}
+.cancelSealed:hover{
+    background: rgba(43,148,255,.5);
+}
+.admin-record-item{
+    width: 140px !important;
+}
+.adminVideoItem {
+    display: flex;
+    flex-flow: column nowrap;
+    position: relative;
+    margin: 0 50px 20px 5px;
+    width: 160px;
+    height: 140px;
+    cursor: pointer;
+}
+
+.removeVideo{
+    font-size: 13px;
+    padding: 3px 6px;
+    background: #7d817d;
+    color: #fff;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: none;
+}
+.recordVideo:hover .removeVideo{
+    font-size: 13px;
+    padding: 3px 6px;
+    background: #7d817d;
+    color: #fff;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: inline !important;
+}
+.userLists-title{
+    font-size: 30px;
+}
+.admincloseLive{
+    font-size: 14px;
+    padding: 5px 12px;
+    background: #bf4e4e;
+    color: white;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: none;
+}
+.adminVideoItem:hover .admincloseLive{
+    font-size: 14px;
+    padding: 5px 10px;
+    background: #bf4e4e;
+    color: white;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: inline !important;
+}
+/*-----Admin Header-----*/
+#admin-header-out:checked + .admin-header-list{
+    width: 0;
+}
+.admin-main{
+    display: flex;
+    position: relative;
+}
+.admin-header{
+    position: relative;
+    top: 120px;
+    height: 400px;
+}
+.admin-header-out{
+    position: absolute;
+    right: -20px;
+    bottom: 40%;
+    width: 20px;
+    height: 80px;
+    background: #ccc;
+    border-bottom-right-radius: 50%;
+    border-top-right-radius: 50%;
+}
+.admin-header-list{
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    position: relative;
+    height: 100%;
+    width: 120px;
+    background: rgba(256,256,256,.3);
+    border-right: 2px solid #e5e5e5;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: width 0.3s;
+}
+.admin-header-button{
+    width: 120px;
+    padding: 20px 0;
+    text-align: center;
+}
+.admin-header-button:hover{
+    background-color: rgba(0,0,0,0.1);
+    cursor: pointer;
+}
+/*-----peopleStat-----*/
+.people-input{
+    display: flex;
+    margin: 50px 0 20px 0;
+}
+.people-date{
+    width: 270px;
+    margin-left: 30px;
+    background-color: rgba(256,256,256,0.8);
+    border: 0;
+}
+.record-id{
+    margin-left:15px;
+}
+.record-time-text{
+    margin-left:50px;
+}
+#record-time-select{
+    margin-left:15px;
+}
+.record-time{
+    margin-left:15px;
+    width: 270px;
+}

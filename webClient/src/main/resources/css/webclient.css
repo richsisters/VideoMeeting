@@ -1,0 +1,184 @@
+.header{
+    border-bottom: 1px solid #e5e5e5;
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    height: 60px;
+    align-items: center;
+    padding: 0 20px;
+}
+.dash-video-player{
+    width: 65%;
+    background-color:#000000;
+    /*height: 520px;*/
+}
+.dash-video-player video{
+    width: 66%;
+    border-radius: 5px;
+}
+.chooseTwo{
+    display: flex;
+    margin-top: 200px;
+}
+#anchor{
+    width: 100px;
+    height: 60px;
+    border-radius: 20px;
+    margin-right: 20px;
+    background: #f29a38;
+    color: white;
+    line-height: 60px;
+    text-align: center;
+    box-shadow: 0px 0px 3px #b7b1b1cf;
+}
+#audience{
+    width: 100px;
+    height: 60px;
+    border-radius: 20px;
+    margin-left: 20px;
+    color: #f29a38;
+    background: white;
+    line-height: 60px;
+    text-align: center;
+    margin-right: 20px;
+    border: solid 1px #f29a38;
+    box-shadow: 0px 0px 3px #b7b1b1cf;
+}
+.closeAnchor{
+    width: 100px;
+    height: 60px;
+    border-radius: 20px;
+    margin-left: 20px;
+    color: #f29a38;
+    background: white;
+    line-height: 60px;
+    text-align: center;
+    margin-right: 20px;
+    border: solid 1px #f29a38;
+    font-size: 16px;
+}
+.audience_body{
+    display: flex;
+    align-items:flex-start;
+    padding: 50px 120px 0 120px;
+    justify-content: space-around;
+}
+.roomLists{
+    background: white;
+    margin-left: 20px;
+    border-radius: 3px 3px 0 0;
+    display: flex;
+}
+.roomLists-active{
+    font-size: 14px;
+    cursor:pointer;
+}
+.roomLists-noactive{
+    border: 1px solid #dddddd;
+    background: #eee;
+    color:#797f89;
+    font-size: 14px;
+    cursor:pointer;
+}
+.roomLists div{
+    width: 50%;
+    text-align: center;
+    height: 30px;
+    line-height: 30px;
+}
+.roomContain{
+    margin-left: 20px;
+    background: white;
+    padding: 15px;
+    min-width: 28%;
+    height: 425px;
+}
+.showBehind{
+    text-align: center;
+}
+.anchor-all{
+    background: white;
+    padding: 30px 30px 50px 30px;
+    box-shadow: 0px 0px 3px #b7b1b1cf;
+    border-radius: 3px 0 3px 3px;
+
+}
+.anchor-button{
+    background: white;
+    padding: 10px;
+    box-shadow: 3px 0px 3px #b7b1b1cf;
+    border-radius: 0 3px 3px 0;
+}
+.roomContainer{
+    width: 33%;
+}
+.video-controller{
+    margin-top: 250px;
+}
+.chatsend{
+    display: flex;
+    position: relative;
+    /*bottom: 70px;*/
+    margin-left: 20px;
+    justify-content: center;
+}
+.chatsend textarea{
+    border: 1px solid #ff921a;
+    background:#fff;
+    font-size:12px;
+    padding:5px 13px;
+    height:45px;
+    width: 330px;
+    overflow:hidden;
+    border-radius:4px 0 0 4px;
+    resize:none;
+    outline:none;
+}
+.chatsend-button{
+    width: 50px;
+    height: 57px;
+    line-height:57px;
+    border-radius: 0 4px 4px 0;
+    color:#fff;
+    font-size:14px;
+    text-align:center;
+    cursor:pointer;
+    background: #f70;
+}
+/*-----------------主播页start----------------------*/
+.anchorInfo{
+    background: white;
+}
+.videoBig {
+    display: block;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    cursor: pointer;
+}
+
+.videoSmall1 {
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 30%;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    cursor: pointer;
+    z-index: 1;
+    padding: 0px;
+}
+/*-----------------主播页end----------------------*/

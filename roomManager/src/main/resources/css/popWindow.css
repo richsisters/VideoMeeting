@@ -1,0 +1,312 @@
+#pop-login:checked + .pop-background{
+    display:flex;
+}
+#pop-emailLogin:checked + .pop-background{
+    display:flex;
+}
+#pop-register:checked + .pop-background{
+    display:flex;
+}
+#pop-common:checked + .pop-background{
+    display:flex;
+}
+.pop-background{
+    display: none;
+    flex-flow: column nowrap;
+    justify-content: center;
+    position: fixed;
+    z-index: 2;
+    right: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+}
+.pop-main{
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 50px auto;
+    padding: 10px 0 30px 0;
+    width:500px;
+    background-color: #EEEEEE;
+    border-radius: 20px;
+}
+.pop-title{
+    padding: 20px 30% 10px 30%;
+    font-size: 27px;
+    border-bottom: 0px solid gray;
+}
+.pop-content{
+    display: flex;
+    flex-flow: column nowrap;
+    padding: 10px 0;
+}
+.pop-text{
+    padding: 20px 15px 30px 15px;
+}
+.pop-input{
+    margin: 10px 5px;
+    height: 23px;
+    padding: 5px;
+    width: 190px;
+    border: 1px solid #DDDDDD;
+    border-radius: 10px;
+    transition: box-shadow 0.6s;
+}
+.pop-input:focus{
+    outline: none;
+    box-shadow: 0 0 5px #e17d25;
+}
+.pop-tip{
+    font-size: 15px;
+    line-height: 26px;
+    color: #2b94ff;
+    cursor: pointer;
+}
+.pop-confirm{
+    display:flex;
+    flex-flow:row nowrap;
+}
+.pop-button{
+    margin: 5px 8px;
+    min-width: 190px;
+    height: 23px;
+    padding: 5px 5px;
+    text-align:center;
+    color: #eaeaea;
+    background-color: #ff7700;
+    border: 0px solid gray;
+    border-radius: 10px;
+    cursor: pointer;
+    line-height: 23px;
+}
+
+.anchorControl .pop-background-anImg{
+    display: block;
+    flex-flow: column nowrap;
+    justify-content: center;
+    position: fixed;
+    z-index: 13;
+    right: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+}
+.pop-main-anImg{
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    margin: 200px auto 30px auto;
+    padding: 10px 0 30px 0;
+    width:500px;
+    background-color: #EEEEEE;
+    border-radius: 20px;
+}
+.header-backgroudImg{
+    /*background-image: url("/VideoMeeting/static/img/header1.jpg");*/
+    width: 100%;
+    height: 205px;
+    /*-webkit-background-size: 100% 100%;*/
+    /*background-size: 100% 100%;*/
+    /*background-repeat:no-repeat;*/
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    display: flex;
+    justify-content: space-around;
+    background: linear-gradient(rgba(239,125,65,.45), #f2f3f5);
+}
+
+/*礼物栏样式*/
+.bottom-content{
+    margin: 10px 0 0 0;
+    /* padding: 8px 0 0 0; */
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-end;
+    align-items: center;
+}
+.bottom-like{
+    background-image: url("/VideoMeeting/static/img/gifts/no-like.png");
+    background-size: 36px 36px;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin: 10px;
+    width: 36px;
+    height: 36px;
+    transition: transform 1s;
+}
+#bottom-like-button:checked + .bottom-like{
+    background-image: url("/VideoMeeting/static/img/gifts/like.png");
+    transform: scale(1.2);
+}
+.bottom-gifts{
+    display: flex;
+    flex-flow: row nowrap;
+    padding: 0 10px 0 50px;
+}
+@keyframes giftAnime{
+    0% {transform: rotate(0deg);}
+    25% {transform: rotate(20deg);}
+    75% {transform: rotate(-20deg);}
+    100% {transform: rotate(0deg);}
+}
+.bottom-gift{
+    position: relative;
+}
+.bottom-gift:hover .gift-content{
+    display: flex;
+}
+.bottom-gift:hover .bottom-gift-img{
+    animation: giftAnime 2s infinite;
+}
+.bottom-gift-img{
+    margin: 0 3px;
+    width: 46px;
+    height: 46px;
+}
+.gift-content{
+    position: absolute;
+    bottom: 50px;
+    left: -260px;
+    z-index: 100;
+    display: none;
+    flex-flow: column nowrap;
+    justify-content: space-around;
+    width: 360px;
+    background-color: #FDFDFD;
+    box-shadow: 0px 0px 10px #888888;
+    border-radius: 10px;
+}
+.gift-desc{
+    display: flex;
+    flex-flow: row nowrap;
+    border-bottom: 1px #D8D8D8 solid;
+}
+.gift-img{
+    width: 90px;
+    height: 90px;
+}
+.gift-text{
+    display: flex;
+    flex-flow: column nowrap;
+    padding: 10px 10px;
+}
+.gift-text-title{
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    line-height: 28px;
+}
+.gift-text-title-name{
+    font-size: 17px;
+}
+.gift-text-title-coinImg{
+    margin-left: 20px;
+    margin-right: 8px;
+    width: 17px;
+    height: 17px;
+}
+.gift-text-title-coin{
+    font-size: 15px;
+    color: #229988;
+}
+.gift-text-desc{
+    font-size: 13px;
+    color: #888888;
+}
+.gift-text-tip{
+    font-size: 13px;
+    line-height: 28px;
+}
+.gift-confirm{
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+    margin: 8px 20px;
+
+}
+.gift-number{
+    display: flex;
+    width: 65%;
+}
+.gift-number-check{
+    margin: 0 5px 0 0;
+    padding: 0 8px;
+    width: 38px;
+    text-align: center;
+    border: 1px solid gray;
+    border-radius: 6px;
+}
+.number1:checked + .gift-number-check{
+    border: 1px solid #ff921a;
+    color: #ff921a;
+    background-color: rgba(256,92,26,0.1);
+}
+.number10:checked + .gift-number-check{
+    border: 1px solid #ff921a;
+    color: #ff921a;
+    background-color: rgba(256,92,26,0.1);
+}
+.number100:checked + .gift-number-check{
+    border: 1px solid #ff921a;
+    color: #ff921a;
+    background-color: rgba(256,92,26,0.1);
+}
+.gift-number-input{
+    width: 40px;
+}
+.gift-send{
+    max-width: 80px;
+    padding: 8px 15px;
+    text-align:center;
+    color: #eaeaea;
+    background-color: #ff7700;
+    border: 0px solid gray;
+    border-radius: 8px;
+    cursor: pointer;
+    text-space: 10px;
+}
+
+/*-----------关注样式--------------*/
+.info-blank{
+    display: flex;
+    flex-grow: 2;
+}
+.attention{
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 20px 0px 0px;
+}
+.attention-button-close{
+    width: 25px;
+    height: 25px;
+    background-image: url("/VideoMeeting/roomManager/static/img/gifts/no-like.png");
+    background-size: cover;
+    cursor: pointer;
+}
+.attention-button-open{
+    width: 25px;
+    height: 25px;
+    background-image: url("/VideoMeeting/roomManager/static/img/gifts/like.png");
+    background-size: cover;
+    cursor: pointer;
+}
+.attention-number{
+    align-self: flex-end;
+    width: 40px;
+    padding: 0 0 0 0;
+    font-size: 16px;
+    color: gray;
+    border: none;
+    background-color: rgba(256,256,256,0);
+    text-align: center;
+}

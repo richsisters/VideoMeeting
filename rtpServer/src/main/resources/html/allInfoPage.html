@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GetAllInfo</title>
+  <style>
+    table{
+      border-collapse: collapse;
+      border-spacing: 0;
+      border: 1px solid #555;
+    }
+
+    table table{
+      border: 0px;
+      height:100%;
+      width:100%;
+    }
+
+    .thd{
+      border-left: 1px solid #555;
+      border-top: 1px solid #555;
+      padding: 5px;
+    }
+
+    .subDiv{
+      text-align:center;
+      width:80px;
+      border-right:1px solid #555;
+      padding: 5px;
+      float: left;
+    }
+
+    .subBiggerDiv{
+      text-align:center;
+      width:160px;
+      border-right:1px solid #555;
+      padding: 5px;
+      float: left;
+    }
+
+    .subLastDiv{
+      text-align:center;
+      width:80px;
+      padding: 5px;
+      display:inline-block;
+    }
+
+    .subtd{
+      border-left: 1px solid #555;
+      border-top: 1px solid #555;
+      border-bottom: 1px solid #555;
+      padding: 5px;
+    }
+
+    .subTdDiv{
+      width:80px;
+      text-align:center;
+      margin:0px;
+    }
+
+    .biggerSubTdDiv{
+      width:160px;
+      text-align:center;
+      margin:0px;
+    }
+
+    .lastTd{
+      border: 1px solid #555;
+      border-right:none;
+      padding: 5px;
+    }
+
+
+  </style>
+</head>
+<body>
+<button id="btn">暂停</button>
+<div id="container"></div>
+<script type="text/template" id="tableTemplate">
+  <div style='margin: 20px auto;line-height: 20px'>
+    <h1>拉流信息</h1>
+    <table>
+      <tr>
+        <th class="thd">IP</th>
+        <th class="thd">端口</th>
+        <th class="thd" style="padding:0px;">
+          <div style='border-bottom:1px solid #555;'>丢包率</div>
+          <div>
+            <div class="subBiggerDiv">liveId</div>
+            <div class="subDiv">60s(总)</div>
+            <div class="subDiv">60s(乱序)</div>
+            <div class="subDiv">10s(总)</div>
+            <div class="subDiv">10s(乱序)</div>
+            <div class="subDiv">2s(总)</div>
+            <div class="subLastDiv">2s(乱序)</div>
+          </div>
+        </th>
+        <th class="thd" style="padding:0px">
+          <div style='border-bottom:1px solid #555;'>带宽(bit/s)</div>
+          <div>
+            <div class="subDiv">10s</div>
+            <div class="subDiv">3s</div>
+            <div class="subLastDiv">1s</div>
+          </div>
+        </th>
+      </tr>
+      <% for(var i = 0; i < allInfo.pullStreamInfo.length; ++i) {%>
+        <tr>
+          <td class="thd"><%=allInfo.pullStreamInfo[i].address.host%></td>
+          <td class="thd"><%=allInfo.pullStreamInfo[i].address.port%></td>
+          <td style='height:95px;padding:0;'>
+            <table>
+              <%for(var j = 0; j < allInfo.pullStreamInfo[i].packageInfo.length; ++j){%>
+                <tr>
+                  <td class="subtd"><div class="biggerSubTdDiv"><%=allInfo.pullStreamInfo[i].packageInfo[j].liveId%></div></td>
+                  <td class="subtd"><div class="subTdDiv"><%=allInfo.pullStreamInfo[i].packageInfo[j].packageLossInfo.lossScale60.toFixed(4)%></div></td>
+                  <td class="subtd"><div class="subTdDiv"><%=allInfo.pullStreamInfo[i].packageInfo[j].packageLossInfo.throwScale60.toFixed(4)%></div></td>
+                  <td class="subtd"><div class="subTdDiv"><%=allInfo.pullStreamInfo[i].packageInfo[j].packageLossInfo.lossScale10.toFixed(4)%></div></td>
+                  <td class="subtd"><div class="subTdDiv"><%=allInfo.pullStreamInfo[i].packageInfo[j].packageLossInfo.throwScale10.toFixed(4)%></div></td>
+                  <td class="subtd"><div class="subTdDiv"><%=allInfo.pullStreamInfo[i].packageInfo[j].packageLossInfo.lossScale2.toFixed(4)%></div></td>
+                  <td class="lastTd"><div class="subTdDiv"><%=allInfo.pullStreamInfo[i].packageInfo[j].packageLossInfo.throwScale2.toFixed(4)%></div></td>
+                </tr>
+              <%}%>
+            </table>
+          </td>
+          <td  style='padding:0;height:95px;'>
+            <table>
+              <tr>
+                <td class="subtd"><div class="subTdDiv"><%=allInfo.pullStreamInfo[i].bandwidthInfo.in10s%></div></td>
+                <td class="subtd"><div class="subTdDiv"><%=allInfo.pullStreamInfo[i].bandwidthInfo.in3s%></div></td>
+                <td class="lastTd"><div class="subTdDiv"><%=allInfo.pullStreamInfo[i].bandwidthInfo.in1s%></div></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      <%}%>
+    </table>
+  </div>
+  <div style='margin: 20px auto;line-height: 20px'>
+    <h1>推流信息</h1>
+    <table>
+      <tr>
+        <th class="thd">ip</th>
+        <th class="thd">port</th>
+        <th class="thd">liveId</th>
+        <th class="thd">ssrc</th>
+        <th class="thd" style="padding:0px">
+          <div style='border-bottom:1px solid #555;'>带宽(bit/s)</div>
+          <div>
+            <div class="subDiv">10s</div>
+            <div class="subDiv">3s</div>
+            <div class="subLastDiv">1s</div>
+          </div>
+        </th>
+        <th class="thd">延时(ms)</th>
+      </tr>
+      <%for(var i = 0; i < allInfo.streamInfo.length; ++i){%>
+        <tr>
+          <td class="thd"><%=allInfo.streamInfo[i].ip%></td>
+          <td class="thd"><%=allInfo.streamInfo[i].port%></td>
+          <td class="thd"><%=allInfo.streamInfo[i].liveId%></td>
+          <td class="thd"><%=allInfo.streamInfo[i].ssrc%></td>
+          <td style='padding:0;height:95px'>
+            <table>
+              <tr>
+                <%
+                function findBandWidth(target){
+                  for(var j = 0; j < allInfo.streamInfo[i].bandwidth.length; ++j){
+                    if(allInfo.streamInfo[i].bandwidth[j][0] == target){
+                      return allInfo.streamInfo[i].bandwidth[j][1];
+                    }
+                  }
+                  return 0;
+                }
+                %>
+                <td class="subtd"><div class="subTdDiv"><%=findBandWidth(10)%></div></td>
+                <td class="subtd"><div class="subTdDiv"><%=findBandWidth(3)%></div></td>
+                <td class="lastTd"><div style='width:80px;border-right:none;text-align:center'><%=findBandWidth(1)%></div></td>
+              </tr>
+            </table>
+          </td>
+          <td class="thd"><%=allInfo.streamInfo[i].delay%></td>
+        </tr>
+      <%}%>
+    </table>
+  </div>
+</script>
+<script src="/VideoMeeting/rtpServer/static/js/jquery.min.js"></script>
+<script src="/VideoMeeting/rtpServer/static/js/template-native.js"></script>
+<script src="/VideoMeeting/rtpServer/static/js/allInfoPage.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VideoMeeting</title>
+    <link rel="stylesheet" href="/VideoMeeting/roomManager/static/css/phoneClient.css">
+    <script class="code" src="/VideoMeeting/roomManager/static/js/dash.all.debug.js"></script>
+    <script type="text/javascript" src="/VideoMeeting/roomManager/static/js/TestC-copy.js"></script>
+    <script type="text/javascript" src="/VideoMeeting/roomManager/static/js/util.js"></script>
+    <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
+    <script src="https://unpkg.com/video.js/dist/video.js"></script>
+    <script src="https://unpkg.com/videojs-contrib-hls/dist/videojs-contrib-hls.js"></script>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0,minimum-scale=1.0,maximum-scale=1.0">
+    <script>
+        (function (doc, win) {
+            var docEl = doc.documentElement,
+                resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+                recalc = function () {
+                    var clientWidth = docEl.clientWidth;
+                    if (!clientWidth) return;
+                    docEl.style.fontSize = 100 * (clientWidth / 375) + 'px';
+                };
+            if (!doc.addEventListener) return;
+            win.addEventListener(resizeEvt, recalc, false);
+            doc.addEventListener('DOMContentLoaded', recalc, false);
+        })(document, window);
+    </script>
+</head>
+<body onload="setHeight()">
+<script>
+    function setHeight() {
+        var hrt = document.documentElement.clientHeight;//获取当前可视区域的高度
+        document.body.style.height= hrt+'px'//把获取到的高度赋值给根div
+    };
+    function browserRedierc() {
+        var userAgent = navigator.userAgent.toLowerCase();
+        console.log("webClient:  " + userAgent)
+        var bIsIphoneOs = userAgent.match(/iphone os/i) == "iphone os";
+        var bIsMidp = userAgent.match(/midp/i) == "midp";
+        var bIsUc7 = userAgent.match(/rv:1.2.3.4/i) == "rv:1.2.3.4";
+        var bIsUc = userAgent.match(/ucweb/i) == "ucweb";
+        var bIsAndroid = userAgent.match(/android/i) == "android";
+        var bIsCE = userAgent.match(/windows ce/i) == "windows ce";
+        var bIsWM = userAgent.match(/windows mobile/i) == "windows mobile";
+        if (!(bIsIphoneOs || bIsMidp || bIsUc7 || bIsUc || bIsAndroid || bIsCE || bIsWM) ){
+            window.location.href = window.location.origin + "/VideoMeeting/webClient"
+        } else {
+
+        }
+    }
+    browserRedierc()
+</script>
+<script type="text/javascript" src="/VideoMeeting/roomManager/static/sjsout/phoneclient-fastopt.js"></script>
+</body>
+</html>

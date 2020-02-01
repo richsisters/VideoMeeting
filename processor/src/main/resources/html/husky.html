@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Husky</title>
+    <link rel="stylesheet" href="/husky/static/css/controlbar.css">
+    <script src="/husky/static/js/require.js"></script>
+    <!--<script src="/husky/static/js/dash.all.min.js"></script>-->
+    <script class="code" src="/husky/static/js/ControlBar.js"></script>
+    <script class="code" src="/husky/static/js/dash.all.debug.js"></script>
+    <script src="/husky/static/js/rtmp-streamer.min.js"></script>
+    <script src="/husky/static/js/TestC.js"></script>
+    <!--<script src="/husky/static/js/utils.js"></script>-->
+    <style>
+        .header{
+            border-bottom: 1px solid #e5e5e5;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            height: 60px;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .dash-video-player{
+            width: 65%;
+            background-color:#000000;
+        }
+        video{
+            width: 100%;
+        }
+        .chooseTwo{
+            display: flex;
+            margin-top: 200px;
+        }
+        #anchor{
+            width: 100px;
+            height: 60px;
+            border-radius: 20px;
+            margin-right: 20px;
+            background: #f29a38;
+            color: white;
+            line-height: 60px;
+            text-align: center;
+            box-shadow: 0px 0px 3px #b7b1b1cf;
+        }
+        #audience{
+            width: 100px;
+            height: 60px;
+            border-radius: 20px;
+            margin-left: 20px;
+            color: #f29a38;
+            background: white;
+            line-height: 60px;
+            text-align: center;
+            margin-right: 20px;
+            border: solid 1px #f29a38;
+            box-shadow: 0px 0px 3px #b7b1b1cf;
+        }
+        .closeAnchor{
+            width: 100px;
+            height: 60px;
+            border-radius: 20px;
+            margin-left: 20px;
+            color: #f29a38;
+            background: white;
+            line-height: 60px;
+            text-align: center;
+            margin-right: 20px;
+            border: solid 1px #f29a38;
+            font-size: 16px;
+        }
+        .audience_body{
+            display: flex;
+            width: 100%;
+            align-items:flex-start;
+        }
+        .roomLists{
+            background: white;
+            padding: 20px;
+            margin-left: 20px;
+            max-width: 20%;
+        }
+        .roomContain{
+            margin-left: 20px;
+            background: white;
+            padding: 15px;
+            min-width: 28%;
+        }
+        .showBehind{
+            text-align: center;
+        }
+        .anchor-all{
+            background: white;
+            padding: 30px 30px 50px 30px;
+            box-shadow: 0px 0px 3px #b7b1b1cf;
+            border-radius: 3px 0 3px 3px;
+
+        }
+        .anchor-button{
+            background: white;
+            padding: 10px;
+            box-shadow: 3px 0px 3px #b7b1b1cf;
+            border-radius: 0 3px 3px 0;
+        }
+    </style>
+</head>
+<body style="background:#eeeeee;margin: 0px;">
+
+<div class="header">
+    <div style="display:flex;width:100px;justify-content:space-around">
+        <div id="login">登录</div>
+        <div id="register">注册</div>
+    </div>
+</div>
+<div class="body" id="body"></div>
+</body>
+
+<script type="text/javascript" src="/husky/static/jsFile/frontend-fastopt/20190529"></script>
+
+</html>
