@@ -1,7 +1,7 @@
 ### 开始拉流
 ```
 POST请求
-URL：/theia/distributor/startPull
+URL：/VideoMeeting/distributor/startPull
 req:
 case class StartPullReq(
     roomId:Long,
@@ -18,7 +18,7 @@ case class StartPullRsp(
 ### 结束拉流
 ```
 POST请求
-URL：/theia/distributor/finishPull
+URL：/VideoMeeting/distributor/finishPull
 req:
 case class FinishPullReq(
   liveId:String
@@ -32,7 +32,7 @@ rsp:
 ### 查询某条流状态
 ```
 POST请求
-URL：/theia/distributor/checkStream
+URL：/VideoMeeting/distributor/checkStream
 req:
 case class CheckStreamReq(
   liveId:String
@@ -47,7 +47,7 @@ case class CheckStreamRsp(
 ### 查找录像
 ```
 POST请求
-URL：/theia/distributor/seekRecord
+URL：/VideoMeeting/distributor/seekRecord
 req:
 case class SeekRecord(
     roomId:Long,

@@ -17,7 +17,7 @@
   - application.conf
     - 配置文件
 
-- scala.seekloud.theia.distirbutor
+- scala.seekloud.VideoMeeting.distirbutor
   - common
     - AppSetting
         - 管理application配置文件（可对akka进行配置管理）

@@ -66,22 +66,22 @@ function sendGifts(str) {
     var cmtArr = [];
     var dur = Math.floor(Math.random()*4000 + 4000);
     if(str.indexOf('西蓝花') !== -1){
-        cmtArr = [{"text":str,"imgUrl":'/theia/roomManager/static/img/gifts/broccoli.png',"color":'808000',"size":25,"gift":true}];
+        cmtArr = [{"text":str,"imgUrl":'/VideoMeeting/roomManager/static/img/gifts/broccoli.png',"color":'808000',"size":25,"gift":true}];
     }
     else if(str.indexOf('棒棒糖') !== -1 ){
-        cmtArr = [{"text":str,"imgUrl":'/theia/roomManager/static/img/gifts/lollipop.png',"color":'808000',"size":25,"gift":true}];
+        cmtArr = [{"text":str,"imgUrl":'/VideoMeeting/roomManager/static/img/gifts/lollipop.png',"color":'808000',"size":25,"gift":true}];
     }
     else if(str.indexOf('雪糕') !== -1 ){
-        cmtArr = [{"text":str,"imgUrl":'/theia/roomManager/static/img/gifts/ice-cream.png',"color":'808000',"size":25,"gift":true}];
+        cmtArr = [{"text":str,"imgUrl":'/VideoMeeting/roomManager/static/img/gifts/ice-cream.png',"color":'808000',"size":25,"gift":true}];
     }
     else if(str.indexOf('面包') !== -1 ){
-        cmtArr = [{"text":str,"imgUrl":'/theia/roomManager/static/img/gifts/bread.png',"color":'808000',"size":25,"gift":true}];
+        cmtArr = [{"text":str,"imgUrl":'/VideoMeeting/roomManager/static/img/gifts/bread.png',"color":'808000',"size":25,"gift":true}];
     }
     else if(str.indexOf('果汁') !== -1 ){
-        cmtArr = [{"text":str,"imgUrl":'/theia/roomManager/static/img/gifts/juice.png',"color":'808000',"size":25,"gift":true}];
+        cmtArr = [{"text":str,"imgUrl":'/VideoMeeting/roomManager/static/img/gifts/juice.png',"color":'808000',"size":25,"gift":true}];
     }
     else if(str.indexOf('蛋糕') !== -1 ){
-        cmtArr = [{"text":str,"imgUrl":'/theia/roomManager/static/img/gifts/cake.png',"color":'808000',"size":25,"gift":true}];
+        cmtArr = [{"text":str,"imgUrl":'/VideoMeeting/roomManager/static/img/gifts/cake.png',"color":'808000',"size":25,"gift":true}];
     }else{
         cmtArr = [{"text":str,"imgUrl":str,"color":'808000',"size":25}];
     }

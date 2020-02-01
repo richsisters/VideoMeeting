@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Adaptive Streaming with HTML5</title>
-    <script src="/theia/static/js/dash.all.min.js"></script>
+    <script src="/VideoMeeting/static/js/dash.all.min.js"></script>
 </head>
 <style>
     video {
@@ -19,7 +19,7 @@
     // setup the video element and attach it to the Dash player
     function setupVideo() {
         // var url = "http://10.1.29.246:41650/dash/10000/index.mpd";
-        var url = "http://10.1.29.246:41660/theia/processor/get/10000/index.mpd";
+        var url = "http://10.1.29.246:41660/VideoMeeting/processor/get/10000/index.mpd";
         var player = dashjs.MediaPlayer().create();
         player.initialize(document.querySelector("#videoplayer"), url, true);
     }

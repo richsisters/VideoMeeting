@@ -52,7 +52,7 @@ var animalHtml = "";
 var fruitOrFoodHtml = "";
 function fetchEmoji(type) {
     if(!fetchOver){
-        fetch('/theia/roomManager/static/html/edata.json').then(data => data.json()).then(json =>{
+        fetch('/VideoMeeting/roomManager/static/html/edata.json').then(data => data.json()).then(json =>{
             var cutFlag = 1;
             for( k in json){
                 var emoji = json[k];
