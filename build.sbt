@@ -49,35 +49,6 @@ lazy val rtpClient = (project in file("rtpClient"))
 
 
 
-lazy val phoneClient = (project in file("phoneClient"))
-  .enablePlugins(ScalaJSPlugin)
-  .settings(name := "phoneClient")
-  .settings(commonSettings: _*)
-  .settings(
-    inConfig(Compile)(
-      Seq(
-        fullOptJS,
-        fastOptJS,
-        packageJSDependencies,
-        packageMinifiedJSDependencies
-      ).map(f => (crossTarget in f) ~= (_ / "sjsout"))
-    ))
-  .settings(skip in packageJSDependencies := false)
-  .settings(
-    scalaJSUseMainModuleInitializer := true,
-    //mainClass := Some("com.neo.sk.virgour.front.Main"),
-    libraryDependencies ++= Seq(
-      "io.circe" %%% "circe-core" % "0.8.0",
-      "io.circe" %%% "circe-generic" % "0.8.0",
-      "io.circe" %%% "circe-parser" % "0.8.0",
-      "org.scala-js" %%% "scalajs-dom" % "0.9.2",
-      "com.lihaoyi" %%% "scalatags" % "0.6.7" withSources(),
-      "org.seekloud" %%% "byteobject" % "0.1.1",
-      "in.nvilla" %%% "monadic-html" % "0.4.0-RC1" withSources()
-    )
-  )
-  .dependsOn(webrtcMessageJs, protocolJs)
-
 lazy val webClient = (project in file("webClient"))
   .enablePlugins(ScalaJSPlugin)
   .settings(name := "webClient")
@@ -183,36 +154,6 @@ lazy val player = (project in file("player")).enablePlugins(PackPlugin)
   .dependsOn(protocolJvm, rtpClient)
 
 
-lazy val statistics = (project in file("statistics"))
-  .enablePlugins(ScalaJSPlugin)
-  .settings(name := "statistics")
-  .settings(commonSettings: _*)
-  .settings(
-    inConfig(Compile)(
-      Seq(
-        fullOptJS,
-        fastOptJS,
-        packageJSDependencies,
-        packageMinifiedJSDependencies
-      ).map(f => (crossTarget in f) ~= (_ / "sjsout"))
-    ))
-  .settings(skip in packageJSDependencies := false)
-  .settings(
-    scalaJSUseMainModuleInitializer := true,
-    //mainClass := Some("com.neo.sk.virgour.front.Main"),
-    libraryDependencies ++= Seq(
-      "io.circe" %%% "circe-core" % "0.8.0",
-      "io.circe" %%% "circe-generic" % "0.8.0",
-      "io.circe" %%% "circe-parser" % "0.8.0",
-      "org.scala-js" %%% "scalajs-dom" % "0.9.2",
-      "com.lihaoyi" %%% "scalatags" % "0.6.7" withSources(),
-      "org.seekloud" %%% "byteobject" % "0.1.1",
-      "in.nvilla" %%% "monadic-html" % "0.4.0-RC1" withSources()
-    )
-  )
-  .dependsOn(protocolJs)
-
-
 val roomManagerMain = "org.seekloud.VideoMeeting.roomManager.Boot"
 
 lazy val roomManager = (project in file("roomManager")).enablePlugins(PackPlugin)
@@ -256,50 +197,7 @@ lazy val roomManager = (project in file("roomManager")).enablePlugins(PackPlugin
   )
   .settings(scalaJSUseMainModuleInitializer := false)
   .dependsOn(protocolJvm)
-
-  .settings {
-    (resourceGenerators in Compile) += Def.task {
-      val fastJsOut = (fastOptJS in Compile in phoneClient).value.data
-      val fastJsSourceMap = fastJsOut.getParentFile / (fastJsOut.getName + ".map")
-      Seq(
-        fastJsOut,
-        fastJsSourceMap
-      )
-    }.taskValue
-  }
-  .settings((resourceGenerators in Compile) += Def.task {
-    Seq(
-      (packageJSDependencies in Compile in phoneClient).value
-      //(packageMinifiedJSDependencies in Compile in frontend).value
-    )
-  }.taskValue)
-  .settings(
-    (resourceDirectories in Compile) += (crossTarget in phoneClient).value,
-    watchSources ++= (watchSources in phoneClient).value
-  )
-  .settings(scalaJSUseMainModuleInitializer := false)
-  .dependsOn(protocolJvm)
-
-  .settings {
-    (resourceGenerators in Compile) += Def.task {
-      val fastJsOut = (fastOptJS in Compile in statistics).value.data
-      val fastJsSourceMap = fastJsOut.getParentFile / (fastJsOut.getName + ".map")
-      Seq(
-        fastJsOut,
-        fastJsSourceMap
-      )
-    }.taskValue
-  }
-  .settings((resourceGenerators in Compile) += Def.task {
-    Seq(
-      (packageJSDependencies in Compile in statistics).value
-      //(packageMinifiedJSDependencies in Compile in frontend).value
-    )
-  }.taskValue)
-  .settings(
-    (resourceDirectories in Compile) += (crossTarget in statistics).value,
-    watchSources ++= (watchSources in statistics).value
-  )
+  
   .settings(scalaJSUseMainModuleInitializer := false)
   .dependsOn(protocolJvm)
 
@@ -350,55 +248,6 @@ lazy val distributor = (project in file("distributor")).enablePlugins(PackPlugin
     libraryDependencies ++= Dependencies.bytedecoLibs
   ).dependsOn(protocolJvm)
 
-
-val aiMain = "org.seekloud.VideoMeeting.ai.Boot"
-
-lazy val ai = (project in file("ai")).enablePlugins(PackPlugin)
-  .settings(commonSettings: _*)
-  .settings(
-    mainClass in reStart := Some(aiMain),
-    javaOptions in reStart += "-Xmx2g"
-  )
-  .settings(name := "processor")
-  .settings(
-    //pack
-    // If you need to specify main classes manually, use packSettings and packMain
-    //packSettings,
-    // [Optional] Creating `hello` command that calls org.mydomain.Hello#main(Array[String])
-    packMain := Map("ai" -> aiMain),
-    packJvmOpts := Map("ai" -> Seq("-Xmx64m", "-Xms32m")),
-    packExtraClasspath := Map("ai" -> Seq("."))
-  )
-  .settings(
-    libraryDependencies ++= Dependencies.backendDependencies
-  ).dependsOn(protocolJvm)
-
-
-val rtmpServerMain = "org.seekloud.VideoMeeting.rtmpServer.Boot"
-
-lazy val rtmpServer = (project in file("rtmpServer")).enablePlugins(PackPlugin)
-  .settings(commonSettings: _*)
-  .settings(
-    mainClass in reStart := Some(rtmpServerMain),
-    javaOptions in reStart += "-Xmx2g"
-  )
-  .settings(name := "rtmpServer")
-  .settings(
-    //pack
-    // If you need to specify main classes manually, use packSettings and packMain
-    //packSettings,
-    // [Optional] Creating `hello` command that calls org.mydomain.Hello#main(Array[String])
-    packMain := Map("rtmpServer" -> rtmpServerMain),
-    packJvmOpts := Map("rtmpServer" -> Seq("-Xmx1024m", "-Xms1024m")),
-    packExtraClasspath := Map("rtmpServer" -> Seq("."))
-  )
-  .settings(
-    libraryDependencies ++= Dependencies.backendDependencies,
-    libraryDependencies ++= Dependencies.bytedecoLibs
-  ).dependsOn(protocolJvm, rtpClient)
-
-
-
 val rtpServerMain = "org.seekloud.VideoMeeting.rtpServer.Boot"
 
 lazy val rtpServer = (project in file("rtpServer")).enablePlugins(PackPlugin)
@@ -448,30 +297,4 @@ lazy val webrtcServer = (project in file("webrtcServer")).enablePlugins(PackPlug
   ).dependsOn(webrtcMessageJvm, protocolJvm, rtpClient)
 
 
-val faceAnalysisMain = "org.seekloud.VideoMeeting.faceAnalysis.BootJFx"
-resolvers in ThisBuild ++= Seq(
-  "Spring Plugins Repository" at "https://repo.spring.io/plugins-release/"
-)
-lazy val faceAnalysis = (project in file("faceAnalysis")).enablePlugins(PackPlugin)
-  .settings(commonSettings: _*)
-  .settings(
-    mainClass in reStart := Some(faceAnalysisMain),
-    javaOptions in reStart += "-Xmx3g"
-  )
-  .settings(name := "faceAnalysis")
-  .settings(
-    //pack
-    // If you need to specify main classes manually, use packSettings and packMain
-    //packSettings,
-    // [Optional] Creating `hello` command that calls org.mydomain.Hello#main(Array[String])
-    packMain := Map("faceAnalysis" -> faceAnalysisMain),
-    packJvmOpts := Map("faceAnalysis" -> Seq("-Xmx512m", "-Xms256m", "-XX:+HeapDumpOnOutOfMemoryError")),
-    packExtraClasspath := Map("faceAnalysis" -> Seq("."))
-  )
-  .settings(
-    libraryDependencies ++= Dependencies.backendDependencies,
-    libraryDependencies ++= Dependencies.bytedecoLibs,
-    libraryDependencies ++= Dependencies4Face.jme3Libs
-  )
-  .dependsOn(protocolJvm, rtpClient)
 
