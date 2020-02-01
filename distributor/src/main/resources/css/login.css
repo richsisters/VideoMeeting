@@ -1,0 +1,43 @@
+/* css 样式可以写在这里*/
+.LoginForm{
+    margin: 10% 20%;
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.LoginForm>.inputContent{
+    padding: 0 80px 0px 0;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+}
+
+.LoginForm span{
+    margin:0 10px;
+    width: 100px;
+    text-align: right;
+    vertical-align: middle;
+}
+
+.LoginForm input{
+    margin: 10px 0;
+    height: 27px;
+    width: 85%;
+    border-radius: 8px;
+}
+
+.LoginForm button{
+    margin: 10px 0;
+    padding: 5px 15px;
+    border-radius: 10px;
+    font-size: 17px;
+}
+
+.css2 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 8em;
+}

@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>VideoMeeting</title>
-    <link rel="stylesheet" href="/VideoMeeting/roomManager/static/css/phoneClient.css">
-    <script class="code" src="/VideoMeeting/roomManager/static/js/dash.all.debug.js"></script>
-    <script type="text/javascript" src="/VideoMeeting/roomManager/static/js/TestC-copy.js"></script>
-    <script type="text/javascript" src="/VideoMeeting/roomManager/static/js/util.js"></script>
+    <title>Theia</title>
+    <link rel="stylesheet" href="/theia/roomManager/static/css/phoneClient.css">
+    <script class="code" src="/theia/roomManager/static/js/dash.all.debug.js"></script>
+    <script type="text/javascript" src="/theia/roomManager/static/js/TestC-copy.js"></script>
+    <script type="text/javascript" src="/theia/roomManager/static/js/util.js"></script>
     <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
     <script src="https://unpkg.com/video.js/dist/video.js"></script>
     <script src="https://unpkg.com/videojs-contrib-hls/dist/videojs-contrib-hls.js"></script>
@@ -43,13 +43,13 @@
         var bIsCE = userAgent.match(/windows ce/i) == "windows ce";
         var bIsWM = userAgent.match(/windows mobile/i) == "windows mobile";
         if (!(bIsIphoneOs || bIsMidp || bIsUc7 || bIsUc || bIsAndroid || bIsCE || bIsWM) ){
-            window.location.href = window.location.origin + "/VideoMeeting/webClient"
+            window.location.href = window.location.origin + "/theia/webClient"
         } else {
 
         }
     }
     browserRedierc()
 </script>
-<script type="text/javascript" src="/VideoMeeting/roomManager/static/sjsout/phoneclient-fastopt.js"></script>
+<script type="text/javascript" src="/theia/roomManager/static/sjsout/phoneclient-fastopt.js"></script>
 </body>
 </html>

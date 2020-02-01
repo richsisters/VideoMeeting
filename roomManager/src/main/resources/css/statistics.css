@@ -47,6 +47,7 @@
 .stat-list-title{
     display: flex;
     flex-flow: row nowrap;
+    align-items: baseline;
     margin: 0 0 20px 0;
     font-weight: bold;
     font-size: 19px;
@@ -95,6 +96,14 @@
 .card-dat-2{
     padding-left: 80px;
     font-size: 16px;
+    color: #00a1d6;
+}
+#people-date{
+    border: none;
+    outline: none;
+    cursor: pointer;
+}
+#people-date:hover{
     color: #00a1d6;
 }
 /*-----*/
@@ -208,5 +217,34 @@
 }
 .video-container{
     width: 800px;
-    height: 400px;
+    box-shadow: 0 0 10px #666;
+    border-radius: 5px;
+}
+/*---page---*/
+.RLPageNav{
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+}
+.RLPageNav ul{
+    display: flex;
+    flex-flow: row nowrap;
+    list-style: none;
+    margin: 0;
+}
+.RLPageNav ul li{
+    list-style: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.RLPageNav ul li:hover{
+    color: #00a1d6;
+}
+.RLPageNav ul li[data-page~='1']{
+    color: #bee1eb;
+}
+.wait-text{
+    font-size: 42px;
+    color: #00a1d6;
+    padding: 50px 50px;
 }

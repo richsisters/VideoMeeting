@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Theia</title>
+    <script class="code" src="/theia/distributor/static/js/dash.all.debug.js"></script>
+    <link rel="stylesheet" href="/theia/distributor/static/css/login.css"/>
+</head>
+<body style="background:#eeeeee;margin: 0px;">
+</body>
+
+<script type="text/javascript" src="/theia/distributor/static/jsFile/distributorpage-fastopt/20190108"></script>
+<script>
+    // setup the video element and attach it to the Dash player
+    function setupVideo(url) {
+        // var url = "https://bitmovin-a.akamaihd.net/content/MI201109210084_1/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd";
+        var player = dashjs.MediaPlayer().create();
+        player.initialize(document.querySelector("#videoplayer"), url, true);
+    }
+</script>
+</html>

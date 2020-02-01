@@ -107,7 +107,7 @@
     border-radius: 20px;
 }
 .header-backgroudImg{
-    /*background-image: url("/VideoMeeting/static/img/header1.jpg");*/
+    /*background-image: url("/theia/static/img/header1.jpg");*/
     width: 100%;
     height: 205px;
     /*-webkit-background-size: 100% 100%;*/
@@ -132,7 +132,7 @@
     align-items: center;
 }
 .bottom-like{
-    background-image: url("/VideoMeeting/static/img/gifts/no-like.png");
+    background-image: url("/theia/static/img/gifts/no-like.png");
     background-size: 36px 36px;
     background-repeat: no-repeat;
     background-position: center;
@@ -142,7 +142,7 @@
     transition: transform 1s;
 }
 #bottom-like-button:checked + .bottom-like{
-    background-image: url("/VideoMeeting/static/img/gifts/like.png");
+    background-image: url("/theia/static/img/gifts/like.png");
     transform: scale(1.2);
 }
 .bottom-gifts{
@@ -289,14 +289,14 @@
 .attention-button-close{
     width: 25px;
     height: 25px;
-    background-image: url("/VideoMeeting/roomManager/static/img/gifts/no-like.png");
+    background-image: url("/theia/roomManager/static/img/gifts/no-like.png");
     background-size: cover;
     cursor: pointer;
 }
 .attention-button-open{
     width: 25px;
     height: 25px;
-    background-image: url("/VideoMeeting/roomManager/static/img/gifts/like.png");
+    background-image: url("/theia/roomManager/static/img/gifts/like.png");
     background-size: cover;
     cursor: pointer;
 }

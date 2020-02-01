@@ -1,7 +1,7 @@
 -- roomManager 数据表 创建时间： 2019/7/15
 
-create sequence user_info_uid_seq start with 100001;
-create sequence user_info_rid_seq start with 1000001;
+create sequence user_info_uid_seq1 start with 100201;
+create sequence user_info_rid_seq1 start with 1000201;
 create sequence login_event_id_seq
   START WITH 2000001
   INCREMENT BY 1;
@@ -10,28 +10,25 @@ START WITH 3000001
 INCREMENT BY 1;
 
 create table user_info (
-  uid               bigint primary key default nextval('user_info_uid_seq'),
+  uid               bigint primary key default nextval('user_info_uid_seq1'),
   user_name         varchar(100)  not null,
   password          varchar(100)  not null,
-  roomId            bigint        not null default nextval('user_info_rid_seq'),
+  roomId            bigint        not null default nextval('user_info_rid_seq1'),
   token             varchar(63)   not null default '',
   token_create_time bigint        not null,
-  headImg           varchar(100)
+  head_img           varchar(256) not null default '',
+  cover_img         varchar(256) not null default '',
+  email             varchar(256) not null default '',
+  create_time       bigint        not null,
+  rtmp_token        varchar(256) not null default '',
+  sealed            BOOLEAN NOT NULL DEFAULT FALSE,
+  sealed_util_time  BIGINT NOT NULL DEFAULT 0,
+  allow_anchor      BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 alter sequence user_info_uid_seq owned by user_info.uid;
 alter sequence user_info_rid_seq owned by user_info.roomId;
 create unique index user_info_user_name_index on user_info(user_name);
-
-
-alter table user_info add head_img varchar(256) not null default '';
-alter table user_info add cover_img varchar(256) not null default '';
-ALTER TABLE user_info ADD sealed BOOLEAN NOT NULL DEFAULT FALSE ;
-ALTER TABLE user_info ADD sealed_util_time BIGINT NOT NULL DEFAULT 0;--（true/-1）
-ALTER TABLE user_info ADD allow_anchor BOOLEAN NOT NULL DEFAULT TRUE ;
-
-alter table user_info add rtmp_token varchar(256) not null default '';
-alter table user_info rename column token_expire_time to token_create_time;
 
 ALTER TABLE record ADD cover_img VARCHAR(256) NOT NULL DEFAULT '';
 ALTER TABLE record ADD record_name VARCHAR NOT NULL DEFAULT '';
@@ -73,3 +70,5 @@ create table observe_event (
   in_time        bigint default 0 not null,
   out_time       bigint default 0 not null
 );
+
+ALTER TABLE record ADD COLUMN record_addr VARCHAR(100) NOT NULL DEFAULT '';

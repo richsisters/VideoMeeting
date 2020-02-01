@@ -7,7 +7,29 @@
     <option name="linkedExternalProjectsSettings">
       <SbtProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="sbtVersion" value="1.3.4" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/capture" />
+            <option value="$PROJECT_DIR$/distributor" />
+            <option value="$PROJECT_DIR$/pcClient" />
+            <option value="$PROJECT_DIR$/player" />
+            <option value="$PROJECT_DIR$/processor" />
+            <option value="$PROJECT_DIR$/project" />
+            <option value="$PROJECT_DIR$/protocol" />
+            <option value="$PROJECT_DIR$/protocol/.js" />
+            <option value="$PROJECT_DIR$/protocol/.jvm" />
+            <option value="$PROJECT_DIR$/roomManager" />
+            <option value="$PROJECT_DIR$/rtpClient" />
+            <option value="$PROJECT_DIR$/rtpServer" />
+            <option value="$PROJECT_DIR$/shared" />
+            <option value="$PROJECT_DIR$/webClient" />
+            <option value="$PROJECT_DIR$/webrtcMessage" />
+            <option value="$PROJECT_DIR$/webrtcMessage/.js" />
+            <option value="$PROJECT_DIR$/webrtcMessage/.jvm" />
+          </set>
+        </option>
+        <option name="sbtVersion" value="1.3.6" />
       </SbtProjectSettings>
     </option>
     <option name="vmParameters" value="-Dsbt.override.build.repos=true" />

@@ -2,9 +2,23 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/VideoMeeting.iml" filepath="$PROJECT_DIR$/VideoMeeting.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/videomeeting_9534.iml" filepath="$PROJECT_DIR$/.idea/modules/videomeeting_9534.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/videomeeting_9534-build.iml" filepath="$PROJECT_DIR$/.idea/modules/videomeeting_9534-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/.js-webrtcMessage.iml" filepath="$PROJECT_DIR$/.idea/modules/.js-webrtcMessage.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/.jvm-protocol.iml" filepath="$PROJECT_DIR$/.idea/modules/.jvm-protocol.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/VideoMeeting.iml" filepath="$PROJECT_DIR$/.idea/VideoMeeting.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/VideoMeeting-build.iml" filepath="$PROJECT_DIR$/.idea/modules/VideoMeeting-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/VideoMeeting-processor.iml" filepath="$PROJECT_DIR$/.idea/modules/VideoMeeting-processor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/capture.iml" filepath="$PROJECT_DIR$/.idea/modules/capture.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/distributor.iml" filepath="$PROJECT_DIR$/.idea/modules/distributor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/pcClient.iml" filepath="$PROJECT_DIR$/.idea/modules/pcClient.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/player.iml" filepath="$PROJECT_DIR$/.idea/modules/player.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/protocol.iml" filepath="$PROJECT_DIR$/.idea/modules/protocol.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/protocol-sources.iml" filepath="$PROJECT_DIR$/.idea/modules/protocol-sources.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/roomManager.iml" filepath="$PROJECT_DIR$/.idea/modules/roomManager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rtpClient.iml" filepath="$PROJECT_DIR$/.idea/modules/rtpClient.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rtpServer.iml" filepath="$PROJECT_DIR$/.idea/modules/rtpServer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/shared.iml" filepath="$PROJECT_DIR$/.idea/modules/shared.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/webClient.iml" filepath="$PROJECT_DIR$/.idea/modules/webClient.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/webrtcMessage.iml" filepath="$PROJECT_DIR$/.idea/modules/webrtcMessage.iml" />
     </modules>
   </component>
 </project>
