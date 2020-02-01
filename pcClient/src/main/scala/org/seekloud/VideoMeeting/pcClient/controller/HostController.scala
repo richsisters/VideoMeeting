@@ -213,17 +213,17 @@ class HostController(
           }
         }
 
-      case AudienceDisconnect =>
-        //观众断开，提醒主播，去除连线观众信息
-        rmManager ! RmManager.JoinStop
-        Boot.addToPlatform {
-          if (!hostScene.tb3.isSelected) {
-            hostScene.tb3.setGraphic(hostScene.connectionIcon1)
-          }
-          hostScene.connectionStateText.setText(s"目前状态：无连接")
-          hostScene.connectStateBox.getChildren.remove(hostScene.shutConnectionBtn)
-          isConnecting = false
-        }
+//      case AudienceDisconnect =>
+//        //观众断开，提醒主播，去除连线观众信息
+//        rmManager ! RmManager.JoinStop
+//        Boot.addToPlatform {
+//          if (!hostScene.tb3.isSelected) {
+//            hostScene.tb3.setGraphic(hostScene.connectionIcon1)
+//          }
+//          hostScene.connectionStateText.setText(s"目前状态：无连接")
+//          hostScene.connectStateBox.getChildren.remove(hostScene.shutConnectionBtn)
+//          isConnecting = false
+//        }
 
       case msg: RcvComment =>
         //判断userId是否为-1，是的话当广播处理

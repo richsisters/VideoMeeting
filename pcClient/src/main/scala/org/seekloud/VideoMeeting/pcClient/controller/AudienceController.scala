@@ -255,11 +255,11 @@ class AudienceController(
             audienceScene.hasReqJoin = false
           }
 
-        case HostDisconnect =>
-          Boot.addToPlatform {
-            WarningDialog.initWarningDialog("主播已断开连线~")
-          }
-          rmManager ! RmManager.StopJoinAndWatch
+//        case HostDisconnect =>
+//          Boot.addToPlatform {
+//            WarningDialog.initWarningDialog("主播已断开连线~")
+//          }
+//          rmManager ! RmManager.StopJoinAndWatch
 
 
         case HostCloseRoom =>

@@ -1,4 +1,4 @@
-package org.seekloud.VideoMeeting.VideoMeeting.common
+package org.seekloud.VideoMeeting.pcClient.common
 
 import java.util.concurrent.TimeUnit
 

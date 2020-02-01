@@ -270,31 +270,3 @@ lazy val rtpServer = (project in file("rtpServer")).enablePlugins(PackPlugin)
     libraryDependencies ++= Dependencies.backendDependencies
   ).dependsOn(protocolJvm, shared, rtpClient)
 
-
-
-val webrtcServerMain = "org.seekloud.VideoMeeting.webrtcServer.Boot"
-
-lazy val webrtcServer = (project in file("webrtcServer")).enablePlugins(PackPlugin)
-  .settings(commonSettings: _*)
-  .settings(
-    mainClass in reStart := Some(webrtcServerMain),
-    javaOptions in reStart += "-Xmx2g"
-  )
-  .settings(name := "webrtcServer")
-  .settings(
-    //pack
-    // If you need to specify main classes manually, use packSettings and packMain
-    //packSettings,
-    // [Optional] Creating `hello` command that calls org.mydomain.Hello#main(Array[String])
-    packMain := Map("webrtcServer" -> webrtcServerMain),
-    packJvmOpts := Map("webrtcServer" -> Seq("-Xmx1024m", "-Xms1024m")),
-    packExtraClasspath := Map("webrtcServer" -> Seq("."))
-  )
-  .settings(
-    libraryDependencies ++= Dependencies4WebRtc.backendDependencies,
-    libraryDependencies ++= Dependencies.bytedecoLibs,
-    libraryDependencies ++= Dependencies4WebRtc.dependencies4WebRtc
-  ).dependsOn(webrtcMessageJvm, protocolJvm, rtpClient)
-
-
-
