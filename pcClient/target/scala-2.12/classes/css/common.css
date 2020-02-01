@@ -76,6 +76,7 @@
 }
 .hostScene-leftArea-toggleButton{
     -fx-font-size: 13;
+    /*-fx-min-width: 70px;*/
 }
 
 .hostScene-leftArea-wholeBox{
