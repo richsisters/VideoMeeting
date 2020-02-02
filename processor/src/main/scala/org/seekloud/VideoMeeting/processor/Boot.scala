@@ -28,7 +28,7 @@ object Boot extends HttpService {
   import concurrent.duration._
   import org.seekloud.VideoMeeting.processor.common.AppSettings._
 
-  override implicit val system: ActorSystem = ActorSystem("org/seekloud/VideoMeeting/processor", config)
+  override implicit val system: ActorSystem = ActorSystem("processor", config)
   // the executor should not be the default dispatcher.
   override implicit val executor: MessageDispatcher = system.dispatchers.lookup("akka.actor.my-blocking-dispatcher")
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
