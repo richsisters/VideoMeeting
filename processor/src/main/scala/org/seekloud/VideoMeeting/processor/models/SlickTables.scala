@@ -1,4 +1,5 @@
 package org.seekloud.VideoMeeting.processor.models
+
 // AUTO-GENERATED Slick data model
 /** Stand-alone Slick data model for immediate use */
 object SlickTables extends {

@@ -36,7 +36,7 @@ object MySlickCodeGenerator {
   val url = "jdbc:postgresql://10.1.29.248:5432/processor?useUnicode=true&characterEncoding=utf-8"
   val outputFolder = "target/gencode/genTablesPsql"
   val pkg = "org.seekloud.VideoMeeting.processor.models"
-  val user = "processor"
+  val user = "org/seekloud/VideoMeeting/processor"
   val password = "1qaz@WSX"
 
 

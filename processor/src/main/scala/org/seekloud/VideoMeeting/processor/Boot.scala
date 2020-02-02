@@ -14,12 +14,8 @@ import akka.util.Timeout
 import org.seekloud.VideoMeeting.processor.http.HttpService
 import akka.actor.typed.scaladsl.adapter._
 import akka.dispatch.MessageDispatcher
-import com.sun.xml.internal.messaging.saaj.util.ByteInputStream
-import org.bytedeco.javacv.{FFmpegFrameGrabber, FFmpegFrameGrabber1, FFmpegFrameRecorder, Frame}
-import org.seekloud.VideoMeeting.processor.core.RoomManager.UpdateRoomInfo
-import org.seekloud.VideoMeeting.processor.core.{ChannelWorker, GrabberManager, RecorderManager, RoomManager, SendActor}
+import org.seekloud.VideoMeeting.processor.core_new.{StreamPullActor, StreamPushActor, RoomManager}
 import org.seekloud.VideoMeeting.rtpClient.Protocol.Command
-
 import scala.collection.mutable
 import scala.language.postfixOps
 import org.seekloud.VideoMeeting.processor.utils.CpuUtils
@@ -32,8 +28,7 @@ object Boot extends HttpService {
   import concurrent.duration._
   import org.seekloud.VideoMeeting.processor.common.AppSettings._
 
-
-  override implicit val system: ActorSystem = ActorSystem("processor", config)
+  override implicit val system: ActorSystem = ActorSystem("org/seekloud/VideoMeeting/processor", config)
   // the executor should not be the default dispatcher.
   override implicit val executor: MessageDispatcher = system.dispatchers.lookup("akka.actor.my-blocking-dispatcher")
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -48,18 +43,14 @@ object Boot extends HttpService {
 
   val roomManager:ActorRef[RoomManager.Command] = system.spawn(RoomManager.create(),"roomManager")
 
-  val grabberManager:ActorRef[GrabberManager.Command] = system.spawn(GrabberManager.create(),"grabberManager")
+  val streamPushActor:ActorRef[Command]=system.spawn(StreamPushActor.create(),"streamPushActor")
 
-  val recorderManager:ActorRef[RecorderManager.Command] = system.spawn(RecorderManager.create(),"recorderManager")
+  val streamPullActor:ActorRef[Command] = system.spawn(StreamPullActor.create(), "streamPullActor")
 
-  val channelWorker:ActorRef[Command] = system.spawn(ChannelWorker.create(),"channelWorker")
-
-  val sendActor:ActorRef[Command] = system.spawn(SendActor.create(), "sender")
+  //fixme 此处用以判断流是否存在
+  var showStreamLog = false
 
 	def main(args: Array[String]) {
-
-//    Thread.sleep(5000)
-//    roomManager ! UpdateRoomInfo(8888,List("liveIdTest-1111"),1,0)
 
 
     Http().bindAndHandle(routes, httpInterface, httpPort)

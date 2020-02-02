@@ -32,7 +32,6 @@ trait HttpService extends
   ResourceService with
   ProcessorService {
 
-
   implicit val system: ActorSystem
 
   implicit val executor: ExecutionContextExecutor
@@ -44,13 +43,9 @@ trait HttpService extends
   implicit val scheduler: Scheduler
 
 
-
-
   val routes =
     pathPrefix("VideoMeeting") {
        resourceRoutes ~ processorRoute
     }
-
-
 
 }

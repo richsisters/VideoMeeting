@@ -7,11 +7,10 @@ import akka.http.scaladsl.server.Route
 import org.seekloud.VideoMeeting.processor.protocol.SharedProtocol._
 import org.seekloud.VideoMeeting.processor.protocol.CommonErrorCode.{fileNotExistError, parseJsonError, updateRoomError}
 import org.seekloud.VideoMeeting.processor.utils.ServiceUtils
-import org.seekloud.VideoMeeting.processor.Boot.{executor, recorderManager, roomManager, scheduler, timeout}
+import org.seekloud.VideoMeeting.processor.Boot.{executor, roomManager, scheduler, showStreamLog, timeout}
 import io.circe.Error
 import io.circe.generic.auto._
-import org.seekloud.VideoMeeting.processor.core.RoomManager
-import org.seekloud.VideoMeeting.processor.core.{RecorderManager, RoomManager}
+import org.seekloud.VideoMeeting.processor.core_new.RoomManager
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.http.scaladsl.server.directives.FileInfo
 import akka.http.scaladsl.model.ContentTypes
@@ -20,6 +19,7 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
 import ch.megard.akka.http.cors.scaladsl.model.HttpOriginMatcher
 import org.seekloud.VideoMeeting.processor.models.MpdInfoDao
+import org.seekloud.VideoMeeting.protocol.ptcl.processer2Manager.Processor.{NewConnect, NewConnectRsp, CloseRoom, CloseRoomRsp, UpdateRoomInfo, UpdateRsp}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
@@ -28,18 +28,12 @@ trait ProcessorService extends ServiceUtils {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
-  private def updateRoomInfo = (path("updateRoomInfo") & post) {
-    entity(as[Either[Error, UpdateRoom]]) {
+  private def newConnect = (path("newConnect") & post) {
+    entity(as[Either[Error, NewConnect]]) {
       case Right(req) =>
-        log.info(s"post method updateRoomInfo.")
-        if(req.liveIdList.nonEmpty) {
-          roomManager ! RoomManager.UpdateRoomInfo(req.roomId, req.liveIdList, req.startTime, req.layout, req.aiMode)
-          complete(SuccessRsp())
-        }else{
-          roomManager ! RoomManager.CloseRoom(req.roomId)
-          complete(SuccessRsp(0,"close room successfully."))
-        }
-
+        log.info(s"post method $NewConnect")
+        roomManager ! RoomManager.NewConnection(req.roomId, req.host, req.client, req.pushLiveId, req.pushLiveCode,req.layout)
+        complete(NewConnectRsp())
       case Left(e) =>
         complete(parseJsonError)
     }
@@ -50,82 +44,20 @@ trait ProcessorService extends ServiceUtils {
       case Right(req) =>
         log.info(s"post method closeRoom ${req.roomId}.")
         roomManager ! RoomManager.CloseRoom(req.roomId)
-        complete(SuccessRsp())
+        complete(CloseRoomRsp())
 
       case Left(e) =>
         complete(parseJsonError)
     }
   }
 
-  private def getMpd = (path("getMpd") & post) {
-    entity(as[Either[Error, GetMpd]]) {
+  private def updateRoomInfo = (path("updateRoomInfo") & post) {
+    entity(as[Either[Error, UpdateRoomInfo]]) {
       case Right(req) =>
-        log.info(s"post method getMpd.")
-        val msg:Future[MpdRsp] = recorderManager ? (RecorderManager.GetMpdAndRtmp(req.roomId, _))
-        dealFutureResult(
-          msg.map{ rsp =>
-            println()
-            println(rsp)
-            complete(rsp)
-          }
-        )
+        log.info(s"post method updateRoomInfo.")
+        roomManager ! RoomManager.UpdateRoomInfo(req.roomId, req.layout)
+        complete(UpdateRsp())
 
-      case Left(e) =>
-        complete(parseJsonError)
-    }
-  }
-  private val settings = CorsSettings.defaultSettings.withAllowedOrigins(
-    HttpOriginMatcher.*
-  )
-
-  val getDash = (path("getDash"/Segments(2))& get & pathEndOrSingleSlash & cors(settings)){
-    case dir :: file :: Nil =>
-      val f = new File(s"/tmp/dash/$dir/$file").getAbsoluteFile
-      getFromFile(f,ContentTypes.`application/octet-stream`)
-
-    case x =>
-      log.error(s"errs in getm: $x")
-      complete(fileNotExistError)
-  }
-
-  private def getRtmpUrl = (path("getRtmpUrl") & post) {
-    entity(as[Either[Error, GetRtmpUrl]]) {
-      case Right(req) =>
-        log.info(s"post method getRtmpUrl.")
-        val msg:Future[RtmpRsp] = recorderManager ? (RecorderManager.GetRtmpUrl(req.roomId, _))
-        dealFutureResult(
-          msg.map{ rsp =>
-            complete(rsp)
-          }
-        )
-
-      case Left(e) =>
-        complete(parseJsonError)
-    }
-  }
-
-  private val getMpd4Record = (path("getMpd4Record") & post) {
-    entity(as[Either[Error, GetMpd4Record]]) {
-      case Right(req) =>
-        dealFutureResult(
-          MpdInfoDao.getMpd4Record(req.roomId, req.startTime).map { rs =>
-            complete(RtmpRsp(rs))
-          }
-        )
-      case Left(e) =>
-        complete(parseJsonError)
-    }
-  }
-
-  private val getRecordList = (path("getRecordList") & post) {
-    entity(as[Either[Error, GetRecordList]]) {
-      case Right(req) =>
-        dealFutureResult(
-          MpdInfoDao.getRecordList(req.roomId).map { list =>
-            val data = list.map( r => Record(r.roomId,r.startTime,r.endTime,r.mpdAddr)).toList
-            complete(GetRecordListRsp(Some(data)))
-          }
-        )
       case Left(e) =>
         complete(parseJsonError)
     }
@@ -160,7 +92,16 @@ trait ProcessorService extends ServiceUtils {
     }
   }
 
-  val processorRoute:Route = pathPrefix("processor") {
-    updateRoomInfo ~ closeRoom ~ getMpd ~ getRtmpUrl ~ getDash ~ getMpd4Record ~ getRecordList ~ upLoadImg
+  private val streamLog  = (path("streamLog") & get){
+    showStreamLog = !showStreamLog
+    complete(showStreamLog)
+  }
+//
+//  val processorRoute:Route = pathPrefix("processor") {
+//    updateRoomInfo ~ closeRoom ~ getMpd ~ getRtmpUrl ~ getDash ~ getMpd4Record ~ getRecordList ~ upLoadImg ~ streamLog
+//  }
+
+  val processorRoute:Route = pathPrefix("org/seekloud/VideoMeeting/processor") {
+   newConnect  ~ closeRoom ~ updateRoomInfo  ~ upLoadImg ~ streamLog
   }
 }

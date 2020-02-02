@@ -68,6 +68,8 @@ object AppSettings {
   val imageWidth = appConfig.getInt("imageWidth")
   val imageHeight = appConfig.getInt("imageHeight")
   val isTest = appConfig.getBoolean("isTest")
+  val debugPath = appConfig.getString("debugPath")
+
 
   val slickConfig = config.getConfig("slick.db")
   val slickUrl = slickConfig.getString("url")
@@ -77,6 +79,7 @@ object AppSettings {
   val slickConnectTimeout = slickConfig.getInt("connectTimeout")
   val slickIdleTimeout = slickConfig.getInt("idleTimeout")
   val slickMaxLifetime = slickConfig.getInt("maxLifetime")
+  val isDebug = appConfig.getBoolean("isDebug")
 
   
   val sessionConfig = {
