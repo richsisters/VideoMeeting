@@ -156,8 +156,8 @@ object HestiaClient extends HttpUtil with CirceSupport {
     //    }.failed.foreach{ e =>
     //      print("wrong")
     //    }
-    val file = new File("/Users/angel/Desktop/VideoMeeting/pcClient/src/main/resources/img/agreeBtn.png")
-    val f = upload(file, "stars.png")
+    val file = new File("D:/test.png")
+    val f = upload(file, "test.png")
     f.map(s =>
       println(genImgUrl(s.right.get))
     ).failed.foreach { e =>

@@ -1,4 +1,5 @@
 package org.seekloud.VideoMeeting.roomManager.models.dao
+
 import java.util
 
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo.RecordInfo
@@ -49,13 +50,13 @@ object StatisticDao {
     db.run(tObserveEvent.filter(_.recordid === recordId).result)
   }
 
-  //在endTime没有指定的情况下，暂时仅用startTime检测
+  //FIXME 在endTime没有指定的情况下，暂时仅用startTime检测
   def getObserveDataByTime(recordId:Long,startTime:Long,endTime:Long) = {
 //    db.run(tObserveEvent.filter(t => t.recordid === recordId && t.outTime >= startTime && t.inTime <= endTime).result)
     db.run(tObserveEvent.filter(t => t.recordid === recordId && t.inTime >= startTime && t.inTime <= endTime).result)
   }
 
-  def getObserveDataByHourList(recordId:Long,ls:List[(Long,Long)]) = {
+  def getObserveDataByTimeList(recordId:Long,ls:List[(Long,Long)]) = {
     val query = ls.map{v =>getObserveDataByTime(recordId,v._1,v._2).map{r =>(r,v._1)}}
     Future.sequence(query)
   }

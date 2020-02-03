@@ -1,4 +1,5 @@
 package org.seekloud.VideoMeeting.roomManager.models.dao
+
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo.UserInfo
 import org.seekloud.VideoMeeting.roomManager.models.SlickTables
 import slick.jdbc.PostgresProfile.api._

@@ -4,7 +4,8 @@ import java.util
 
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo.{RecordInfo, UserInfo}
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.http.CommonProtocol.GetRecordListRsp
-import org.seekloud.VideoMeeting.protocol.ptcl.processer2Manager.ProcessorProtocol.RecordData
+//import org.seekloud.VideoMeeting.protocol.ptcl.processer2Manager.ProcessorProtocol.RecordData
+import org.seekloud.VideoMeeting.protocol.ptcl.distributor2Manager.DistributorProtocol.RecordData
 import org.seekloud.VideoMeeting.roomManager.utils.DBUtil._
 import org.seekloud.VideoMeeting.roomManager.models.SlickTables._
 import slick.jdbc.PostgresProfile.api._
@@ -31,7 +32,7 @@ object RecordDao {
             Some(RecordInfo(r.id,r.roomid,r.recordName,r.recordDes,w.get.uid,w.get.userName,r.startTime,
               UserInfoDao.getHeadImg(w.get.headImg),UserInfoDao.getCoverImg(r.coverImg),r.viewNum,r.likeNum,r.duration))
           }else{
-            println("获取主播信息失败，主播不存在")
+            log.debug("获取主播信息失败，主播不存在")
             Some(RecordInfo(r.id,r.roomid,r.recordName,r.recordDes,-1l,"",r.startTime,
               UserInfoDao.getHeadImg(""),UserInfoDao.getCoverImg(r.coverImg),r.viewNum,r.likeNum,r.duration))
           }
@@ -76,7 +77,7 @@ object RecordDao {
             RecordInfo(r.id,r.roomid,r.recordName,r.recordDes,w.get.uid,w.get.userName,r.startTime,
               UserInfoDao.getHeadImg(w.get.headImg),UserInfoDao.getCoverImg(r.coverImg),r.viewNum,r.likeNum,r.duration)
           }else{
-            println("获取主播信息失败，主播不存在")
+            log.debug("获取主播信息失败，主播不存在")
             RecordInfo(r.id,r.roomid,r.recordName,r.recordDes,-1l,"",r.startTime,
               UserInfoDao.getHeadImg(""),UserInfoDao.getCoverImg(r.coverImg),r.viewNum,r.likeNum,r.duration)
           }
@@ -96,14 +97,10 @@ object RecordDao {
 
   }
 
-  def getAuthorRecordList(roomId: Long, sortBy: String, pageNum: Int, pageSize: Int): Future[List[RecordInfo]] = {
+  def getAuthorRecordList(roomId: Long): Future[List[RecordInfo]] = {
     val resList = UserInfoDao.searchByRoomId(roomId).flatMap{
       case Some(author) =>
-        val records = sortBy match {
-          case "time" => db.run(tRecord.filter(_.roomid === roomId).sortBy(_.startTime.reverse).drop((pageNum - 1) * pageSize).take(pageSize).result)
-          case "view" => db.run(tRecord.filter(_.roomid === roomId).sortBy(_.viewNum.reverse).drop((pageNum - 1) * pageSize).take(pageSize).result)
-          case _ => db.run(tRecord.filter(_.roomid === roomId).sortBy(_.likeNum.reverse).drop((pageNum - 1) * pageSize).take(pageSize).result)
-        }
+        val records = db.run(tRecord.filter(_.roomid === roomId).sortBy(_.startTime.reverse).result)
         records.map{ls =>
           val res = ls.map{r =>
             RecordInfo(r.id,r.roomid,r.recordName,r.recordDes,author.uid,author.userName,r.startTime,
@@ -121,6 +118,14 @@ object RecordDao {
 
   def getAuthorRecordTotalNum(roomId: Long): Future[Int] = {
     db.run(tRecord.filter(_.roomid === roomId).length.result)
+  }
+
+  def deleteAuthorRecord(recordId: Long) = {
+    db.run(tRecord.filter(_.id === recordId).delete)
+  }
+
+  def addRecordAddr(recordId: Long, recordAddr: String): Future[Int] = {
+    db.run(tRecord.filter(_.id === recordId).map(_.recordAddr).update(recordAddr))
   }
 
 

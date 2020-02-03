@@ -1,7 +1,7 @@
 package org.seekloud.VideoMeeting.roomManager.common
 
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo.UserInfo
-import org.seekloud.VideoMeeting.roomManager.common.AppSettings.{distributorDomain, distributorPort}
+import org.seekloud.VideoMeeting.roomManager.common.AppSettings._
 
 object Common {
   object Role{
@@ -32,9 +32,9 @@ object Common {
   }
 
   def getMpdPath(roomId:Long) = {
-    s"https://$distributorDomain/VideoMeeting/distributor/getFile/${
-      if(roomId == TestConfig.TEST_ROOM_ID)"test" else roomId
-    }/index.mpd"
+      s"/VideoMeeting/distributor/getFile/${
+        if(roomId == TestConfig.TEST_ROOM_ID)"test" else roomId
+      }/index.mpd"
   }
 
 

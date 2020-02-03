@@ -1,5 +1,6 @@
 package org.seekloud.VideoMeeting.roomManager.core
 
+import akka.actor.Cancellable
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
 import akka.actor.typed.{ActorRef, Behavior}
@@ -11,7 +12,7 @@ import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo._
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol._
-import org.seekloud.VideoMeeting.roomManager.Boot.{executor, roomManager}
+import org.seekloud.VideoMeeting.roomManager.Boot.{executor, roomManager, scheduler}
 import org.seekloud.VideoMeeting.roomManager.common.Common
 import org.seekloud.VideoMeeting.roomManager.models.dao.UserInfoDao
 import org.seekloud.VideoMeeting.roomManager.protocol.ActorProtocol
@@ -83,6 +84,7 @@ object UserActor {
   def create(userId: Long,temporary:Boolean): Behavior[Command] = {
     Behaviors.setup[Command] { ctx =>
       log.info(s"userActor-$userId is starting...")
+      ctx.setReceiveTimeout(30.seconds, CompleteMsgClient)
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       Behaviors.withTimers[Command] { implicit timer =>
         implicit val sendBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(8192)
@@ -105,7 +107,7 @@ object UserActor {
         msg match {
           case UserClientActor(clientActor) =>
             ctx.watchWith(clientActor, UserLeft(clientActor))
-            timer.startPeriodicTimer("HeartBeatKey_" + userId, SendHeartBeat, 5.seconds)
+            timer.startPeriodicTimer("HeartBeatKey_" + userId, SendHeartBeat, 10.seconds)
             switchBehavior(ctx, "audience", audience(userId,temporary,clientActor,roomIdOpt.get))
 
 
@@ -146,7 +148,7 @@ object UserActor {
       msg match {
         case SendHeartBeat =>
 //          log.debug(s"${ctx.self.path} 发送心跳给userId=$userId,roomId=$roomId")
-          clientActor ! Wrap(HeatBeat(System.currentTimeMillis()).asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
+          ctx.scheduleOnce(10.seconds, clientActor, Wrap(HeatBeat(System.currentTimeMillis()).asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result()))
           Behaviors.same
 
         case DispatchMsg(message,closeRoom) =>
@@ -154,37 +156,44 @@ object UserActor {
           Behaviors.same
 
         case WebSocketMsg(reqOpt) =>
-          reqOpt match{
-            case Some(req) =>
-              UserInfoDao.searchById(userId).map{
-                case Some(v) =>
-                  if(v.`sealed`){
-                    log.debug(s"${ctx.self.path} 该用户已经被封号，无法发送ws消息")
-                    clientActor !Wrap(AuthProtocol.AccountSealed.asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
+          if(reqOpt.contains(PingPackage)){
+            if(timer.isTimerActive("HeartBeatKey_" + userId)) timer.cancel("HeartBeatKey_" + userId)
+            ctx.self ! SendHeartBeat
+            Behaviors.same
+          }
+          else{
+            reqOpt match{
+              case Some(req) =>
+                UserInfoDao.searchById(userId).map{
+                  case Some(v) =>
+                    if(v.`sealed`){
+                      log.debug(s"${ctx.self.path} 该用户已经被封号，无法发送ws消息")
+                      clientActor !Wrap(AuthProtocol.AccountSealed.asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
+                      ctx.self ! CompleteMsgClient
+                      ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
+                    }else{
+                      req match {
+                        case StartLiveReq(`userId`,token,clientType) =>
+                          roomManager ! ActorProtocol.StartLiveAgain(roomId)
+                          ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
+
+                        case x =>
+                          roomManager ! ActorProtocol.WebSocketMsgWithActor(userId,roomId,x)
+                          ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
+
+                      }
+                    }
+                  case None =>
+                    log.debug(s"${ctx.self.path} 该用户不存在，无法直播")
+                    clientActor !Wrap(AuthProtocol.NoUser.asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
                     ctx.self ! CompleteMsgClient
                     ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
-                  }else{
-                    req match {
-                      case StartLiveReq(`userId`,token,clientType) =>
-                        roomManager ! ActorProtocol.StartLiveAgain(roomId)
-                        ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
-
-                      case x =>
-                        roomManager ! ActorProtocol.WebSocketMsgWithActor(userId,roomId,x)
-                        ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
-
-                    }
-                  }
-                case None =>
-                  log.debug(s"${ctx.self.path} 该用户不存在，无法直播")
-                  clientActor !Wrap(AuthProtocol.NoUser.asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
-                  ctx.self ! CompleteMsgClient
-                  ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
-              }
-              switchBehavior(ctx,"busy",busy(),BusyTime,TimeOut("busy"))
-            case None =>
-              log.debug(s"${ctx.self.path} there is no web socket msg in anchor state")
-              Behaviors.same
+                }
+                switchBehavior(ctx,"busy",busy(),BusyTime,TimeOut("busy"))
+              case None =>
+                log.debug(s"${ctx.self.path} there is no web socket msg in anchor state")
+                Behaviors.same
+            }
           }
 
         case CompleteMsgClient =>
@@ -226,7 +235,7 @@ object UserActor {
       msg match {
         case SendHeartBeat =>
 //          log.debug(s"${ctx.self.path} 发送心跳给userId=$userId,roomId=$roomId")
-          clientActor ! Wrap(HeatBeat(System.currentTimeMillis()).asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
+          ctx.scheduleOnce(10.seconds, clientActor, Wrap(HeatBeat(System.currentTimeMillis()).asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result()))
           Behaviors.same
 
         case DispatchMsg(message,closeRoom) =>
@@ -241,6 +250,7 @@ object UserActor {
           //主播需要关闭房间，通知所有观众
           //观众需要清楚房间中对应的用户信息映射
           log.debug(s"${ctx.self.path.name} complete msg")
+          timer.cancelAll()
           roomManager ! ActorProtocol.UpdateSubscriber(Common.Subscriber.left,roomId,userId,temporary,Some(ctx.self))
           Behaviors.stopped
 
@@ -250,42 +260,50 @@ object UserActor {
           Behaviors.stopped
 
         case WebSocketMsg(reqOpt) =>
-          reqOpt match{
-            case Some(req) =>
-              if(temporary){
-//                log.debug(s"${ctx.self.path} the user is temporary, no privilege,userId=$userId in room=$roomId")
-                Behaviors.same
-              }else{
-                UserInfoDao.searchById(userId).map{
-                  case Some(v) =>
-                    if(v.`sealed`){
-                      log.debug(s"${ctx.self.path} 该用户已经被封号，无法发送ws消息")
-                      clientActor !Wrap(AuthProtocol.AccountSealed.asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
-                      ctx.self ! SwitchBehavior("audience",audience(userId,temporary,clientActor,roomId))
-                    }else{
-                      req match{
-                        case StartLiveReq(`userId`,token,clientType) =>
-                          roomManager ! ActorProtocol.StartRoom4Anchor(userId,roomId,ctx.self)
-                          ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
-
-                        case x =>
-                          roomManager ! ActorProtocol.WebSocketMsgWithActor(userId,roomId,req)
-                          ctx.self ! SwitchBehavior("audience",audience(userId,temporary,clientActor,roomId))
-                      }
-                    }
-                  case None =>
-                    log.debug(s"${ctx.self.path} 该用户不存在，无法直播")
-                    clientActor !Wrap(AuthProtocol.NoUser.asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
-                    ctx.self ! CompleteMsgClient
-                    ctx.self ! SwitchBehavior("audience",audience(userId,temporary,clientActor,roomId))
-                }
-                switchBehavior(ctx,"busy",busy(),BusyTime,TimeOut("busy"))
-              }
-
-            case None =>
-              log.debug(s"${ctx.self.path} there is no web socket msg in anchor state")
-              Behaviors.same
+          if(reqOpt.contains(PingPackage)){
+            if(timer.isTimerActive("HeartBeatKey_" + userId)) timer.cancel("HeartBeatKey_" + userId)
+            ctx.self ! SendHeartBeat
+            Behaviors.same
           }
+          else{
+            reqOpt match{
+              case Some(req) =>
+                if(temporary){
+                  //                log.debug(s"${ctx.self.path} the user is temporary, no privilege,userId=$userId in room=$roomId")
+                  Behaviors.same
+                }else{
+                  UserInfoDao.searchById(userId).map{
+                    case Some(v) =>
+                      if(v.`sealed`){
+                        log.debug(s"${ctx.self.path} 该用户已经被封号，无法发送ws消息")
+                        clientActor !Wrap(AuthProtocol.AccountSealed.asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
+                        ctx.self ! SwitchBehavior("audience",audience(userId,temporary,clientActor,roomId))
+                      }else{
+                        req match{
+                          case StartLiveReq(`userId`,token,clientType) =>
+                            roomManager ! ActorProtocol.StartRoom4Anchor(userId,roomId,ctx.self)
+                            ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
+
+                          case x =>
+                            roomManager ! ActorProtocol.WebSocketMsgWithActor(userId,roomId,req)
+                            ctx.self ! SwitchBehavior("audience",audience(userId,temporary,clientActor,roomId))
+                        }
+                      }
+                    case None =>
+                      log.debug(s"${ctx.self.path} 该用户不存在，无法直播")
+                      clientActor !Wrap(AuthProtocol.NoUser.asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
+                      ctx.self ! CompleteMsgClient
+                      ctx.self ! SwitchBehavior("audience",audience(userId,temporary,clientActor,roomId))
+                  }
+                  switchBehavior(ctx,"busy",busy(),BusyTime,TimeOut("busy"))
+                }
+
+              case None =>
+                log.debug(s"${ctx.self.path} there is no web socket msg in anchor state")
+                Behaviors.same
+            }
+          }
+
 
         case ChangeBehaviorToInit =>
           log.debug(s"${ctx.self.path} 切换到init状态")

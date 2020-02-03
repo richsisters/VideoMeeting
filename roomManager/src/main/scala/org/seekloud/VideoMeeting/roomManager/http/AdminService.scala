@@ -1,4 +1,5 @@
 package org.seekloud.VideoMeeting.roomManager.http
+
 import org.seekloud.VideoMeeting.roomManager.Boot._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route

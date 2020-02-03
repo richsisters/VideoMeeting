@@ -1,4 +1,5 @@
 package org.seekloud.VideoMeeting.roomManager.http
+
 import scala.language.postfixOps
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
@@ -24,7 +25,7 @@ trait TestService extends ServiceUtils{
     entity(as[Either[Error,UpdateRoomInfo]]){
       case Right(req) =>
         dealFutureResult{
-          ProcessorClient.updateRoomInfo(req.roomId,req.liveIdList,req.layout,req.aiMode,req.startTime).map{
+          ProcessorClient.updateRoomInfo(req.roomId,req.layout).map{
             case Right(v) =>
               complete(v)
             case Left(e) =>
@@ -69,29 +70,10 @@ trait TestService extends ServiceUtils{
     }
   }
 
-  private val testgetMpd = (path("testgetMpd") & post){
-    entity(as[Either[Error,GetMpd]]){
-      case Right(req) =>
-        dealFutureResult{
-          ProcessorClient.getmpd(req.roomId).map{
-            case Right(v) =>
-              println(v.mpd)
-              complete(v)
-            case Left(e) =>
-              println(s"error:${e}")
-              complete(s"$e")
-          }
-        }
-
-      case Left(error) =>
-        println(s"$error")
-        complete("error")
-    }
-  }
 
 
   val test = pathPrefix("test"){
-    testUpdateRoomInfo ~ testgetMpd ~ testCloseRoom ~ testSeekRecord
+    testUpdateRoomInfo ~ testCloseRoom ~ testSeekRecord
   }
 
 

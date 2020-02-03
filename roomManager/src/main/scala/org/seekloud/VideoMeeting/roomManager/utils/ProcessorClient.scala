@@ -25,9 +25,28 @@ object ProcessorClient extends HttpUtil{
   val processorBaseUrl = s"http://${AppSettings.processorIp}:${AppSettings.processorPort}/VideoMeeting/processor"
   val distributorBaseUrl = s"https://$distributorDomain/VideoMeeting/distributor"
 
-  def updateRoomInfo(roomId:Long,liveIdList:List[String],layout:Int,aiMode:Int, startTime:Long):Future[Either[String,UpdateRsp]] = {
+  def newConnect(roomId:Long, liveId4host: String, liveId4client: String, liveId4push: String, liveCode4push: String, layout: Int):Future[Either[String,newConnectRsp]] = {
+    val url = processorBaseUrl + "/newConnect"
+    val jsonString = newConnectInfo(roomId, liveId4host, liveId4client, liveId4push, liveCode4push, layout).asJson.noSpaces
+    postJsonRequestSend("newConnect",url,List(),jsonString,timeOut = 60 * 1000,needLogRsp = false).map{
+      case Right(v) =>
+        decode[newConnectRsp](v) match{
+          case Right(value) =>
+            Right(value)
+          case Left(e) =>
+            log.error(s"newConnect decode error : $e")
+            Left("Error")
+        }
+      case Left(error) =>
+        log.error(s"newConnect postJsonRequestSend error : $error")
+        Left("Error")
+    }
+
+  }
+
+  def updateRoomInfo(roomId:Long,layout:Int):Future[Either[String,UpdateRsp]] = {
     val url = processorBaseUrl + "/updateRoomInfo"
-    val jsonString = ProcessorProtocol.UpdateRoomInfo(roomId,liveIdList,startTime,layout,aiMode).asJson.noSpaces
+    val jsonString = ProcessorProtocol.UpdateRoomInfo(roomId, layout).asJson.noSpaces
     postJsonRequestSend("updateRoomInfo",url,List(),jsonString,timeOut = 60 * 1000,needLogRsp = false).map{
       case Right(v) =>
         decode[UpdateRsp](v) match{

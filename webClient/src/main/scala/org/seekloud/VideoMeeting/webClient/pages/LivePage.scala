@@ -499,7 +499,7 @@ class LivePage(userId:Long, roomId:Long) extends Page{
         likeNumber := roomInfo.like
 
 
-      case HostDisconnect =>
+      case HostDisconnect(_) =>
       //房主断开连线通知
         enterRoom()
         ScalaWebSocket.sendMessage(BrowserJson.DisConnect(BrowserJson.EventId.DISCONNECT, audienceLiveId).asJson.noSpaces)

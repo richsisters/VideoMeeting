@@ -2,6 +2,7 @@ package org.seekloud.VideoMeeting.roomManager.core
 
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer}
 import akka.actor.typed.{ActorRef, Behavior}
+import org.seekloud.VideoMeeting.protocol.ptcl
 import org.seekloud.VideoMeeting.roomManager.core.RegisterActor.{ConfirmEmail, SendEmail}
 import org.slf4j.LoggerFactory
 
@@ -46,8 +47,15 @@ object RegisterManager {
 
 
         case msg: ConfirmEmail =>
-          getRegisterActor(ctx, msg.email) ! msg
-          Behaviors.same
+          if(ctx.child("registerActor_" + msg.email).isDefined) {
+            getRegisterActor(ctx, msg.email) ! msg
+            Behaviors.same
+          } else {
+            log.debug(s"get confirmEmail ${msg.email} but registerActor_${msg.email} has closed")
+            emailMap -= msg.email
+            msg.replyTo ! ptcl.CommonRsp(180010, "请重新注册")
+            Behavior.unhandled
+          }
 
 
 

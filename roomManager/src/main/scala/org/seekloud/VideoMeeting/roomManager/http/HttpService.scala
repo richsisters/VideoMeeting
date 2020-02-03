@@ -64,7 +64,7 @@ trait HttpService extends ServiceUtils
     ignoreTrailingSlash {
       pathPrefix("VideoMeeting") {
         home ~ statistics ~
-        pathPrefix("roomManager"){
+        pathPrefix("org/seekloud/VideoMeeting/roomManager"){
           resourceRoutes ~ userRoutes ~ rtpRoutes ~ recordRoutes ~ test ~ file ~ rtmp ~ admin ~ recordComment ~ statistic
         }
       }

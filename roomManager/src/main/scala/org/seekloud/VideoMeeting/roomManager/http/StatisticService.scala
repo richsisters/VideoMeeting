@@ -173,7 +173,7 @@ trait StatisticService extends ServiceUtils{
             p <- StatisticDao.getObserveTimeByRid(req.recordId)
           }yield {
             if (v.nonEmpty) {
-              val rsp = WatchProfileInfo(p.getOrElse(0l) / 1000 / 60, v.filter(!_.temporary).map(_.uid).toSet.size,v.count(!_.temporary),v.count(_.temporary))
+              val rsp = WatchProfileInfo(p.getOrElse(0l) / 1000, v.filter(!_.temporary).map(_.uid).toSet.size,v.count(!_.temporary),v.count(_.temporary))
               val roomId = q.map(_.roomid).getOrElse(-1l)
               val startTime = q.map(_.startTime).getOrElse(-1l)
               val url = s"https://${AppSettings.distributorDomain}/VideoMeeting/distributor/getRecord/$roomId/$startTime/record.mp4"
@@ -199,7 +199,7 @@ trait StatisticService extends ServiceUtils{
       case Right(req) =>
         dealFutureResult{
           val timeSpanList = TimeUtil.getSplitTimeSpanByHour(req.startTime, req.endTime)
-          StatisticDao.getObserveDataByHourList(req.recordId,timeSpanList).map { r =>
+          StatisticDao.getObserveDataByTimeList(req.recordId,timeSpanList).map { r =>
             val data = r.map { w =>
               WatchDataByHourInfo(w._2, w._1.filter(!_.temporary).map(_.uid).toSet.size, w._1.count(!_.temporary),w._1.count(_.temporary))
             }
@@ -216,8 +216,31 @@ trait StatisticService extends ServiceUtils{
     }
   }
 
-  val statistic = pathPrefix("statistic"){
-    watchRecordEnd ~ getLoginData ~ loginDataByDay ~ loginDataByHour ~ getRecordDataByAdmin ~ getObserveDataById ~ getObserveDataByHour
+  val getObserveDataByDay = (path("watchObserveByDay") & post){
+    entity(as[Either[Error,WatchDataByDayReq]]){
+      case Right(req) =>
+        dealFutureResult{
+          val timeSpanList = TimeUtil.getSplitTimeSpanByDay(req.startTime, req.endTime)
+          StatisticDao.getObserveDataByTimeList(req.recordId,timeSpanList).map { r =>
+            val data = r.map { w =>
+              WatchDataByHourInfo(w._2, w._1.filter(!_.temporary).map(_.uid).toSet.size, w._1.count(!_.temporary),w._1.count(_.temporary))
+            }
+            complete(WatchDataByHourRsp(data))
+          }.recover{ case e: Exception =>
+            log.debug(s"获取录像的统计信息失败：${e}")
+            complete(CommonRsp(2000006, s"获取录像的统计信息失败：${e}"))
+          }
+        }
+      case Left(e) =>
+        log.debug(s"获取录像的统计信息失败：${e}")
+        complete(CommonRsp(2000005,s"获取录像的统计信息失败：${e}"))
+
+    }
+  }
+
+  val statistic = pathPrefix("statistic") {
+    watchRecordEnd ~ getLoginData ~ loginDataByDay ~ loginDataByHour ~ getRecordDataByAdmin ~ getObserveDataById ~
+    getObserveDataByHour ~ getObserveDataByDay
   }
 
 }

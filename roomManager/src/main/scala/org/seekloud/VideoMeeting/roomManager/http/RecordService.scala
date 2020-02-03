@@ -84,14 +84,11 @@ trait RecordService {
   private val getAuthorRecordList = (path("getAuthorRecordList") & get) {
     parameters(
       'roomId.as[Long],
-      'sortBy.as[String],
-      'pageNum.as[Int],
-      'pageSize.as[Int]
-    ) { case (roomId, sortBy, pageNum, pageSize) =>
+    ) { case roomId =>
       dealFutureResult {
-        RecordDao.getAuthorRecordList(roomId, sortBy, pageNum, pageSize).flatMap{ recordList =>
+        RecordDao.getAuthorRecordList(roomId).flatMap { recordList =>
           log.info("获取主播录像列表成功")
-          RecordDao.getAuthorRecordTotalNum(roomId).map{n =>
+          RecordDao.getAuthorRecordTotalNum(roomId).map { n =>
             complete(GetAuthorRecordListRsp(n, recordList))
           }
         }.recover {
@@ -107,7 +104,7 @@ trait RecordService {
     entity(as[Either[Error, AuthorDeleteRecordReq]]) {
       case Right(req) =>
         dealFutureResult {
-          RecordDao.deleteRecordById(req.recordIdList).map { r =>
+          RecordDao.deleteAuthorRecord(req.recordId).map { r =>
             log.info("主播删除录像成功")
             complete(CommonRsp())
           }.recover {
@@ -119,8 +116,27 @@ trait RecordService {
     }
   }
 
+  private val addRecordAddr = (path("addRecordAddr") & post) {
+    entity(as[Either[Error, AddRecordAddrReq]]) {
+      case Right(req) =>
+        dealFutureResult {
+          RecordDao.addRecordAddr(req.recordId, req.recordAddr).map{r =>
+            if(r == 1){
+              log.info("添加录像地址成功")
+              complete(CommonRsp())
+            } else {
+              log.info("添加录像地址失败")
+              complete(CommonRsp(100049, s"add record failed"))
+            }
+          }
+        }
+      case Left(e) =>
+        complete(CommonRsp(100050, s"add record req error: $e"))
+    }
+  }
+
 
   val recordRoutes: Route = pathPrefix("record") {
-    getRecordList ~ searchRecord ~ watchRecordOver ~ getAuthorRecordList ~ deleteRecord
+    getRecordList ~ searchRecord ~ watchRecordOver ~ getAuthorRecordList ~ deleteRecord ~ addRecordAddr
   }
 }

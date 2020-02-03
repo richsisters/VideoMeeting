@@ -490,7 +490,7 @@ class AnchorPage(userId:Long,userName:String, roomId:Long,roomName:String, token
           audienceLiveId = joinInfo.get.liveId
         }
 
-      case AudienceDisconnect =>
+      case AudienceDisconnect(_) =>
       //观众断开连线通知
         println("AudienceDisconnect")
         audienceConnectLists.update( i =>

@@ -178,6 +178,9 @@ object UserManager {
                 getUserActorOpt(userId,temporary,ctx) match{
                   case Some(actor) =>
                     log.debug(s"${ctx.self.path} setup websocket error:该账户已经登录userId=$userId,temporary=$temporary")
+                    //TODO 重复登录相关处理
+//                    actor ! UserActor.UserLogin(roomId,userId)
+//                    replyTo ! Some(setupWebSocketFlow(actor))
                     replyTo ! None
                   case None =>
                     val userActor = getUserActor(userId, temporary,ctx)
@@ -196,6 +199,9 @@ object UserManager {
             getUserActorOpt(userId,temporary,ctx) match{
               case Some(actor) =>
                 log.debug(s"${ctx.self.path} setup websocket error:该账户已经登录userId=$userId,temporary=$temporary")
+                //TODO 重复登录相关处理
+//                actor ! UserActor.UserLogin(roomId,userId)
+//                replyTo ! Some(setupWebSocketFlow(actor))
                 replyTo ! None
               case None =>
                 val userActor = getUserActor(userId, temporary,ctx)
@@ -260,7 +266,7 @@ object UserManager {
           UserActor.WebSocketMsg(m)
 
         case BinaryMessage.Strict(m) =>
-          log.debug(s"接收到ws消息，类型Binary")
+//          log.debug(s"接收到ws消息，类型Binary")
           val buffer = new MiddleBufferInJvm(m.asByteBuffer)
           bytesDecode[WsMsgClient](buffer) match {
             case Right(req) =>

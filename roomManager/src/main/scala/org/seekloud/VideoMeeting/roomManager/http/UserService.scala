@@ -26,7 +26,7 @@ import org.seekloud.VideoMeeting.roomManager.utils.SecureUtil
 
 import scala.concurrent.Future
 
-trait UserService extends ServiceUtils{
+trait UserService extends ServiceUtils {
   import io.circe._
   import io.circe.syntax._
   import io.circe.generic.auto._
@@ -35,25 +35,26 @@ trait UserService extends ServiceUtils{
 
   private val signUp = (path("signUp") & post) {
 
-    entity(as[Either[Error, SignUp]]){
+    entity(as[Either[Error, SignUp]]) {
       case Right(data) =>
+        //TODO: 正则表达式有点问题
         val emailReg = "^([a-z0-9A-Z]+[-|\\.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}$"
         data.email.matches(emailReg) match {
           case true =>
             val code = SecureUtil.nonceStr(20)
-            dealFutureResult{
+            dealFutureResult {
               UserInfoDao.checkEmail(data.email).map {
                 case Some(_) =>
                   complete(CommonRsp(180002, "邮箱已注册"))
                 case None =>
-                  dealFutureResult{
-                    UserInfoDao.searchByName(data.userName).map{
+                  dealFutureResult {
+                    UserInfoDao.searchByName(data.userName).map {
                       case Some(_) =>
                         complete(CommonRsp(180010, "用户名已注册"))
                       case None =>
                         val signFutureRsp: Future[SignUpRsp] = registerManager ? (SendEmail(code, data.url, data.email, data.userName, data.password, _))
                         dealFutureResult {
-                          signFutureRsp.map{
+                          signFutureRsp.map {
                             rsp =>
                               complete(rsp)
                           }
@@ -63,7 +64,7 @@ trait UserService extends ServiceUtils{
               }
             }
           case false =>
-            complete(CommonRsp(180001,"邮箱地址不合法"))
+            complete(CommonRsp(180001, "邮箱地址不合法"))
 
         }
       case Left(error) =>
@@ -78,13 +79,14 @@ trait UserService extends ServiceUtils{
     ) { case (email, code) =>
       log.info(s"receive confirmEmail:$email, $code")
       val rstF: Future[Response] = registerManager ? (ConfirmEmail(code, email, _))
-      dealFutureResult{
+      dealFutureResult {
         rstF.map {
-          case RegisterSuccessRsp(url, _, _)=>
+          case RegisterSuccessRsp(url, _, _) =>
             log.info(s"注册成功！")
-            if(url == ""){
+            if (url == "") {
               complete(CommonRsp())
-            }else{
+            } else {
+              //println("返回重定向url")
               redirect(url, StatusCodes.SeeOther)
             }
           case rsp@CommonRsp(errCode, msg) =>
@@ -95,10 +97,10 @@ trait UserService extends ServiceUtils{
   }
 
   private val signIn = (path("signIn") & post) {
-    entity(as[Either[Error, SignIn]]){
+    entity(as[Either[Error, SignIn]]) {
       case Right(data) =>
-        dealFutureResult{
-          UserInfoDao.searchByName(data.userName).map{
+        dealFutureResult {
+          UserInfoDao.searchByName(data.userName).map {
             case Some(rst) =>
               if (rst.password != SecureUtil.getSecurePassword(data.password, rst.email, rst.createTime)) {
                 log.error(s"login error: wrong pw")
@@ -112,7 +114,7 @@ trait UserService extends ServiceUtils{
                 val roomInfo = RoomInfo(rst.roomid, s"${rst.userName}的直播间", "", rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, if (rst.coverImg == "") Common.DefaultImg.coverImg else rst.coverImg, 0, 0)
                 StatisticDao.addLoginEvent(userInfo.userId, System.currentTimeMillis())
                 val session = UserSession(rst.uid.toString, rst.userName, System.currentTimeMillis().toString).toSessionMap
-                addSession(session){
+                addSession(session) {
                   log.info(s"${rst.uid} login success")
                   complete(SignInRsp(Some(userInfo), Some(roomInfo)))
                 }
@@ -122,7 +124,7 @@ trait UserService extends ServiceUtils{
                 val roomInfo = RoomInfo(rst.roomid, s"${rst.userName}的直播间", "", rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, if (rst.coverImg == "") Common.DefaultImg.coverImg else rst.coverImg, 0, 0)
                 StatisticDao.addLoginEvent(userInfo.userId, System.currentTimeMillis())
                 val session = UserSession(rst.uid.toString, rst.userName, System.currentTimeMillis().toString).toSessionMap
-                addSession(session){
+                addSession(session) {
                   log.info(s"${rst.uid} login success")
                   complete(SignInRsp(Some(userInfo), Some(roomInfo)))
                 }
@@ -138,10 +140,10 @@ trait UserService extends ServiceUtils{
   }
 
   private val signInByMail = (path("signInByMail") & post) {
-    entity(as[Either[Error, SignInByMail]]){
+    entity(as[Either[Error, SignInByMail]]) {
       case Right(data) =>
-        dealFutureResult{
-          UserInfoDao.checkEmail(data.email).map{
+        dealFutureResult {
+          UserInfoDao.checkEmail(data.email).map {
             case Some(rst) =>
               if (rst.password != SecureUtil.getSecurePassword(data.password, rst.email, rst.createTime)) {
                 log.error(s"login error: wrong pw")
@@ -155,7 +157,7 @@ trait UserService extends ServiceUtils{
                 val roomInfo = RoomInfo(rst.roomid, s"${rst.userName}的直播间", "", rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, if (rst.coverImg == "") Common.DefaultImg.coverImg else rst.coverImg, 0, 0)
                 StatisticDao.addLoginEvent(userInfo.userId, System.currentTimeMillis())
                 val session = UserSession(rst.uid.toString, rst.userName, System.currentTimeMillis().toString).toSessionMap
-                addSession(session){
+                addSession(session) {
                   log.info(s"${rst.uid} login success")
                   complete(SignInRsp(Some(userInfo), Some(roomInfo)))
                 }
@@ -166,7 +168,7 @@ trait UserService extends ServiceUtils{
                 val roomInfo = RoomInfo(rst.roomid, s"room:${rst.roomid}", "", rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, if (rst.coverImg == "") Common.DefaultImg.coverImg else rst.coverImg, 0, 0)
                 StatisticDao.addLoginEvent(userInfo.userId, System.currentTimeMillis())
                 val session = UserSession(rst.uid.toString, rst.userName, System.currentTimeMillis().toString).toSessionMap
-                addSession(session){
+                addSession(session) {
                   log.info(s"${rst.uid} login success")
                   complete(SignInRsp(Some(userInfo), Some(roomInfo)))
                 }
@@ -186,10 +188,10 @@ trait UserService extends ServiceUtils{
       'userId.as[Long],
       'token.as[String],
       'roomId.as[Long]
-    ) { (uid, token,roomId) =>
-      val setWsFutureRsp : Future[Option[Flow[Message, Message, Any]]] = userManager ? (SetupWs(uid, token,roomId, _))
+    ) { (uid, token, roomId) =>
+      val setWsFutureRsp: Future[Option[Flow[Message, Message, Any]]] = userManager ? (SetupWs(uid, token, roomId, _))
       dealFutureResult(
-        setWsFutureRsp.map{
+        setWsFutureRsp.map {
           case Some(rsp) => handleWebSocketMessages(rsp)
           case None =>
             log.debug(s"建立websocket失败，userId=$uid,roomId=$roomId,token=$token")
@@ -203,7 +205,7 @@ trait UserService extends ServiceUtils{
 
   private val getRoomList = (path("getRoomList") & get) {
 
-    val roomListFutureRsp : Future[RoomListRsp] = roomManager ? (GetRoomList(_))
+    val roomListFutureRsp: Future[RoomListRsp] = roomManager ? (GetRoomList(_))
     dealFutureResult(
       roomListFutureRsp.map(rsp => complete(rsp))
     )
@@ -211,12 +213,12 @@ trait UserService extends ServiceUtils{
 
 
   private val searchRoom = (path("searchRoom") & post) {
-    entity(as[Either[Error,SearchRoomReq]]){
+    entity(as[Either[Error, SearchRoomReq]]) {
       case Right(rsp) =>
-        if(rsp.roomId < 0){
+        if (rsp.roomId < 0) {
           complete(SearchRoomError4RoomId)
-        }else{
-          val searchRoomFutureRsp:Future[SearchRoomRsp] = roomManager ? (RoomManager.SearchRoom(rsp.userId, rsp.roomId, _))
+        } else {
+          val searchRoomFutureRsp: Future[SearchRoomRsp] = roomManager ? (RoomManager.SearchRoom(rsp.userId, rsp.roomId, _))
           dealFutureResult(
             searchRoomFutureRsp.map(rsp => complete(rsp))
           )
@@ -229,78 +231,79 @@ trait UserService extends ServiceUtils{
     }
   }
 
-  private val nickNameChange = (path("nickNameChange") & get){
-//    authUser { _ =>
-      parameter('userId.as[Long], 'newName.as[String]) {
-        (userId, newName) =>
-          dealFutureResult {
-            UserInfoDao.searchById(userId).map {
-              case Some(_) =>
-                dealFutureResult {
-                  UserInfoDao.searchByName(newName).map {
-                    case Some(_) =>
-                      complete(CommonRsp(1000051, "用户名已被注册"))
-                    case None =>
-                      dealFutureResult {
-                        UserInfoDao.updateName(userId, newName).map { rst =>
-                          roomManager ! UserInfoChange(userId, false)
-                          complete(CommonRsp(0, "ok"))
-                        }
+  private val nickNameChange = (path("nickNameChange") & get) {
+    //    authUser { _ =>
+    parameter('userId.as[Long], 'newName.as[String]) {
+      (userId, newName) =>
+        dealFutureResult {
+          UserInfoDao.searchById(userId).map {
+            case Some(_) =>
+              dealFutureResult {
+                UserInfoDao.searchByName(newName).map {
+                  case Some(_) =>
+                    complete(CommonRsp(1000051, "用户名已被注册"))
+                  case None =>
+                    dealFutureResult {
+                      UserInfoDao.updateName(userId, newName).map { rst =>
+                        roomManager ! UserInfoChange(userId, false)
+                        complete(CommonRsp(0, "ok"))
                       }
-                  }
+                    }
                 }
-              case None =>
-                complete(CommonRsp(1000050, "user not exist"))
-            }
+              }
+            case None =>
+              complete(CommonRsp(1000050, "user not exist"))
           }
-      }
-//    }
+        }
+    }
+    //    }
   }
 
-  /**临时用户申请userId和token接口*/
-  private val temporaryUser = (path("temporaryUser") & get){
-    val rspFuture:Future[GetTemporaryUserRsp] = userManager ? (TemporaryUser(_))
+  /** 临时用户申请userId和token接口 */
+  private val temporaryUser = (path("temporaryUser") & get) {
+    val rspFuture: Future[GetTemporaryUserRsp] = userManager ? (TemporaryUser(_))
     dealFutureResult(rspFuture.map(complete(_)))
   }
 
-  case class DeleteUser(email:String)
-  private val deleteUserByEmail = (path("deleteUser") & post){
-    entity(as[Either[Error,DeleteUser]]){
+  case class DeleteUser(email: String)
+
+  private val deleteUserByEmail = (path("deleteUser") & post) {
+    entity(as[Either[Error, DeleteUser]]) {
       case Right(req) =>
-        dealFutureResult(UserInfoDao.deleteUserByEmail(req.email,"").map(_ => complete(CommonRsp())))
+        dealFutureResult(UserInfoDao.deleteUserByEmail(req.email, "").map(_ => complete(CommonRsp())))
       case Left(error) =>
-        complete(CommonRsp(100034,s"decode error:$error"))
+        complete(CommonRsp(100034, s"decode error:$error"))
     }
   }
 
-  private val getRoomInfo = (path("getRoomInfo") & post){
-    entity(as[Either[Error,GetRoomInfoReq]]){
+  private val getRoomInfo = (path("getRoomInfo") & post) {
+    entity(as[Either[Error, GetRoomInfoReq]]) {
       case Right(req) =>
-        dealFutureResult{
-          for{
-            verify <- UserInfoDao.verifyUserWithToken(req.userId,req.token)
-          }yield {
-            if(verify){
-              dealFutureResult{
-                UserInfoDao.searchById(req.userId).map{r =>
+        dealFutureResult {
+          for {
+            verify <- UserInfoDao.verifyUserWithToken(req.userId, req.token)
+          } yield {
+            if (verify) {
+              dealFutureResult {
+                UserInfoDao.searchById(req.userId).map { r =>
                   val rsp = r.get
-                  complete(RoomInfoRsp(Some(RoomInfo(rsp.roomid,s"room:${rsp.roomid}","", rsp.uid,rsp.userName,if(rsp.headImg == "")Common.DefaultImg.headImg else rsp.headImg,if(rsp.coverImg == "")Common.DefaultImg.coverImg else rsp.coverImg,0,0))))
+                  complete(RoomInfoRsp(Some(RoomInfo(rsp.roomid, s"room:${rsp.roomid}", "", rsp.uid, rsp.userName, if (rsp.headImg == "") Common.DefaultImg.headImg else rsp.headImg, if (rsp.coverImg == "") Common.DefaultImg.coverImg else rsp.coverImg, 0, 0))))
                 }
               }
-            }else{
-              complete(CommonRsp(100046,s"userId和token验证失败"))
+            } else {
+              complete(CommonRsp(100046, s"userId和token验证失败"))
             }
           }
         }
 
       case Left(error) =>
         log.debug(s"获取房间信息失败，解码失败，error:$error")
-        complete(CommonRsp(100045,s"decode error:$error"))
+        complete(CommonRsp(100045, s"decode error:$error"))
     }
   }
 
   val userRoutes: Route = pathPrefix("user") {
     signUp ~ signIn ~ confirmEmail ~ deleteUserByEmail ~
-      nickNameChange ~ getRoomList ~ searchRoom ~ setupWebSocket ~ temporaryUser ~ signInByMail ~ getRoomInfo
+    nickNameChange ~ getRoomList ~ searchRoom ~ setupWebSocket ~ temporaryUser ~ signInByMail ~ getRoomInfo
   }
 }

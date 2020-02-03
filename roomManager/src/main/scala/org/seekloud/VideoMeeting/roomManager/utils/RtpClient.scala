@@ -22,7 +22,7 @@ object RtpClient extends HttpUtil{
   def getLiveInfoFunc():Future[Either[String,GetLiveInfoRsp]] = {
     log.debug("get live info")
     val url = processorBaseUrl + "/getLiveInfo"
-    val req = genPostEnvelope("roomManager",System.nanoTime().toString,"{}","484ec7db9e39bc4b5e3d").asJson.noSpaces
+    val req = genPostEnvelope("org/seekloud/VideoMeeting/roomManager",System.nanoTime().toString,"{}","484ec7db9e39bc4b5e3d").asJson.noSpaces
     postJsonRequestSend("getLiveInfo",url,List(),req,timeOut = 60 * 1000,needLogRsp = false).map{
       case Right(v) =>
         decode[GetLiveInfoRsp](v) match{

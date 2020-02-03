@@ -72,13 +72,13 @@ object RegisterActor {
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
         case SendEmail(code, redirectUrl, email, name, password, replyTo) =>
-          val url = serverProtocol + "://" + serverHost + ":"  + serverPort + "/" + serverUrl + "/roomManager/user/confirmEmail" + s"?email=$email&code=$code"
+          val url = serverProtocol + "://" + serverHost + ":"  + serverPort + "/" + serverUrl + "/org/seekloud/VideoMeeting/roomManager/user/confirmEmail" + s"?email=$email&code=$code"
           //todo 取消注释，emailActor设定为新的
           emailActor ! EmailActor.SendConfirmEmail(url, email)
+          replyTo ! SignUpRsp(0, "认证邮件已发送，请在注册邮箱中查看")
           val timeOut: TimeOut = TimeOut("waiting for confirming time out")
           timer.startSingleTimer(TimeoutKey, timeOut, timeOutDuration.seconds)
           waitingForConfirm(code, redirectUrl, email, name, password, replyTo)
-
 
         //未知消息
         case x =>
@@ -109,7 +109,7 @@ object RegisterActor {
             case Success(id) =>
               println("add user success")
               replyTo ! RegisterSuccessRsp(redirectUrl)
-              reply ! SignUpRsp()
+              //reply ! SignUpRsp()
               registerManager ! RegisterFinished(email)
               println(s"register actor $email stopped")
 //              switchBehavior(ctx, "waitingForConfirm", waitingForConfirm(code, receiveCode, email, name, password, reply))
@@ -117,13 +117,15 @@ object RegisterActor {
             case Failure(e) =>
               log.debug(s"add register user failed, error: $e")
               replyTo ! ptcl.CommonRsp(180004, "add register user failed")
+              //reply ! SignUpRsp(180006, "add register user failed")
 //              ctx.self ! SignUpFinish
           }
         } else {
           replyTo ! CommonRsp(180005, "code error")
+          //reply ! SignUpRsp(180007, "注册失败")
         }
-        val timeOut: TimeOut = TimeOut("waiting for getting info time out")
-        timer.startSingleTimer(TimeoutKey, timeOut, timeOutDuration.seconds)
+//        val timeOut: TimeOut = TimeOut("waiting for getting info time out")
+//        timer.startSingleTimer(TimeoutKey, timeOut, timeOutDuration.seconds)
 
 //        switchBehavior(ctx, "busy", busy(), Some(10.minutes))
         Behaviors.stopped
@@ -131,7 +133,8 @@ object RegisterActor {
 
 
       case m: SendEmail =>
-        m.replyTo ! SignUpRsp(180003, "邮件已发送，请在注册邮箱中确认")
+//        m.replyTo ! SignUpRsp(180003, "邮件已发送，请在注册邮箱中确认")
+        m.replyTo ! SignUpRsp(0, "邮件已发送，请在注册邮箱中确认")
         Behaviors.same
 
       case TimeOut(m) =>

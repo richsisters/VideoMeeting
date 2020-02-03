@@ -68,6 +68,7 @@ object AppSettings {
 
   val processorIp = appConfig.getString("processor.ip")
   val processorPort = appConfig.getInt("processor.port")
+  val distributorUseIp = appConfig.getBoolean("distributor.useIp")
   val distributorIp = appConfig.getString("distributor.ip")
   val distributorPort = appConfig.getString("distributor.port")
   val distributorDomain = appConfig.getString("distributor.domain")
