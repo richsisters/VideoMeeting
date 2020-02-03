@@ -15,6 +15,3 @@ create table user_info (
   email varchar(256) not null default '',
   role boolean not null default false -- 用户角色，1为主持人，0为参会者
 );
-
-create sequence group_seq;
-create table test3(id bigint default group_seq.nextval primary key);
