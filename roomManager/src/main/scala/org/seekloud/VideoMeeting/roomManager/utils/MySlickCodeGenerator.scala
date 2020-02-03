@@ -1,8 +1,7 @@
 package org.seekloud.VideoMeeting.roomManager.utils
 
 import slick.codegen.SourceCodeGenerator
-import slick.jdbc.{JdbcProfile, PostgresProfile}
-
+import slick.jdbc.{H2Profile, JdbcProfile}
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
@@ -15,17 +14,13 @@ object MySlickCodeGenerator {
 
   import concurrent.ExecutionContext.Implicits.global
 
-  val slickProfile = "slick.jdbc.PostgresProfile"
-  val jdbcDriver = "org.postgresql.Driver"
-  val url = "jdbc:postgresql://10.1.29.248:5432/VideoMeeting"
+  val slickProfile = "slick.jdbc.H2Profile"
+  val jdbcDriver = "org.h2.Driver"
+  val url = "jdbc:h2:file:./data/VideoMeeting"
   val outputFolder = "target/gencode/genTablesPsql"
   val pkg = "org.seekloud.VideoMeeting.roomManager.models"
   val user = "VideoMeeting"
   val password = "1qaz@WSX"//Rm1qaz@WSX
-
-
-  //val dbDriver = MySQLDriver
-
 
   def genCustomTables(dbProfile: JdbcProfile) = {
 
@@ -89,7 +84,7 @@ object MySlickCodeGenerator {
 
   def main(args: Array[String]) {
     //genDefaultTables()
-    val dbProfile = PostgresProfile
+    val dbProfile = H2Profile
 
     genCustomTables(dbProfile)
 

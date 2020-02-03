@@ -3,7 +3,7 @@ package org.seekloud.VideoMeeting.roomManager.utils
 import com.zaxxer.hikari.HikariDataSource
 import org.seekloud.VideoMeeting.roomManager.common.AppSettings._
 import org.slf4j.LoggerFactory
-import slick.jdbc.H2Profile
+import slick.jdbc.H2Profile.api._
 
 /**
  * User: Taoz
@@ -16,8 +16,7 @@ object DBUtil {
   private val dataSource = createDataSource()
 
   private def createDataSource() = {
-
-    val dataSource = new org.postgresql.ds.PGSimpleDataSource()
+    val dataSource = new org.h2.jdbcx.JdbcDataSource
     dataSource.setUrl(slickUrl)
     dataSource.setUser(slickUser)
     dataSource.setPassword(slickPassword)
@@ -30,10 +29,6 @@ object DBUtil {
     hikariDS.setAutoCommit(true)
     hikariDS
   }
-
-  val driver = H2Profile
-
-  import driver.api.Database
 
   val db: Database = Database.forDataSource(dataSource, Some(slickMaximumPoolSize))
 
