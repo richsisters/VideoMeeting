@@ -1,16 +1,10 @@
-package org.seekloud.VideoMeeting.distributor
-
 import java.io.{PipedInputStream, PipedOutputStream}
 import java.net.{InetSocketAddress, Socket}
 import java.nio.ByteBuffer
 import java.nio.channels.{DatagramChannel, Pipe}
 
-/**
-  * User: yuwei
-  * Date: 2019/8/31
-  * Time: 16:22
-  */
-object SocketClient {
+object TestDistributor {
+  import java.nio.channels.SocketChannel
 
   object PayloadType{
     val newLive:Byte = 1
@@ -18,16 +12,24 @@ object SocketClient {
     val closeLive:Byte = 3
     val heartBeat:Byte = 4
   }
-  private val socket = new Socket("127.0.0.1", 30391) //tcp
+
+//  val distributorAddr = "10.1.29.248"
+  val distributorAddr = "127.0.0.1"
+
+  private val socket = new Socket(distributorAddr, 30391) //tcp
+  println("-----------")
   private val roomId = 1000L
   private val receiveBuf = ByteBuffer.allocate(4096)
-  private val packArray = new Array[Byte](188)
   private val packBuf = ByteBuffer.allocate(188)
+//  private val packBuf = ByteBuffer.allocate(1327)
   private val output = socket.getOutputStream
   private val streamChannel = DatagramChannel.open()
-  private val inetSocketAddress =new InetSocketAddress("127.0.0.1",41100)//udp
+  private val inetSocketAddress = new InetSocketAddress("127.0.0.1",41100)//udp
   streamChannel.bind(inetSocketAddress)
-  val dst = new InetSocketAddress("127.0.0.1", 45501)
+  //  val dst = new InetSocketAddress("127.0.0.1", 45501)
+
+  private val num = 1
+  private val duration = 180000
 
   val pipe: Pipe = Pipe.open()
   val sink: Pipe.SinkChannel = pipe.sink()
@@ -37,18 +39,19 @@ object SocketClient {
     receiveThread.start()
     sendNewLive()
     sendThread.start()
-//    println(System.currentTimeMillis())
+    Thread.sleep(duration)
+    sendClose()
+    //    println(System.currentTimeMillis())
   }
 
   val receiveThread = new Thread(() =>{
-      while (true) {
-        if(streamChannel.receive(receiveBuf) != null){
-          receiveBuf.flip()
-          sink.write(receiveBuf)
-          println("00000000000000000000000000000")
-          receiveBuf.clear()
-        }
+    while (true) {
+      if(streamChannel.receive(receiveBuf) != null){
+        receiveBuf.flip()
+        sink.write(receiveBuf)
+        receiveBuf.clear()
       }
+    }
   })
 
   private val sendThread = new Thread(()=>{
@@ -56,10 +59,12 @@ object SocketClient {
       packBuf.clear()
       val n = source.read(packBuf)
       packBuf.flip()
-      val data = packTs4Dispatcher(PayloadType.packet, roomId, packBuf.array(), n)
-      output.write(data)
-      println("===================")
-//      streamChannel.send(packBuf, dst)
+      val a = packBuf.array()
+      for(i <- 1000l until 1000l+num) {
+        val data = packTs4Dispatcher(PayloadType.packet, i, a, n)
+        output.write(data)
+      }
+      //      streamChannel.send(packBuf, dst)
     }
   })
 
@@ -68,13 +73,25 @@ object SocketClient {
     println(s"sT:$startTime")
     packBuf.clear()
     packBuf.putLong(startTime)
-    val data = packTs4Dispatcher(PayloadType.newLive, roomId, packBuf.array(), 8)
-    output.write(data)
+    val a = packBuf.array()
+    for(i <- 1000l until 1000l+num) {
+      val data = packTs4Dispatcher(PayloadType.newLive, i, a, 8)
+      output.write(data)
+      Thread.sleep(1)
+    }
   }
 
   private def sendClose(): Unit = {
-    val data = packTs4Dispatcher(PayloadType.closeLive, roomId, packBuf.array(), 0)
-//    output.write(data)
+    receiveThread.interrupt()
+    Thread.sleep(10)
+    val a = packBuf.array()
+    for(i <- 1000l until 1000l+num) {
+      val data = packTs4Dispatcher(PayloadType.closeLive, i, a, 0)
+      output.write(data)
+      Thread.sleep(2)
+    }
+    Thread.sleep(5)
+    sendThread.interrupt()
   }
 
   private def packTs4Dispatcher(payload:Byte, roomId: Long, ts:Array[Byte], valid:Long) ={
@@ -93,6 +110,5 @@ object SocketClient {
       (num >> ((byte_num - index - 1) * 8) & 0xFF).toByte
     }.toArray
   }
-
 
 }

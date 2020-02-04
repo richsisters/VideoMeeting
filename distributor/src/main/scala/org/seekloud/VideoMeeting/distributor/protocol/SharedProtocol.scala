@@ -7,19 +7,24 @@ package org.seekloud.VideoMeeting.distributor.protocol
   */
 object SharedProtocol {
 
-  case class UpdateRoom(
+  case class StartPullReq(
     roomId:Long,
-    liveIdList:List[String], //主播放在第一个
-    startTime: Long,
-    layout:Int,
-    aiMode:Int //为了之后拓展多种模式，目前0为不开ai，1为人脸目标检测
+    liveId:String
+  )
+
+  case class CheckStream(
+    liveId:String
   )
 
   case class RoomInfo(roomId:Long, roles:List[String], layout:Int, aiMode:Int=0)
 
-  case class CloseRoom(
-                        roomId:Long
-                      )
+  case class FinishPullReq(
+    liveId:String
+  )
+
+  case class CheckStreamReq(
+    liveId:String
+  )
 
   case class GetMpd(
                      roomId:Long
@@ -38,6 +43,27 @@ object SharedProtocol {
     val errCode: Int
     val msg: String
   }
+
+  case class StartPullRsp(
+    errCode:Int,
+    msg:String,
+    liveAdd:String,
+    startTime:Long
+  ) extends CommonRsp
+
+  case class FinishPullRsp(
+    errCode: Int = 0,
+    msg: String = "ok"
+  ) extends CommonRsp
+
+  case class CheckStreamRsp(
+    errCode:Int = 0,
+    msg:String = "ok",
+    status:String = "正常"
+  ) extends CommonRsp
+
+  val StreamError = CheckStreamRsp(100001, "streamError", "没有流信息")
+  val RoomError = CheckStreamRsp(100002, "roomError", "没有流对应的房间")
 
   case class MpdRsp(
                      mpd: String,
@@ -69,6 +95,12 @@ object SharedProtocol {
                          startTime:Long
                        )
 
+  case class RecordInfoRsp(
+                            errCode:Int = 0,
+                            msg:String = "ok",
+                            duration:String
+                          ) extends CommonRsp
+
   case class RecordList(
                        records:List[RecordData]
                        )
@@ -78,10 +110,5 @@ object SharedProtocol {
                        startTime:Long
                        )
 
-  case class RecordInfoRsp(
-                            errCode:Int = 0,
-                            msg:String = "ok",
-                            duration:String
-                          ) extends CommonRsp
 
 }

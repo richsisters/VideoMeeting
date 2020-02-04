@@ -45,6 +45,11 @@ trait ResourceService {
 
 
   private val resources = {
+    pathPrefix("html") {
+      extractUnmatchedPath { path =>
+        getFromResourceDirectory("html")
+      }
+    } ~
     pathPrefix("css") {
       extractUnmatchedPath { path =>
         getFromResourceDirectory("css")
@@ -74,14 +79,14 @@ trait ResourceService {
     pathPrefix("test") {
       getFromDirectory("D:\\workstation\\sbt\\vigour\\logs\\test")
     } ~
-      path("jsFile" / Segment / AppSettings.projectVersion) { name =>
-        val jsFileName = name + ".js"
-        if (jsFileName == "frontend-fastopt.js") {
-          getFromResource(s"sjsout/$jsFileName")
-        } else {
-          getFromResource(s"js/$jsFileName")
-        }
+    path("jsFile" / Segment / AppSettings.projectVersion) { name =>
+      val jsFileName = name + ".js"
+      if (jsFileName == "distributorpage-fastopt.js") {
+        getFromResource(s"sjsout/$jsFileName")
+      } else {
+        getFromResource(s"js/$jsFileName")
       }
+    }
   }
 
   //cache code copied from zhaorui.

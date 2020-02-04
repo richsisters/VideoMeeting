@@ -1,6 +1,5 @@
 package org.seekloud.VideoMeeting.distributor.core
 
-import java.io.File
 import java.net.ServerSocket
 
 import scala.language.implicitConversions
@@ -9,13 +8,14 @@ import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerSch
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
-import org.seekloud.VideoMeeting.distributor.Boot.distributor
+import org.seekloud.VideoMeeting.distributor.Boot.{pullActor,liveManager}
 
 /**
   * User: yuwei
   * Date: 2019/8/26
   * Time: 20:09
   */
+
 object EncodeManager {
   sealed trait Command
 
@@ -28,7 +28,7 @@ object EncodeManager {
   case class ChildDead(roomId: Long, childName: String, value: ActorRef[EncodeActor.Command]) extends Command
 
   def create(): Behavior[Command] = {
-    Behaviors.setup[Command] { ctx =>
+    Behaviors.setup[Command] { _ =>
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       Behaviors.withTimers[Command] {
         implicit timer =>
@@ -45,12 +45,14 @@ object EncodeManager {
       msg match {
         case m@UpdateEncode(roomId, startTime) =>
           log.info(s"got msg: $m")
-          val port = getFreePort()
-          distributor ! DistributorWorker.RoomWithPort(roomId, port)
+          //fixme 连线流程
           if(enCodeRefMap.get(roomId).isDefined){
-            log.info(s"restart room $roomId exist, assign free port $port.")
-            enCodeRefMap.get(roomId).get._2 ! EncodeActor.ReStart(port, startTime)
+            log.info(s"room $roomId exist.")
+//            enCodeRefMap(roomId)._2 ! EncodeActor.ReStart(port, startTime)
           }else{
+            val port = getFreePort
+            pullActor ! PullActor.RoomWithPort(roomId, port)
+            liveManager ! LiveManager.RoomWithPort(roomId, port)
             log.info(s"assign free port $port")
             val encoder = getEncodeActor(ctx, roomId, port, startTime)
             enCodeRefMap.put(roomId, (port,encoder))
@@ -62,7 +64,7 @@ object EncodeManager {
           enCodeRefMap.remove(roomId)
           Behaviors.same
 
-        case ChildDead(roomId, childName, value) =>
+        case ChildDead(_, childName, _) =>
           log.info(s"$childName id dead ---")
           Behaviors.same
       }
@@ -78,7 +80,7 @@ object EncodeManager {
     }.unsafeUpcast[EncodeActor.Command]
   }
 
-  private def getFreePort() = {
+  private def getFreePort: Int = {
     val serverSocket =  new ServerSocket(0) //读取空闲的可用端口
     val port = serverSocket.getLocalPort
     serverSocket.close()

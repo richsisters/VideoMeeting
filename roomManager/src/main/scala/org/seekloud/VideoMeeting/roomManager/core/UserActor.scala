@@ -168,7 +168,7 @@ object UserActor {
                   case Some(v) =>
                     if(v.`sealed`){
                       log.debug(s"${ctx.self.path} 该用户已经被封号，无法发送ws消息")
-                      clientActor !Wrap(AuthProtocol.AccountSealed.asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
+                      clientActor ! Wrap(AuthProtocol.AccountSealed.asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
                       ctx.self ! CompleteMsgClient
                       ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
                     }else{

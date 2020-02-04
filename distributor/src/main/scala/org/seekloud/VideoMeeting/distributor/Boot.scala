@@ -4,24 +4,25 @@ import org.seekloud.VideoMeeting.distributor.http.HttpService
 import org.seekloud.VideoMeeting.distributor.common.AppSettings._
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.typed.{ActorRef, DispatcherSelector}
-import akka.actor.{ActorSystem, Props, Scheduler}
+import akka.actor.{ActorSystem, Scheduler}
 import akka.dispatch.MessageDispatcher
 import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
-import akka.routing.RoundRobinPool
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 
 import scala.language.postfixOps
-import org.seekloud.VideoMeeting.distributor.core.{DistributorWorker, EncodeManager, SaveManager, RevActor}
+import org.seekloud.VideoMeeting.distributor.core.{EncodeManager, LiveManager, PullActor, SaveManager}
+import org.seekloud.VideoMeeting.rtpClient.Protocol._
+
 /**
   * User: yuwei
   * Date: 7/15/2019
   */
+
 object Boot extends HttpService {
 
   import concurrent.duration._
-
 
   override implicit val system: ActorSystem = ActorSystem("dispatcher", config)
   // the executor should not be the default dispatcher.
@@ -40,9 +41,13 @@ object Boot extends HttpService {
 
   val saveManager:ActorRef[SaveManager.Command] = system.spawn(SaveManager.create(), "saveManager")
 
-  val distributor:ActorRef[DistributorWorker.Command] = system.spawn(DistributorWorker.create(), "router")
+//  val distributor:ActorRef[DistributorWorker.Command] = system.spawn(DistributorWorker.create(), "router")
 
-  val revActor:ActorRef[RevActor.Command] = system.spawn(RevActor.create(), "recActor")
+//  val revActor:ActorRef[RevActor.Command] = system.spawn(RevActor.create(), "recActor")
+
+  val liveManager:ActorRef[LiveManager.Command] = system.spawn(LiveManager.create(), "liveManager")
+
+  val pullActor:ActorRef[Command] = system.spawn(PullActor.create(),"pullActor")
 
 	def main(args: Array[String]) {
     Http().bindAndHandle(routes, httpInterface, httpPort)
@@ -51,10 +56,5 @@ object Boot extends HttpService {
     Thread.sleep(2000)
 
   }
-
-
-
-
-
 
 }

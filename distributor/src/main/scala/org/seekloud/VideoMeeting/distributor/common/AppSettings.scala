@@ -22,11 +22,11 @@ import org.seekloud.VideoMeeting.distributor.utils.SessionSupport.SessionConfig
 import com.typesafe.config.{Config, ConfigFactory}
 import org.slf4j.{Logger, LoggerFactory}
 
-
 /**
   * User: yuwei
   * Date: 7/15/2019
   */
+
 object AppSettings {
   
   private implicit class RichConfig(config: Config) {
@@ -51,16 +51,24 @@ object AppSettings {
 
   val appConfig: Config = config.getConfig("app")
 
+  val serverProtocol: String = appConfig.getString("server.protocol")
+  val serverHost: String = appConfig.getString("server.host")
+  val serverPort: String = appConfig.getString("server.port")
+
   val projectVersion: String = appConfig.getString("projectVersion")
   val httpInterface: String = appConfig.getString("http.interface")
   val httpPort: Int = appConfig.getInt("http.port")
 
   val fileLocation: String = appConfig.getString("fileLocation")
-  val dashLocation: String = appConfig.getString("dashLocation")
-  val hlsLocation: String = appConfig.getString("hlsLocation")
   val recordLocation: String = appConfig.getString("recordLocation")
+  val testLocation: String = appConfig.getString("testPath")
   val indexPath: String = appConfig.getString("indexPath")
-  val isTest: Boolean = appConfig.getBoolean("isTest")
+  val testModel: Boolean = appConfig.getBoolean("testModel")
+  val testStream: Boolean = appConfig.getBoolean("testStream")
+  val testFile: Boolean = appConfig.getBoolean("testFile")
+
+  val rtpToHost: String = appConfig.getString("rtpToHost")
+  val rtpServerDst: String = appConfig.getString("rtpServerDst")
 
   val slickConfig: Config = config.getConfig("slick.db")
   val slickUrl: String = slickConfig.getString("url")
