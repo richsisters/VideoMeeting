@@ -3,7 +3,6 @@ package org.seekloud.VideoMeeting.distributor.core
 import java.io.{BufferedReader, File, InputStreamReader}
 import java.util.regex.Pattern
 
-import org.slf4j.LoggerFactory
 
 import scala.language.implicitConversions
 import akka.actor.typed.{ActorRef, Behavior}
@@ -31,7 +30,7 @@ object SaveManager {
 
   case class ChildDead(roomId: Long, childName: String, value: ActorRef[SaveActor.Command]) extends Command
   def create(): Behavior[Command] = {
-    Behaviors.setup[Command] { ctx =>
+    Behaviors.setup[Command] { _ =>
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       Behaviors.withTimers[Command] {
         implicit timer =>
@@ -50,14 +49,16 @@ object SaveManager {
           getSaveActor(ctx, roomId,startTime)
           Behaviors.same
 
-        case SeekRecord(roomId,startTime,reply)=>
-          val file = new File(s"$recordLocation$roomId/$startTime/record.ts")
+        case m@SeekRecord(roomId, startTime, reply)=>
+          log.info(s"got msg: $m")
+          val file = new File(s"$recordLocation$roomId/$startTime/record.mp4")
           if(file.exists()){
             val d = getVideoDuration(roomId,startTime)
             log.info(s"duration:$d")
-            reply ! RecordInfo(true,d)
+            reply ! RecordInfo(fileExist = true,d)
           }else{
-            reply ! RecordInfo(false,"00:00:00.00")
+            log.info(s"no record for roomId:$roomId and startTime:$startTime")
+            reply ! RecordInfo(fileExist = false,"00:00:00.00")
           }
           Behaviors.same
 
@@ -87,30 +88,60 @@ object SaveManager {
     }
   }
 
-  private def getVideoDuration(roomId:Long,startTime:Long) = {
-    val ffmpeg = Loader.load(classOf[org.bytedeco.ffmpeg.ffmpeg])
-    val pb = new ProcessBuilder(ffmpeg,"-i",s"$recordLocation$roomId/$startTime/record.ts")
+  private def getVideoDuration(roomId:Long,startTime:Long) ={
+    val ffprobe = Loader.load(classOf[org.bytedeco.ffmpeg.ffprobe])
+    //容器时长（container duration）
+    val pb = new ProcessBuilder(ffprobe,"-v","error","-show_entries","format=duration", "-of","csv=\"p=0\"","-i", s"$recordLocation$roomId/$startTime/record.mp4")
     val processor = pb.start()
-
-    val br = new BufferedReader(new InputStreamReader(processor.getErrorStream))
-    val sb = new StringBuilder()
-    var s = ""
-    s = br.readLine()
-    while(s!=null){
-      sb.append(s)
-      s = br.readLine()
+    val br = new BufferedReader(new InputStreamReader(processor.getInputStream))
+    val s = br.readLine()
+    var duration = 0
+    if(s!= null){
+      duration = (s.toDouble * 1000).toInt
     }
     br.close()
-
-    val regex = "Duration: (.*?),"
-    val p = Pattern.compile(regex)
-    val m = p.matcher(sb.toString())
-    if(m.find()) {
-      m.group(1)
-    }else{
-      "00:00:00.00"
-    }
+//    if(processor != null){
+//      processor.destroyForcibly()
+//    }
+    millis2HHMMSS(duration)
   }
+
+  def millis2HHMMSS(sec: Double): String = {
+    val hours = (sec / 3600000).toInt
+    val h =  if (hours >= 10) hours.toString else "0" + hours
+    val minutes = ((sec % 3600000) / 60000).toInt
+    val m = if (minutes >= 10) minutes.toString else "0" + minutes
+    val seconds = ((sec % 60000) / 1000).toInt
+    val s = if (seconds >= 10) seconds.toString else "0" + seconds
+    val dec = ((sec % 1000) / 10).toInt
+    val d = if (dec >= 10) dec.toString else "0" + dec
+    s"$h:$m:$s.$d"
+  }
+
+//  private def getVideoDuration(roomId:Long,startTime:Long) = {
+//    val ffmpeg = Loader.load(classOf[org.bytedeco.ffmpeg.ffmpeg])
+//    val pb = new ProcessBuilder(ffmpeg, "-i", s"$recordLocation$roomId/$startTime/record.ts")
+//    val processor = pb.start()
+//
+//    val br = new BufferedReader(new InputStreamReader(processor.getErrorStream))
+//    val sb = new StringBuilder()
+//    var s = ""
+//    s = br.readLine()
+//    while(s!=null){
+//      sb.append(s)
+//      s = br.readLine()
+//    }
+//    br.close()
+//
+//    val regex = "Duration: (.*?),"
+//    val p = Pattern.compile(regex)
+//    val m = p.matcher(sb.toString())
+//    if(m.find()) {
+//      m.group(1)
+//    }else{
+//      "00:00:00.00"
+//    }
+//  }
 
   private def getSaveActor(ctx: ActorContext[Command], roomId: Long , startTime:Long) = {
     val childName = s"saveActor_${roomId}_$startTime"

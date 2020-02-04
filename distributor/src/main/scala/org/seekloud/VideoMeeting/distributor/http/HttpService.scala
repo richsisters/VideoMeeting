@@ -18,6 +18,7 @@ package org.seekloud.VideoMeeting.distributor.http
 
 import akka.actor.{ActorRef, ActorSystem, Scheduler}
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.stream.{Materializer, OverflowStrategy}
 import akka.util.Timeout
@@ -29,7 +30,9 @@ import scala.concurrent.ExecutionContextExecutor
   * Date: 7/15/2019
   */
 trait HttpService extends
-  ResourceService with FileService {
+  ResourceService
+  with FileService
+  with StreamService{
 
 
   implicit val system: ActorSystem
@@ -44,10 +47,20 @@ trait HttpService extends
 
 
 
+  private val home = {
+    pathEndOrSingleSlash{
+      getFromResource("html/distributorPage.html")
+    }
+  }
 
-  val routes =
-    pathPrefix("VideoMeeting") {
-       resourceRoutes ~ fileRoute
+  val routes: Route =
+    ignoreTrailingSlash {
+      pathPrefix("VideoMeeting") {
+        pathPrefix("distributor") {
+          home ~  streamRoute ~ resourceRoutes
+        } ~
+        fileRoute
+      }
     }
 
 

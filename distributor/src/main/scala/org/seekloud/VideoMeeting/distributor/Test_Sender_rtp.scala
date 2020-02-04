@@ -11,21 +11,21 @@ import java.util.concurrent.atomic.AtomicInteger
 object Test_Sender_rtp {
 
   val maxTsNum = 7
-  var ts = 0l
-  val tsBuf = (0 until maxTsNum).map {i =>
+  var ts = 0L
+  val tsBuf: List[ByteBuffer] = (0 until maxTsNum).map {i =>
     ByteBuffer.allocate(188 * 1)
   }.toList
 
   object Rtp_header{
     var m = 0
-    var timestamp = 0l
-    var payloadType = 96.toByte //负载类型号96
+    var timestamp = 0L
+    var payloadType: Byte = 96.toByte //负载类型号96
   }
   def main(args: Array[String]): Unit = {
 
-    val port = 61041
-//    val host = "127.0.0.1"
-    val host = "10.1.29.246"
+    val port = 41660
+    val host = "127.0.0.1"
+//    val host = "10.1.29.246"
     val increasedSequence = new AtomicInteger(0)
     val frameRate = 25
     val timestamp_increse=90000/frameRate//framerate是帧率
@@ -87,8 +87,8 @@ object Test_Sender_rtp {
                 println(s"seq", seq)
                 rtp_buf.put(0x80.toByte)
                 rtp_buf.put(33.toByte)
-                toByte(seq, 2).map(rtp_buf.put(_))
-                toByte(System.currentTimeMillis().toInt, 4).map(rtp_buf.put(_))
+                toByte(seq, 2).map(rtp_buf.put)
+                toByte(System.currentTimeMillis().toInt, 4).map(rtp_buf.put)
                 rtp_buf.putInt(ssrc)
                 (0 until count).foreach(i => rtp_buf.put(tsBuf(i)))
 
@@ -115,8 +115,8 @@ object Test_Sender_rtp {
                 println(s"seq", seq)
                 rtp_buf.put(0x80.toByte)
                 rtp_buf.put(33.toByte)
-                toByte(seq, 2).map(rtp_buf.put(_))
-                toByte(System.currentTimeMillis().toInt, 4).map(rtp_buf.put(_))
+                toByte(seq, 2).map(rtp_buf.put)
+                toByte(System.currentTimeMillis().toInt, 4).map(rtp_buf.put)
                 rtp_buf.putInt(ssrc)
 
                 (0 until count).foreach(i => rtp_buf.put(tsBuf(i)))
@@ -140,14 +140,14 @@ object Test_Sender_rtp {
     println("DONE.")
   }
 
-  def to16Bit(num: Long) = {
+  def to16Bit(num: Long): (Byte, Byte) = {
     val byte1 = (num >>> 8 & 0xFF).toByte
     val byte2 = (num & 0xFF).toByte
     (byte1, byte2)
 
   }
 
-  def to32Bit(num: Long) = {
+  def to32Bit(num: Long): (Byte, Byte, Byte, Byte) = {
     val byte1 = (num >>> 24 & 0xFF).toByte
     val byte2 = (num >>> 16 & 0xFF).toByte
     val byte3 = (num >>> 8 & 0xFF).toByte
@@ -162,7 +162,7 @@ object Test_Sender_rtp {
     hexSymbols(leftSymbol) + hexSymbols(rightSymbol)
   }
 
-  def toByte(num: Long, byte_num: Int) = {
+  def toByte(num: Long, byte_num: Int): List[Byte] = {
     (0 until byte_num).map { index =>
       (num >> ((byte_num - index - 1) * 8) & 0xFF).toByte
     }.toList

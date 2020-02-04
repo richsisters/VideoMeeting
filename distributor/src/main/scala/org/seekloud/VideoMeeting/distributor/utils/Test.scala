@@ -20,6 +20,12 @@ object ProcessorClient extends HttpUtil{
                          aiMode:Int //为了之后拓展多种模式，目前0为不开ai，1为人脸目标检测
                        )
 
+  case class NewLive(
+    roomId:Long,
+    liveId:String,
+    startTime: Long
+  )
+
   case class RoomInfo(roomId:Long, roles:List[String], layout:Int, aiMode:Int=0)
 
   case class CloseRoom(
@@ -69,14 +75,14 @@ object ProcessorClient extends HttpUtil{
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
-  val processorBaseUrl = "http://10.1.29.246:41660/VideoMeeting/processor"
+  val processorBaseUrl = "http://0.0.0.0:30389/VideoMeeting/distributor"
 
 
-  def updateRoomInfo(roomId:Long,liveIdList:List[String],layout:Int,aiMode:Int):Future[Either[String,SuccessRsp]] = {
-    val url = processorBaseUrl + "/updateRoomInfo"
-    val jsonString = UpdateRoom(roomId,liveIdList,layout,aiMode).asJson.noSpaces
+  def newLive(roomId:Long,liveId:String,startTime: Long):Future[Either[String,SuccessRsp]] = {
+    val url = processorBaseUrl + "/newLive"
+    val jsonString = NewLive(roomId,liveId,startTime).asJson.noSpaces
     val jsonData = genPostEnvelope("",System.nanoTime().toString,jsonString,"").asJson.noSpaces
-    postJsonRequestSend("post",url,List(),jsonString,timeOut = 60 * 1000,needLogRsp = false).map{
+    postJsonRequestSend("post", url, List(), jsonString, timeOut = 60 * 1000).map{
       case Right(v) =>
         decode[SuccessRsp](v) match{
           case Right(data) =>
@@ -91,21 +97,21 @@ object ProcessorClient extends HttpUtil{
     }
   }
 
-  def getmpd(roomId:Long):Future[Either[String,MpdRsp]] = {
+  def getMpd(roomId:Long):Future[Either[String,MpdRsp]] = {
     val url = processorBaseUrl + "/getMpd"
     val jsonString = GetMpd(roomId).asJson.noSpaces
     //    val jsonData = genPostEnvelope("",System.nanoTime().toString,jsonString,"").asJson.noSpaces
-    postJsonRequestSend("post",url,List(),jsonString,timeOut = 60 * 1000, needLogRsp = false).map{
+    postJsonRequestSend("post",url,List(),jsonString,timeOut = 60 * 1000).map{
       case Right(v) =>
         decode[MpdRsp](v) match{
           case Right(data) =>
             Right(data)
           case Left(e) =>
-            log.error(s"getmpd decode error : $e")
+            log.error(s"get mpd decode error : $e")
             Left("Error")
         }
       case Left(error) =>
-        log.error(s"getmpd postJsonRequestSend error : $error")
+        log.error(s"get mpd postJsonRequestSend error : $error")
         Left("Error")
     }
   }
@@ -114,24 +120,24 @@ object ProcessorClient extends HttpUtil{
     val url = processorBaseUrl + "/getRtmpUrl"
     val jsonString = GetRtmpUrl(roomId).asJson.noSpaces
     //    val jsonData = genPostEnvelope("",System.nanoTime().toString,jsonString,"").asJson.noSpaces
-    postJsonRequestSend("post",url,List(),jsonString,timeOut = 60 * 1000, needLogRsp = false).map{
+    postJsonRequestSend("post",url,List(),jsonString,timeOut = 60 * 1000).map{
       case Right(v) =>
         decode[RtmpRsp](v) match{
           case Right(data) =>
             Right(data)
           case Left(e) =>
-            log.error(s"getmpd decode error : $e")
+            log.error(s"get rtmp decode error : $e")
             Left("Error")
         }
       case Left(error) =>
-        log.error(s"getmpd postJsonRequestSend error : $error")
+        log.error(s"get rtmp postJsonRequestSend error : $error")
         Left("Error")
     }
   }
 
 
   def main(args: Array[String]): Unit = {
-    updateRoomInfo(8888,List("liveIdTest-1111"),1,0).map{
+    newLive(1,"1",System.currentTimeMillis()).map{
       a=>
         println(a)
     }

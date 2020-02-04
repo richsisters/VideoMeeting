@@ -3,19 +3,19 @@ package org.seekloud.VideoMeeting.distributor.core
 import java.io.File
 
 import akka.actor.typed.{ActorRef, Behavior}
-import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
+import akka.actor.typed.scaladsl.{Behaviors, StashBuffer, TimerScheduler}
 import org.bytedeco.javacpp.Loader
 import org.slf4j.LoggerFactory
 import org.seekloud.VideoMeeting.distributor.common.AppSettings._
-import org.seekloud.VideoMeeting.distributor.core.EncodeManager.Command
 import org.seekloud.VideoMeeting.distributor.Boot.saveManager
 import scala.language.implicitConversions
-import scala.concurrent.duration._
+
 /**
   * User: yuwei
   * Date: 2019/8/26
   * Time: 20:09
   */
+
 object EncodeActor {
 
   private val log = LoggerFactory.getLogger(this.getClass)
@@ -39,10 +39,10 @@ object EncodeActor {
   case object NewFFmpeg extends Command
 
   class CreateFFmpeg(roomId: Long, port: Int, startTime:Long){
-    private var process:Process = _
+    private var process: Process = _
     private var recordProcess: Process = _
 
-    def createDir() = {
+    def createDir(): AnyVal = {
       val fileLoc = new File(s"$fileLocation$roomId/")
       if(!fileLoc.exists()){
         fileLoc.mkdir()
@@ -57,7 +57,7 @@ object EncodeActor {
       }
     }
 
-    def removeFile() = {
+    def removeFile(): AnyVal = {
       val f = new File(s"$fileLocation$roomId/")
       if(f.exists()) {
         f.listFiles().map{
@@ -70,19 +70,16 @@ object EncodeActor {
 
     def start(): Unit = {
       val ffmpeg = Loader.load(classOf[org.bytedeco.ffmpeg.ffmpeg])
-//      val pb = new ProcessBuilder(ffmpeg, "-i", s"udp://127.0.0.1:$port","-b:v","1M",s"$dashLocation$roomId/index.mpd", "-f", "hls","-b:v","1M", "-hls_time", "3", "-segment_list_flags",
-//        "+live","-hls_list_size", "20",s"$hlsLocation$roomId/index.m3u8")
-      val pb = new ProcessBuilder(ffmpeg,"-i",s"udp://127.0.0.1:$port","-b:v","1M","-f","dash","-window_size","20","-extra_window_size","20","-hls_playlist","1",s"$fileLocation$roomId/index.mpd"
-      ,"-b:v","1M",s"$recordLocation$roomId/$startTime/record.ts")
-      val process = pb.inheritIO().start()
-      this.process = process
-    }
-
-    def saveRecord(): Unit = {
-      val ffmpeg = Loader.load(classOf[org.bytedeco.ffmpeg.ffmpeg])
-      val pb = new ProcessBuilder(ffmpeg,"-i",s"$recordLocation$roomId/$startTime/record.flv","-movflags","faststart","-b:v","1M",s"$recordLocation$roomId/$startTime/record.mp4")
-      val process = pb.start()
-      this.recordProcess = process
+//      val pb = new ProcessBuilder(ffmpeg,"-analyzeduration","10000000","-probesize","1000000","-i", s"udp://127.0.0.1:$port", "-b:v", "1M","-bufsize","1M", "-c:v","copy","-vtag","avc1","-f", "dash", "-window_size", "20", "-extra_window_size", "20", "-hls_playlist", "1", s"$fileLocation$roomId/index.mpd")
+      if(!testModel){
+        val pb = new ProcessBuilder(ffmpeg,"-f","mpegts","-i",s"udp://127.0.0.1:$port","-b:v","1M","-bufsize","1M","-f","dash","-window_size","20","-extra_window_size","20","-hls_playlist","1",s"$fileLocation$roomId/index.mpd")
+        val process = pb.inheritIO().start()
+        this.process = process
+      }else{
+        val pb = new ProcessBuilder(ffmpeg,"-f","mpegts","-i",s"udp://127.0.0.1:$port","-b:v","1M","-bufsize","1M","-f","dash","-window_size","20","-extra_window_size","20","-hls_playlist","1","/Users/litianyu/Downloads/dash/index.mpd")
+        val process = pb.inheritIO().start()
+        this.process = process
+      }
     }
 
     def close(): Unit ={
@@ -98,11 +95,13 @@ object EncodeActor {
   }
 
   def create(roomId: Long, port: Int, startTime:Long): Behavior[Command] = {
-    Behaviors.setup[Command] { ctx =>
+    Behaviors.setup[Command] { _  =>
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       Behaviors.withTimers[Command] {
         implicit timer =>
+          log.info(s"encodeActor_$roomId start!")
           val fFmpeg = new CreateFFmpeg(roomId, port, startTime)
+          fFmpeg.removeFile() //删除之前的直播文件
           fFmpeg.createDir()
           fFmpeg.start()
 //          fFmpeg.saveRecord()
@@ -113,18 +112,18 @@ object EncodeActor {
 
   def work(roomId: Long, port: Int, ffmpeg:CreateFFmpeg, startTime:Long)(implicit timer: TimerScheduler[Command],
     stashBuffer: StashBuffer[Command]): Behavior[Command] = {
-    Behaviors.receive[Command] { (ctx, msg) =>
+    Behaviors.receive[Command] { (_, msg) =>
       msg match {
         case Stop =>
-          log.info("stop the encode video.")
+          log.info(s"stop the encode video for roomId:${roomId}.")
           ffmpeg.close()
-          ffmpeg.removeFile()
+//          ffmpeg.removeFile()
           saveManager ! SaveManager.NewSave(startTime, roomId)
           Behaviors.stopped
 
         case ReStart(newPort, newStartTime) =>
           ffmpeg.close()
-          ffmpeg.removeFile()
+          //          ffmpeg.removeFile()
           saveManager ! SaveManager.NewSave(newStartTime, roomId)
           val newFfmpeg = new CreateFFmpeg(roomId, newPort, newStartTime)
           newFfmpeg.createDir()
@@ -137,3 +136,12 @@ object EncodeActor {
 
 
 }
+
+
+
+
+
+
+
+
+

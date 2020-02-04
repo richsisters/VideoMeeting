@@ -3,7 +3,6 @@ package org.seekloud.VideoMeeting.distributor.http
 import java.io.File
 
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.model.ContentTypes
 import akka.http.scaladsl.server.Directives.{Segments, as, complete, entity, getFromFile, path, pathPrefix}
 import akka.http.scaladsl.server.Route
@@ -21,8 +20,8 @@ import scala.concurrent.Future
 import org.seekloud.VideoMeeting.distributor.Boot.{executor, saveManager, scheduler, timeout}
 import org.seekloud.VideoMeeting.distributor.common.AppSettings.{fileLocation, recordLocation}
 import org.seekloud.VideoMeeting.distributor.core.SaveManager.{RecordInfo, RemoveRecords}
-import org.seekloud.VideoMeeting.distributor.core.{EncodeManager, SaveManager}
-import org.seekloud.VideoMeeting.distributor.protocol.SharedProtocol.{RecordInfoRsp, RecordList, SeekRecord, SuccessRsp}
+import org.seekloud.VideoMeeting.distributor.core.SaveManager
+import org.seekloud.VideoMeeting.distributor.protocol.SharedProtocol._
 trait FileService extends ServiceUtils {
 
   private val log = LoggerFactory.getLogger(this.getClass)
@@ -32,9 +31,9 @@ trait FileService extends ServiceUtils {
     HttpOriginMatcher.*
   )
 
-  val getFile = (path("getFile"/Segments(2))& get & pathEndOrSingleSlash & cors(settings)){
+  val getFile: Route = (path("getFile" / Segments(2)) & get & pathEndOrSingleSlash & cors(settings)){
     case dir :: file :: Nil =>
-      println("getFile req.")
+      println(s"getFile req for $dir/$file.")
       val f = new File(s"$fileLocation$dir/$file").getAbsoluteFile
       getFromFile(f,ContentTypes.`application/octet-stream`)
 
@@ -43,9 +42,9 @@ trait FileService extends ServiceUtils {
       complete(fileNotExistError)
   }
 
-  val getRecord = (path("getRecord"/Segments(3))& get & pathEndOrSingleSlash & cors(settings)){
+  val getRecord: Route = (path("getRecord" / Segments(3)) & get & pathEndOrSingleSlash & cors(settings)){
     case roomId :: startTime :: file :: Nil =>
-      println("getRecord req.")
+      println(s"getRecord req for $roomId/$startTime/$file.")
       val f = new File(s"$recordLocation$roomId/$startTime/$file").getAbsoluteFile
       getFromFile(f,ContentTypes.`application/octet-stream`)
 
@@ -54,7 +53,7 @@ trait FileService extends ServiceUtils {
       complete(fileNotExistError)
   }
 
-  val seekRecord = (path("seekRecord") & post) {
+  val seekRecord: Route = (path("seekRecord") & post) {
     entity(as[Either[Error, SeekRecord]]) {
       case Right(req) =>
         log.info("seekRecord.")
@@ -70,12 +69,12 @@ trait FileService extends ServiceUtils {
         )
 
       case Left(e) =>
-        log.info(s"err in seekRecord.")
+        log.info(s"err in seekRecord. error: ${e.getMessage}")
         complete(RecordInfoRsp(1000103,"parse json error",""))
     }
   }
 
-  val removeRecords = (path("removeRecords") & post) {
+  val removeRecords: Route = (path("removeRecords") & post) {
     entity(as[Either[Error, RecordList]]) {
       case Right(req) =>
         saveManager ! RemoveRecords(req.records)
@@ -86,6 +85,21 @@ trait FileService extends ServiceUtils {
         complete(parseJsonError)
     }
   }
+
+//  val newLive: Route = (path("newLive") & post) {
+//    entity(as[Either[Error, NewLive]]) {
+//      case Right(req) =>
+//        log.info(s"post method newLiveInfo.")
+//        complete(SuccessRsp(0,"got liveId."))
+//
+//      case Left(e) =>
+//        complete(parseJsonError)
+//    }
+//  }
+
+
+
+
 
   val fileRoute:Route = pathPrefix("distributor") {
     getFile ~ getRecord ~ seekRecord ~ removeRecords

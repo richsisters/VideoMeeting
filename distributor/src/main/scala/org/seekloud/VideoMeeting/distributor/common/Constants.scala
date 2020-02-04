@@ -17,6 +17,7 @@
 package org.seekloud.VideoMeeting.distributor.common
 
 import java.util.concurrent.atomic.AtomicInteger
+import org.seekloud.VideoMeeting.distributor.common.AppSettings.serverHost
 
 /**
   * User: yuwei
@@ -25,5 +26,23 @@ import java.util.concurrent.atomic.AtomicInteger
 object Constants {
 
   val essfMapKeyName = "essfKey"
+
+  def getMpdPath(roomId:Long): String = {
+//    if(distributorUseIp){
+      s"http://$serverHost/VideoMeeting/distributor/getFile/${
+        if(roomId == TestConfig.TEST_ROOM_ID)"test" else roomId
+      }/index.mpd"
+//    }
+//    else{
+//      s"https://$distributorDomain/VideoMeeting/distributor/getFile/${
+//        if(roomId == TestConfig.TEST_ROOM_ID)"test" else roomId
+//      }/index.mpd"
+//    }
+  }
+
+  object TestConfig{
+    val TEST_USER_ID = 100029L
+    val TEST_ROOM_ID = 1000029L
+  }
 
 }
