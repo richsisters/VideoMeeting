@@ -111,12 +111,12 @@ class RoomController(
       Boot.addToPlatform {
         showLoading()
         if (roomScene.liveMode) {
-//          updateRoomList()
+          //          updateRoomList()
         } else {
           if (!hasWaitingGif) {
             roomScene.recordList = Nil
             for (i <- 1 to 10) {
-//              updateRecordList(sortBy = roomScene.recordSort, pageNum = i)
+              //              updateRecordList(sortBy = roomScene.recordSort, pageNum = i)
             }
           }
         }
@@ -127,6 +127,18 @@ class RoomController(
     override def gotoHomeScene(): Unit = {
       rmManager ! RmManager.BackToHome
     }
+
+    override def find(meeting: String) = {
+//      println("wwwwwww" + meeting)
+      Boot.addToPlatform{
+        if(meeting == ""){
+          WarningDialog.initWarningDialog("会议号不能为空")
+        }else{
+          rmManager ! GetRoomDetail(roomScene.roomList.find(_.roomId == meeting.toLong).get.roomId)//进入会议室
+        }
+      }
+    }
+
   })
 
 
