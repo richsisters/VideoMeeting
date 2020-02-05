@@ -30,6 +30,7 @@ object MySlickCodeGenerator {
     val dbFactory = profile.api.Database
     val db = dbFactory.forURL(url, driver = jdbcDriver,
       user = user, password = password, keepAliveConnection = true)
+    println("test" + db.source)
 
     // fetch data model
     val modelAction = dbProfile.createModel(Some(dbProfile.defaultTables))

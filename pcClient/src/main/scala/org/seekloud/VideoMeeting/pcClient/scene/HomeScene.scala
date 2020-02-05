@@ -46,7 +46,6 @@ object HomeScene {
 
     def logout()
 
-    def editInfo()
   }
 
 }
@@ -124,10 +123,10 @@ class HomeScene {
       IDcard.getStyleClass.add("homeScene-IDcard")
       addBoxEffect(Left(IDcard))
 
-      Tooltip.install(IDcard, new Tooltip("点击修改个人资料"))
-      IDcard.addEventHandler(MouseEvent.MOUSE_CLICKED, (_: MouseEvent) => {
-        listener.editInfo()
-      })
+//      Tooltip.install(IDcard, new Tooltip("点击修改个人资料"))
+//      IDcard.addEventHandler(MouseEvent.MOUSE_CLICKED, (_: MouseEvent) => {
+//        listener.editInfo()
+//      })
 
       IDcard
     }

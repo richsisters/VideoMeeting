@@ -11,15 +11,12 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-
 package org.seekloud.VideoMeeting.roomManager.common
 
 import java.util.concurrent.TimeUnit
-
 import com.typesafe.config.{Config, ConfigFactory}
 import org.seekloud.VideoMeeting.roomManager.utils.SessionSupport.SessionConfig
 import org.slf4j.LoggerFactory
-
 import scala.collection.JavaConverters._
 
 /**

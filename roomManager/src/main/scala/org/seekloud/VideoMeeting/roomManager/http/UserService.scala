@@ -34,7 +34,6 @@ trait UserService extends ServiceUtils {
   private val tokenExistTime = AppSettings.tokenExistTime * 1000L // seconds
 
   private val signUp = (path("signUp") & post) {
-
     entity(as[Either[Error, SignUp]]) {
       case Right(data) =>
         //TODO: 正则表达式有点问题
@@ -102,7 +101,7 @@ trait UserService extends ServiceUtils {
         dealFutureResult {
           UserInfoDao.searchByName(data.userName).map {
             case Some(rst) =>
-              if (rst.password != SecureUtil.getSecurePassword(data.password, rst.email, rst.createTime)) {
+              if (rst.password != SecureUtil.getPoorSecurePassword(data.password, rst.email)) {
                 log.error(s"login error: wrong pw")
                 complete(WrongPwError)
               }
@@ -111,7 +110,7 @@ trait UserService extends ServiceUtils {
                 val token = SecureUtil.nonceStr(40)
                 UserInfoDao.updateToken(rst.uid, token, System.currentTimeMillis())
                 val userInfo = UserInfo(rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, token, tokenExistTime)
-                val roomInfo = RoomInfo(rst.roomid, s"${rst.userName}的直播间", "", rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, if (rst.coverImg == "") Common.DefaultImg.coverImg else rst.coverImg, 0, 0)
+                val roomInfo = RoomInfo(rst.roomid, s"${rst.userName}的会议室", "", rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, Common.DefaultImg.coverImg, 0, 0)
                 StatisticDao.addLoginEvent(userInfo.userId, System.currentTimeMillis())
                 val session = UserSession(rst.uid.toString, rst.userName, System.currentTimeMillis().toString).toSessionMap
                 addSession(session) {
@@ -121,7 +120,7 @@ trait UserService extends ServiceUtils {
               }
               else {
                 val userInfo = UserInfo(rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, rst.token, tokenExistTime)
-                val roomInfo = RoomInfo(rst.roomid, s"${rst.userName}的直播间", "", rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, if (rst.coverImg == "") Common.DefaultImg.coverImg else rst.coverImg, 0, 0)
+                val roomInfo = RoomInfo(rst.roomid, s"${rst.userName}的会议室", "", rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, Common.DefaultImg.coverImg, 0, 0)
                 StatisticDao.addLoginEvent(userInfo.userId, System.currentTimeMillis())
                 val session = UserSession(rst.uid.toString, rst.userName, System.currentTimeMillis().toString).toSessionMap
                 addSession(session) {
@@ -145,7 +144,7 @@ trait UserService extends ServiceUtils {
         dealFutureResult {
           UserInfoDao.checkEmail(data.email).map {
             case Some(rst) =>
-              if (rst.password != SecureUtil.getSecurePassword(data.password, rst.email, rst.createTime)) {
+              if (rst.password != SecureUtil.getPoorSecurePassword(data.password, rst.email)) {
                 log.error(s"login error: wrong pw")
                 complete(WrongPwError)
               }
@@ -154,7 +153,7 @@ trait UserService extends ServiceUtils {
                 val token = SecureUtil.nonceStr(40)
                 UserInfoDao.updateToken(rst.uid, token, System.currentTimeMillis())
                 val userInfo = UserInfo(rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, token, tokenExistTime)
-                val roomInfo = RoomInfo(rst.roomid, s"${rst.userName}的直播间", "", rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, if (rst.coverImg == "") Common.DefaultImg.coverImg else rst.coverImg, 0, 0)
+                val roomInfo = RoomInfo(rst.roomid, s"${rst.userName}的会议室", "", rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, Common.DefaultImg.coverImg, 0, 0)
                 StatisticDao.addLoginEvent(userInfo.userId, System.currentTimeMillis())
                 val session = UserSession(rst.uid.toString, rst.userName, System.currentTimeMillis().toString).toSessionMap
                 addSession(session) {
@@ -165,7 +164,7 @@ trait UserService extends ServiceUtils {
               else {
                 log.info(s"${rst.uid} login success")
                 val userInfo = UserInfo(rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, rst.token, tokenExistTime)
-                val roomInfo = RoomInfo(rst.roomid, s"room:${rst.roomid}", "", rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, if (rst.coverImg == "") Common.DefaultImg.coverImg else rst.coverImg, 0, 0)
+                val roomInfo = RoomInfo(rst.roomid, s"room:${rst.roomid}", "", rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, Common.DefaultImg.coverImg, 0, 0)
                 StatisticDao.addLoginEvent(userInfo.userId, System.currentTimeMillis())
                 val session = UserSession(rst.uid.toString, rst.userName, System.currentTimeMillis().toString).toSessionMap
                 addSession(session) {
@@ -287,7 +286,7 @@ trait UserService extends ServiceUtils {
               dealFutureResult {
                 UserInfoDao.searchById(req.userId).map { r =>
                   val rsp = r.get
-                  complete(RoomInfoRsp(Some(RoomInfo(rsp.roomid, s"room:${rsp.roomid}", "", rsp.uid, rsp.userName, if (rsp.headImg == "") Common.DefaultImg.headImg else rsp.headImg, if (rsp.coverImg == "") Common.DefaultImg.coverImg else rsp.coverImg, 0, 0))))
+                  complete(RoomInfoRsp(Some(RoomInfo(rsp.roomid, s"room:${rsp.roomid}", "", rsp.uid, rsp.userName, if (rsp.headImg == "") Common.DefaultImg.headImg else rsp.headImg, Common.DefaultImg.coverImg, 0, 0))))
                 }
               }
             } else {

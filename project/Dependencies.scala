@@ -50,7 +50,7 @@ object Dependencies {
   val ehcache = "net.sf.ehcache" % "ehcache" % "2.10.6"
   val byteobject = "org.seekloud" %% "byteobject" % "0.1.1"
   val mail = "com.sun.mail" % "javax.mail" % "1.5.3"
-  val h2Database = "com.h2database" % "h2" % "1.4.197"
+  val h2Database = "com.h2database" % "h2" % "1.4.200"
 
   val backendDependencies =
     Dependencies.akkaSeq ++

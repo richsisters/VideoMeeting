@@ -102,38 +102,24 @@ object RegisterActor {
       case ConfirmEmail(receiveCode, _, replyTo) =>
         if (receiveCode == code) {
           val timestamp = System.currentTimeMillis()
-          val token = SecureUtil.nonceStr(40)
           UserInfoDao.addUser(
-            email,name,SecureUtil.getSecurePassword(password, email, timestamp),token,timestamp,SecureUtil.nonceStr(40)
-          ).onComplete {
-            case Success(id) =>
+            email,name,SecureUtil.getPoorSecurePassword(password, email),SecureUtil.nonceStr(40),timestamp).onComplete {
+            case Success(_) =>
               println("add user success")
               replyTo ! RegisterSuccessRsp(redirectUrl)
-              //reply ! SignUpRsp()
               registerManager ! RegisterFinished(email)
               println(s"register actor $email stopped")
-//              switchBehavior(ctx, "waitingForConfirm", waitingForConfirm(code, receiveCode, email, name, password, reply))
-//              ctx.self ! SignUpFinish
+
             case Failure(e) =>
               log.debug(s"add register user failed, error: $e")
               replyTo ! ptcl.CommonRsp(180004, "add register user failed")
-              //reply ! SignUpRsp(180006, "add register user failed")
-//              ctx.self ! SignUpFinish
           }
         } else {
           replyTo ! CommonRsp(180005, "code error")
-          //reply ! SignUpRsp(180007, "注册失败")
         }
-//        val timeOut: TimeOut = TimeOut("waiting for getting info time out")
-//        timer.startSingleTimer(TimeoutKey, timeOut, timeOutDuration.seconds)
-
-//        switchBehavior(ctx, "busy", busy(), Some(10.minutes))
         Behaviors.stopped
-        //未知消息
-
 
       case m: SendEmail =>
-//        m.replyTo ! SignUpRsp(180003, "邮件已发送，请在注册邮箱中确认")
         m.replyTo ! SignUpRsp(0, "邮件已发送，请在注册邮箱中确认")
         Behaviors.same
 
