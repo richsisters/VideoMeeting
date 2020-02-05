@@ -32,12 +32,23 @@ trait ProcessorService extends ServiceUtils {
     entity(as[Either[Error, NewConnect]]) {
       case Right(req) =>
         log.info(s"post method $NewConnect")
-        roomManager ! RoomManager.NewConnection(req.roomId, req.host, req.client, req.pushLiveId, req.pushLiveCode,req.layout)
+        roomManager ! RoomManager.NewConnection(req.roomId, req.host, req.clientInfo, req.pushLiveId, req.pushLiveCode, req.layout)
         complete(NewConnectRsp())
       case Left(e) =>
         complete(parseJsonError)
     }
   }
+
+  //强制某个用户退出接口
+  //  private def forceQuit = (path("forceQuit") & post){
+  //
+  //  }
+
+
+ //主持人屏蔽用户接口
+//  private def shutUp = (path("shutUp") & post){
+//
+//  }
 
   private def closeRoom = (path("closeRoom") & post) {
     entity(as[Either[Error, CloseRoom]]) {

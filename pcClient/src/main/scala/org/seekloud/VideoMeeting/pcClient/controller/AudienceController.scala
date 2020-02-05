@@ -42,7 +42,7 @@ class AudienceController(
       if(audienceScene.getIsRecord) {
         Future{
           while (updateRecCmt) {
-            updateRecCommentList()
+//            updateRecCommentList()
             Thread.sleep(5000)
           }
         }
@@ -52,27 +52,27 @@ class AudienceController(
 
   }
 
-  def updateRecCommentList(): Unit = {
-    RMClient.getRecCommentList(audienceScene.getRecordInfo.roomId, audienceScene.getRecordInfo.startTime).map {
-      case Right(rst) =>
-        if (rst.errCode == 0) {
-          Boot.addToPlatform {
-//            log.debug(s"${System.currentTimeMillis()},update recCommentList success:${rst.recordCommentList}")
-            audienceScene.barrage.refreshRecBarrage(rst.recordCommentList)
-            audienceScene.recCommentBoard.updateCommentsList(rst.recordCommentList)
-          }
-        } else {
-          Boot.addToPlatform(
-            WarningDialog.initWarningDialog(s"${rst.msg}")
-          )
-        }
-      case Left(e) =>
-        log.error(s"getRecCommentList error: $e")
-        Boot.addToPlatform(
-          WarningDialog.initWarningDialog(s"获取评论失败:$e")
-        )
-    }
-  }
+//  def updateRecCommentList(): Unit = {
+//    RMClient.getRecCommentList(audienceScene.getRecordInfo.roomId, audienceScene.getRecordInfo.startTime).map {
+//      case Right(rst) =>
+//        if (rst.errCode == 0) {
+//          Boot.addToPlatform {
+////            log.debug(s"${System.currentTimeMillis()},update recCommentList success:${rst.recordCommentList}")
+//            audienceScene.barrage.refreshRecBarrage(rst.recordCommentList)
+//            audienceScene.recCommentBoard.updateCommentsList(rst.recordCommentList)
+//          }
+//        } else {
+//          Boot.addToPlatform(
+//            WarningDialog.initWarningDialog(s"${rst.msg}")
+//          )
+//        }
+//      case Left(e) =>
+//        log.error(s"getRecCommentList error: $e")
+//        Boot.addToPlatform(
+//          WarningDialog.initWarningDialog(s"获取评论失败:$e")
+//        )
+//    }
+//  }
 
   def addRecComment(
     roomId:Long,          //录像的房间id
@@ -88,7 +88,7 @@ class AudienceController(
         if (rst.errCode == 0) {
           log.debug(s"audience send recordComment success: ${(roomId, recordTime, comment, commentTime, relativeTime, commentUid, authorUidOpt)}")
           //发送评论后重新获取评论列表
-          updateRecCommentList()
+//          updateRecCommentList()
         } else {
           log.debug(s"rst: $rst")
           Boot.addToPlatform(
@@ -166,8 +166,8 @@ class AudienceController(
       if (audienceScene.isFullScreen) {
         audienceScene.imgView.setWidth(Constants.DefaultPlayer.width)
         audienceScene.imgView.setHeight(Constants.DefaultPlayer.height)
-        audienceScene.barrageCanvas.setWidth(Constants.DefaultPlayer.width)
-        audienceScene.barrageCanvas.setHeight(Constants.DefaultPlayer.height)
+//        audienceScene.barrageCanvas.setWidth(Constants.DefaultPlayer.width)
+//        audienceScene.barrageCanvas.setHeight(Constants.DefaultPlayer.height)
         audienceScene.statisticsCanvas.setWidth(Constants.DefaultPlayer.width)
         audienceScene.statisticsCanvas.setHeight(Constants.DefaultPlayer.height)
 
@@ -238,8 +238,8 @@ class AudienceController(
           //判断userId是否为-1，是的话当广播处理
 //          log.debug(s"receive comment: ${msg.comment}")
           Boot.addToPlatform {
-            audienceScene.commentBoard.updateComment(msg)
-            audienceScene.barrage.updateBarrage(msg)
+//            audienceScene.commentBoard.updateComment(msg)
+//            audienceScene.barrage.updateBarrage(msg)
           }
 
 

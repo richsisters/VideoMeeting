@@ -91,7 +91,7 @@ object HostScene {
 
     def exitFullScreen()
 
-    def sendCmt(comment: Comment)
+//    def sendCmt(comment: Comment)
 
     def changeOption(bit: Option[Int] = None, re: Option[String] = None, frameRate: Option[Int] = None, needImage: Boolean = true, needSound: Boolean = true)
 
@@ -260,8 +260,8 @@ class HostScene(stage: Stage) {
   gc.drawImage(backImg, 0, 0, Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
 
 
-  val barrage: Barrage = new Barrage(Constants.WindowStatus.HOST, liveImage.getWidth, liveImage.getHeight)
-  val barrageCanvas: Canvas = barrage.barrageView
+//  val barrage: Barrage = new Barrage(Constants.WindowStatus.HOST, liveImage.getWidth, liveImage.getHeight)
+//  val barrageCanvas: Canvas = barrage.barrageView
 
   val statisticsCanvas = new Canvas(Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
   val ctx: GraphicsContext = statisticsCanvas.getGraphicsContext2D
@@ -286,8 +286,8 @@ class HostScene(stage: Stage) {
   }
 
   /*留言板*/
-  val commentBoard = new CommentBoard(liveImage.getWidth, height * 0.18)
-  val commentArea: VBox = commentBoard.commentArea
+//  val commentBoard = new CommentBoard(liveImage.getWidth, height * 0.18)
+//  val commentArea: VBox = commentBoard.commentArea
 
   /*观看列表*/
   val watchingList = new WatchingList(width * 0.1, width * 0.15, height * 0.8, Some(tb4))
@@ -902,7 +902,7 @@ class HostScene(stage: Stage) {
 
       val livePane = new StackPane()
       livePane.setAlignment(Pos.BOTTOM_RIGHT)
-      livePane.getChildren.addAll(liveImage, statisticsCanvas, barrageCanvas)
+      livePane.getChildren.addAll(liveImage, statisticsCanvas)
 
 
       livePane.addEventHandler(MouseEvent.MOUSE_ENTERED, (_: MouseEvent) => {
@@ -945,33 +945,33 @@ class HostScene(stage: Stage) {
       }
     }
 
-    commentFiled.setFont(Font.font(emojiFont, 15))
-    commentFiled.setPrefWidth(liveImage.getWidth * 0.65)
-    commentFiled.setPrefHeight(30)
-    commentFiled.setPromptText("输入你的留言~")
-    commentFiled.getStyleClass.add("text-area")
-    commentFiled.setOnKeyPressed { e =>
-      if (e.getCode == javafx.scene.input.KeyCode.ENTER) {
-        val comment = Comment(RmManager.roomInfo.get.userId, RmManager.roomInfo.get.roomId, s"${commentFiled.getText}", extension = Some(commentPrefix))
-        listener.sendCmt(comment)
-        commentFiled.clear()
-      }
-    }
-    val emojiBtn = new Button("\uD83D\uDE00")
-    emojiBtn.setStyle("-fx-background-radius: 5px;")
-    emojiBtn.setFont(Font.font(emojiFont, 15))
-    var emojiBtnClick = true
-    val emojiArea = emoji.getEmojiGridPane
+//    commentFiled.setFont(Font.font(emojiFont, 15))
+//    commentFiled.setPre输入你的留言fWidth(liveImage.getWidth * 0.65)
+//    commentFiled.setPrefHeight(30)
+//    commentFiled.setPromptText("~")
+//    commentFiled.getStyleClass.add("text-area")
+//    commentFiled.setOnKeyPressed { e =>
+//      if (e.getCode == javafx.scene.input.KeyCode.ENTER) {
+//        val comment = Comment(RmManager.roomInfo.get.userId, RmManager.roomInfo.get.roomId, s"${commentFiled.getText}", extension = Some(commentPrefix))
+//        listener.sendCmt(comment)
+//        commentFiled.clear()
+//      }
+//    }
+//    val emojiBtn = new Button("\uD83D\uDE00")
+//    emojiBtn.setStyle("-fx-background-radius: 5px;")
+//    emojiBtn.setFont(Font.font(emojiFont, 15))
+//    var emojiBtnClick = true
+//    val emojiArea = emoji.getEmojiGridPane
 
-    emojiBtn.setOnAction { _ =>
-      if (emojiBtnClick) {
-        group.getChildren.add(1, emojiArea)
-      } else {
-        group.getChildren.remove(emojiArea)
-      }
-      emojiBtnClick = !emojiBtnClick
-    }
-    Common.addButtonEffect(emojiBtn)
+//    emojiBtn.setOnAction { _ =>
+//      if (emojiBtnClick) {
+//        group.getChildren.add(1, emojiArea)
+//      } else {
+//        group.getChildren.remove(emojiArea)
+//      }
+//      emojiBtnClick = !emojiBtnClick
+//    }
+//    Common.addButtonEffect(emojiBtn)
 
     val sendIcon = new ImageView("img/confirm.png")
     sendIcon.setFitHeight(20)
@@ -981,19 +981,19 @@ class HostScene(stage: Stage) {
     sendBtn.setOnAction { _ =>
       if (commentFiled.getText() != null) {
         val comment = Comment(RmManager.roomInfo.get.userId, RmManager.roomInfo.get.roomId, s"${commentFiled.getText}", extension = Some(commentPrefix))
-        listener.sendCmt(comment)
+//        listener.sendCmt(comment)
         commentFiled.clear()
       }
     }
     Common.addButtonEffect(sendBtn)
 
 
-    val commentBox = new HBox(commentFiled, emojiBtn, effectChoiceCBx, sendBtn)
-    commentBox.setAlignment(Pos.CENTER)
-    commentBox.setSpacing(8)
+//    val commentBox = new HBox(commentFiled, effectChoiceCBx, sendBtn)
+//    commentBox.setAlignment(Pos.CENTER)
+//    commentBox.setSpacing(8)
 
 
-    val vBox = new VBox(createUpBox, createLivePane, commentArea, commentBox)
+    val vBox = new VBox(createUpBox, createLivePane)
     vBox.getStyleClass.add("hostScene-rightArea-wholeBox")
     vBox.setSpacing(10)
     vBox.setPadding(new Insets(15, 65, 5, 65))
@@ -1013,7 +1013,7 @@ class HostScene(stage: Stage) {
 
   def removeAllElement(): Unit = {
     group.getChildren.clear()
-    fullScreenImage.getChildren.addAll(liveImage, statisticsCanvas, barrageCanvas)
+    fullScreenImage.getChildren.addAll(liveImage, statisticsCanvas)
     fullScreenImage.setLayoutX(0)
     fullScreenImage.setLayoutY(0)
     group.getChildren.add(fullScreenImage)

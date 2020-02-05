@@ -167,12 +167,8 @@ class HomeScene {
   }
 
   def addMiddleArea(): StackPane = {
-        val welcomeText = new Text("欢迎来到VideoMeeting视频会议系统")
-        welcomeText.getStyleClass.add("homeScene-text")
-
-//    val welcomeText = new ImageView("img/welcomeText.png")
-//    welcomeText.setFitHeight(61)
-//    welcomeText.setFitWidth(690)
+    val welcomeText = new Text("欢迎来到VideoMeeting视频会议系统")
+    welcomeText.getStyleClass.add("homeScene-text")
 
     val welcomeBg = new ImageView("img/背景.jpg")
 

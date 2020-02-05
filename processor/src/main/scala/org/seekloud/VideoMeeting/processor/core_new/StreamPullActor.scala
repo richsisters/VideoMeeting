@@ -61,11 +61,8 @@ object StreamPullActor {
   case object StartNewLive extends Command
 
   case class Ready(client: PullStreamClient) extends Command
-  case class PushStream(liveId: String) extends Command
   case object PullStream extends Command
   case class CleanStream(liveId:String) extends Command
-
-  case class GetTs(reply:ActorRef[Long]) extends Command
 
   case class LiveInfo(roomId:Long, status:String)
 
@@ -145,11 +142,6 @@ object StreamPullActor {
 
         case StreamStop(liveId) =>
           ctx.self ! CleanStream(liveId)
-          Behaviors.same
-
-        case GetTs(reply) =>
-          val ts = client.getServerTimestamp()
-          reply ! ts
           Behaviors.same
 
         case CleanStream(liveId) =>
