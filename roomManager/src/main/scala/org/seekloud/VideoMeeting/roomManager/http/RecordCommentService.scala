@@ -31,7 +31,7 @@ trait RecordCommentService extends ServiceUtils{
                     RecordDao.searchRecord(req.roomId,req.recordTime).map{v=>
                       if(v.nonEmpty){
                         dealFutureResult{
-                          RecordCommentDAO.addRecordComment(rRecordComment(req.roomId,req.recordTime,req.comment,req.commentTime,req.commentUid,req.authorUidOpt,-1l,req.relativeTime)).map{r =>
+                          RecordCommentDAO.addRecordComment(rRecordComment(0L, req.roomId,req.recordTime,req.comment,req.commentTime,req.commentUid,req.authorUidOpt,req.relativeTime)).map{r =>
                             complete(CommonRsp())
                           }.recover{
                             case e:Exception =>

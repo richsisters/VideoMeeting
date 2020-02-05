@@ -91,7 +91,7 @@ object RoomActor {
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
         case ActorProtocol.StartRoom4Anchor(userId, `roomId`, actor) =>
-          log.debug(s"${ctx.self.path} 用户id=$userId 开启了的新的直播间id=$roomId")
+          log.debug(s"${ctx.self.path} 用户id=$userId 开启了的新的会议室id=$roomId")
           subscribers.put((userId, false), actor)
           for {
             data <- RtpClient.getLiveInfoFunc()
@@ -101,9 +101,9 @@ object RoomActor {
               case Right(rsp) =>
                 if (userTableOpt.nonEmpty) {
 
-                  val roomInfo = RoomInfo(roomId, s"${userTableOpt.get.userName}的直播间", "", userTableOpt.get.uid, userTableOpt.get.userName,
+                  val roomInfo = RoomInfo(roomId, s"${userTableOpt.get.userName}的会议室", "", userTableOpt.get.uid, userTableOpt.get.userName,
                     UserInfoDao.getHeadImg(userTableOpt.get.headImg),
-                    UserInfoDao.getHeadImg(userTableOpt.get.coverImg), 0, 0, None,
+                    Common.DefaultImg.coverImg, 0, 0, None,
                     Some(rsp.liveInfo.liveId)
                   )
 

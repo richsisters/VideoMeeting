@@ -133,62 +133,62 @@ trait AdminService extends ServiceUtils with SessionBase{
     }
   }
 
-  private def banOnAnchorErrorRsp(msg:String) = CommonRsp(100054,msg)
-
-  private val banOnAnchor = (path("banOnAnchor") & post){
-    AdminAction{ _ =>
-      entity(as[Either[Error,AdminProtocol.BanOnAnchor]]){
-        case Right(req) =>
-          roomManager ! ActorProtocol.BanOnAnchor(req.roomId)
-          dealFutureResult{
-            UserInfoDao.searchByRoomId(req.roomId).map{r =>
-              if(r.nonEmpty){
-                dealFutureResult{
-                  AdminDAO.updateAllowAnchor(r.head.uid,false).map{w =>
-                    complete(CommonRsp())
-                  }.recover{
-                    case e:Exception =>
-                      log.debug(s"禁播失败，error=$e")
-                      complete(banOnAnchorErrorRsp(s"禁播失败，error=$e"))
-                  }
-                }
-              }else{
-                complete(banOnAnchorErrorRsp(s"该直播间不存在"))
-              }
-
-            }.recover{
-              case e:Exception =>
-                log.debug(s"禁播失败，error=$e")
-                complete(banOnAnchorErrorRsp(s"禁播失败，error=$e"))
-            }
-          }
-
-        case Left(error) =>
-          log.debug(s"禁播失败，解析错误error=$error")
-          complete(banOnAnchorErrorRsp(s"禁播失败，解析错误error=$error"))
-
-      }
-    }
-  }
-
-  private val cancelBanOnAnchor = (path("cancelBanOnAnchor") & post){
-    AdminAction{ _ =>
-      entity(as[Either[Error,AdminProtocol.BanOnAnchor]]){
-        case Right(req) =>
-          complete(CommonRsp())
-
-        case Left(error) =>
-          log.debug(s"禁播失败，解析错误error=$error")
-          complete(CommonRsp())
-
-      }
-    }
-  }
+//  private def banOnAnchorErrorRsp(msg:String) = CommonRsp(100054,msg)
+//
+//  private val banOnAnchor = (path("banOnAnchor") & post){
+//    AdminAction{ _ =>
+//      entity(as[Either[Error,AdminProtocol.BanOnAnchor]]){
+//        case Right(req) =>
+//          roomManager ! ActorProtocol.BanOnAnchor(req.roomId)
+//          dealFutureResult{
+//            UserInfoDao.searchByRoomId(req.roomId).map{r =>
+//              if(r.nonEmpty){
+//                dealFutureResult{
+//                  AdminDAO.updateAllowAnchor(r.head.uid,false).map{w =>
+//                    complete(CommonRsp())
+//                  }.recover{
+//                    case e:Exception =>
+//                      log.debug(s"禁播失败，error=$e")
+//                      complete(banOnAnchorErrorRsp(s"禁播失败，error=$e"))
+//                  }
+//                }
+//              }else{
+//                complete(banOnAnchorErrorRsp(s"该直播间不存在"))
+//              }
+//
+//            }.recover{
+//              case e:Exception =>
+//                log.debug(s"禁播失败，error=$e")
+//                complete(banOnAnchorErrorRsp(s"禁播失败，error=$e"))
+//            }
+//          }
+//
+//        case Left(error) =>
+//          log.debug(s"禁播失败，解析错误error=$error")
+//          complete(banOnAnchorErrorRsp(s"禁播失败，解析错误error=$error"))
+//
+//      }
+//    }
+//  }
+//
+//  private val cancelBanOnAnchor = (path("cancelBanOnAnchor") & post){
+//    AdminAction{ _ =>
+//      entity(as[Either[Error,AdminProtocol.BanOnAnchor]]){
+//        case Right(req) =>
+//          complete(CommonRsp())
+//
+//        case Left(error) =>
+//          log.debug(s"禁播失败，解析错误error=$error")
+//          complete(CommonRsp())
+//
+//      }
+//    }
+//  }
 
 
 
   val admin = pathPrefix("admin"){
-    adminSignIn ~ deleteRecord ~ sealAccount ~ cancelSealAccount ~ getUserList ~ banOnAnchor
+    adminSignIn ~ deleteRecord ~ sealAccount ~ cancelSealAccount ~ getUserList
   }
 
 }
