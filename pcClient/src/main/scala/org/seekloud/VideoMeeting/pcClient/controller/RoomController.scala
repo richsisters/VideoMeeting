@@ -65,7 +65,7 @@ class RoomController(
     }
   }
 
-  def updateRecordList(sortBy: String = "time", pageNum: Int = 1, pageSize: Int = roomScene.recordsPerPage): Unit = {
+ /* def updateRecordList(sortBy: String = "time", pageNum: Int = 1, pageSize: Int = roomScene.recordsPerPage): Unit = {
     RMClient.getRecordList(sortBy: String, pageNum: Int, pageSize: Int).map {
       case Right(rst) =>
         if (rst.errCode == 0) {
@@ -74,7 +74,7 @@ class RoomController(
             roomScene.recordsSize = rst.recordNum
             if (roomScene.recordList.size % roomScene.maxPagiNum == 0) {
               removeLoading()
-              roomScene.updateRecordList()
+//              roomScene.updateRecordList()
             }
           }
         } else {
@@ -90,7 +90,7 @@ class RoomController(
           WarningDialog.initWarningDialog("获取录像列表失败")
         }
     }
-  }
+  }*/
 
 
   roomScene.setListener(new RoomSceneListener {
@@ -111,12 +111,12 @@ class RoomController(
       Boot.addToPlatform {
         showLoading()
         if (roomScene.liveMode) {
-          updateRoomList()
+//          updateRoomList()
         } else {
           if (!hasWaitingGif) {
             roomScene.recordList = Nil
             for (i <- 1 to 10) {
-              updateRecordList(sortBy = roomScene.recordSort, pageNum = i)
+//              updateRecordList(sortBy = roomScene.recordSort, pageNum = i)
             }
           }
         }
@@ -132,7 +132,7 @@ class RoomController(
 
   def showScene(): Unit = {
     Boot.addToPlatform {
-      if (roomScene.liveMode) updateRoomList()
+//      if (roomScene.liveMode) updateRoomList()
       context.switchScene(roomScene.getScene, title = "直播间online")
     }
   }

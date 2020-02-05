@@ -128,8 +128,8 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
   var leftArea: VBox = _
   var rightArea: VBox = _
   val gift4Img = new Image("img/rose.png")
-  val gift5Img = new Image("img/gift5.png")
-  val gift6Img = new Image("img/gift6.png")
+//  val gift5Img = new Image("img/gift5.png")
+//  val gift6Img = new Image("img/gift6.png")
   val waitPulling = new Image("img/waitPulling.gif")
 
 

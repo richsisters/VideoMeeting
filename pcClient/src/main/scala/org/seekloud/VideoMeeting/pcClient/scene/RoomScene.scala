@@ -121,42 +121,42 @@ class RoomScene {
   var pendingPage: Int = -1
 
 
-  val liveIcon = new ImageView("img/liveRooms.png")
-  liveIcon.setFitHeight(55)
-  liveIcon.setFitWidth(55)
-  val recordIcon = new ImageView("img/recordRooms.png")
-  recordIcon.setFitHeight(35)
-  recordIcon.setFitWidth(35)
+//  val liveIcon = new ImageView("img/liveRooms.png")
+//  liveIcon.setFitHeight(55)
+//  liveIcon.setFitWidth(55)
+//  val recordIcon = new ImageView("img/recordRooms.png")
+//  recordIcon.setFitHeight(35)
+//  recordIcon.setFitWidth(35)
 
-  val liveBtn = new Button("", liveIcon)
-  Tooltip.install(liveBtn, new Tooltip("观看直播"))
-  val recordBtn = new Button("", recordIcon)
-  Tooltip.install(recordBtn, new Tooltip("观看录像"))
+//  val liveBtn = new Button("", liveIcon)
+//  Tooltip.install(liveBtn, new Tooltip("观看直播"))
+//  val recordBtn = new Button("", recordIcon)
+//  Tooltip.install(recordBtn, new Tooltip("观看录像"))
 
-  liveBtn.getStyleClass.add("roomScene-topBtn")
-  recordBtn.getStyleClass.add("roomScene-topBtn")
+//  liveBtn.getStyleClass.add("roomScene-topBtn")
+//  recordBtn.getStyleClass.add("roomScene-topBtn")
 
 
   val shadow1 = new DropShadow(10, Color.GRAY)
-  liveBtn.setEffect(shadow1)
-  recordBtn.setEffect(shadow1)
+//  liveBtn.setEffect(shadow1)
+//  recordBtn.setEffect(shadow1)
 
-  liveBtn.setOnAction { _ =>
-    liveMode = true
-    liveIcon.setFitHeight(55)
-    liveIcon.setFitWidth(55)
-    recordIcon.setFitHeight(35)
-    recordIcon.setFitWidth(35)
-    listener.refresh()
-  }
-  recordBtn.setOnAction { _ =>
-    liveMode = false
-    recordIcon.setFitHeight(55)
-    recordIcon.setFitWidth(55)
-    liveIcon.setFitHeight(35)
-    liveIcon.setFitWidth(35)
-    listener.refresh()
-  }
+//  liveBtn.setOnAction { _ =>
+//    liveMode = true
+//    liveIcon.setFitHeight(55)
+//    liveIcon.setFitWidth(55)
+//    recordIcon.setFitHeight(35)
+//    recordIcon.setFitWidth(35)
+//    listener.refresh()
+//  }
+//  recordBtn.setOnAction { _ =>
+//    liveMode = false
+//    recordIcon.setFitHeight(55)
+//    recordIcon.setFitWidth(55)
+////    liveIcon.setFitHeight(35)
+////    liveIcon.setFitWidth(35)
+//    listener.refresh()
+//  }
 
   /*liveBox*/
   val liveLabelIcon = new ImageView("img/liveLabel.png")
@@ -284,7 +284,7 @@ class RoomScene {
   refreshBtnBox.setPadding(new Insets(15, 20, 0, 0))
   refreshBtnBox.setAlignment(Pos.TOP_RIGHT)
 
-  val roomTableLabelBox = new HBox(25, liveBtn, recordBtn)
+  val roomTableLabelBox = new HBox(25)
   roomTableLabelBox.setPadding(new Insets(0, 0, 15, 0))
   roomTableLabelBox.setAlignment(Pos.BOTTOM_CENTER)
 
@@ -496,7 +496,7 @@ class RoomScene {
 
   /*record*/
 
-  def getCurRecordList: List[AlbumInfo] = recordList.sortBy(_._1).flatMap(_._2.map(_.toAlbum))
+/*  def getCurRecordList: List[AlbumInfo] = recordList.sortBy(_._1).flatMap(_._2.map(_.toAlbum))
 
   def getExistPageNum: Int = {
     if (getCurRecordList.size % recordsPerPage == 0) getCurRecordList.size / recordsPerPage else getCurRecordList.size / recordsPerPage + 1
@@ -526,10 +526,10 @@ class RoomScene {
           WarningDialog.initWarningDialog("获取录像列表失败")
         }
     }
-  }
+  } */
 
 
-  def updateRecordList(): Unit = {
+ /* def updateRecordList(): Unit = {
     if (recordList.isEmpty) {
       val label = new Label("暂无录像")
       label.setFont(Font.font("Verdana", 30))
@@ -577,7 +577,7 @@ class RoomScene {
       borderPane.setCenter(recCenter)
 
     }
-  }
+  }*/
 
   var listener: RoomSceneListener = _
 
