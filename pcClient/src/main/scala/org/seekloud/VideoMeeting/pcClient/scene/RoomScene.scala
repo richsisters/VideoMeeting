@@ -451,12 +451,25 @@ class RoomScene {
     vBox
   }
 
-  val loading = new Label("房间加载中……")
-  loading.setFont(Font.font("Verdana", 30))
-  loading.setPadding(new Insets(200, 0, 0, 0))
+//  val loading = new Label("房间加载中……")
+//  loading.setFont(Font.font("Verdana", 30))
+//  loading.setPadding(new Insets(200, 0, 0, 0))
+
+  val emailLabel = new Label("会议号:")
+  emailLabel.setFont(Font.font(26))
+  val emailField = new TextField("")
+  val tb2Icon = new ImageView("img/enterBtn.png")
+  tb2Icon.setFitHeight(30)
+  tb2Icon.setFitWidth(30)
+  val findBtn = new Button("", tb2Icon)
+  findBtn.getStyleClass.add("enter")
+  val find = new HBox()
+  find.getChildren.addAll(emailLabel, emailField, findBtn)
+  find.setPadding(new Insets(200, 0, 0, 300))
+
   val borderPane = new BorderPane()
   borderPane.setTop(topBox)
-  borderPane.setCenter(loading)
+  borderPane.setCenter(find)
   group.getChildren.addAll(borderPane)
 
   /**
