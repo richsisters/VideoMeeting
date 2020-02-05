@@ -15,7 +15,7 @@ object ProcessorProtocol {
   case class newConnectInfo(
     roomId: Long,
     host: String,
-    client: String,
+    clientInfo: List[String], //存放多个参会人的liveId
     pushLiveId: String,
     pushLiveCode: String,
     layout: Int,
