@@ -293,16 +293,16 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
   }
 
   /*弹幕*/
-  val barrage: Barrage = if(!isRecord){
-    new Barrage(Constants.WindowStatus.AUDIENCE_LIVE, imgView.getWidth, imgView.getHeight)
-  } else {
-    new Barrage(Constants.WindowStatus.AUDIENCE_REC, imgView.getWidth, imgView.getHeight, Some(player))
-  }
-  val barrageCanvas: Canvas = barrage.barrageView
+//  val barrage: Barrage = if(!isRecord){
+//    new Barrage(Constants.WindowStatus.AUDIENCE_LIVE, imgView.getWidth, imgView.getHeight)
+//  } else {
+//    new Barrage(Constants.WindowStatus.AUDIENCE_REC, imgView.getWidth, imgView.getHeight, Some(player))
+//  }
+//  val barrageCanvas: Canvas = barrage.barrageView
 
   /*留言板*/
-  val commentBoard = new CommentBoard(imgView.getWidth, height * 0.18)
-  val commentArea: VBox = commentBoard.commentArea
+//  val commentBoard = new CommentBoard(imgView.getWidth, height * 0.18)
+//  val commentArea: VBox = commentBoard.commentArea
 
   /*观看列表*/
   val watchingList = new WatchingList(width * 0.1, width * 0.15, height * 0.3, None)
@@ -322,12 +322,12 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
   scene.setOnKeyPressed { e =>
     if (e.getCode == javafx.scene.input.KeyCode.ESCAPE) listener.exitFullScreen(isRecord)
   }
-  if(isRecord){
-    scene.setOnMouseClicked { e =>
-      commentFiled.setPromptText(s"^_^点我发弹幕~")
-      recCommentBoard.sayTo = None
-    }
-  }
+//  if(isRecord){
+//    scene.setOnMouseClicked { e =>
+//      commentFiled.setPromptText(s"^_^点我发弹幕~")
+//      recCommentBoard.sayTo = None
+//    }
+//  }
 
   def getScene: Scene = this.scene
 
@@ -506,9 +506,9 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
 
     val livePane = new StackPane()
     if (!isRecord) {
-      livePane.getChildren.addAll(imgView, statisticsCanvas, barrageCanvas)
+      livePane.getChildren.addAll(imgView, statisticsCanvas)
     } else {
-      livePane.getChildren.addAll(playerPane.getMediaView, barrageCanvas)
+      livePane.getChildren.addAll(playerPane.getMediaView)
     }
     livePane.setAlignment(Pos.BOTTOM_RIGHT)
 
@@ -533,7 +533,7 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
       //        playerPane.removeTopAndBottom()
     })
 
-    val gift = new GiftBar(group)
+//    val gift = new GiftBar(group)
 
     def sendGiftAction(input: TextField, btn: Button, name: String, giftDes: VBox, giftType: Int): Unit = {
       btn.setOnAction(_ => {
@@ -547,16 +547,16 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
                       )
     }
 
-    sendGiftAction(gift.input1, gift.sendBtn1, "冰可乐", gift.gift1Des, 1)
-    sendGiftAction(gift.input2, gift.sendBtn2, "雪糕", gift.gift2Des, 2)
-    sendGiftAction(gift.input3, gift.sendBtn3, "巧克力", gift.gift3Des, 3)
-    sendGiftAction(gift.input4, gift.sendBtn4, "鲜花", gift.gift4Des, 4)
-    sendGiftAction(gift.input5, gift.sendBtn5, "飞船", gift.gift5Des, 5)
-    sendGiftAction(gift.input6, gift.sendBtn6, "火箭", gift.gift6Des, 6)
+//    sendGiftAction(gift.input1, gift.sendBtn1, "冰可乐", gift.gift1Des, 1)
+//    sendGiftAction(gift.input2, gift.sendBtn2, "雪糕", gift.gift2Des, 2)
+//    sendGiftAction(gift.input3, gift.sendBtn3, "巧克力", gift.gift3Des, 3)
+//    sendGiftAction(gift.input4, gift.sendBtn4, "鲜花", gift.gift4Des, 4)
+//    sendGiftAction(gift.input5, gift.sendBtn5, "飞船", gift.gift5Des, 5)
+//    sendGiftAction(gift.input6, gift.sendBtn6, "火箭", gift.gift6Des, 6)
 
     val hBox = new HBox()
     if (!isRecord) {
-      hBox.getChildren.addAll(livePane, gift.giftBox)
+      hBox.getChildren.addAll(livePane)
     } else {
       hBox.getChildren.addAll(livePane)
     }
@@ -590,18 +590,18 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
         }
       }
 
-      commentFiled.setPrefWidth(imgView.getWidth * 0.65)
-      commentFiled.setPrefHeight(30)
-      commentFiled.setFont(Font.font(emojiFont, 15))
-      commentFiled.setPromptText("输入你的留言~")
-      commentFiled.getStyleClass.add("text-area")
-      commentFiled.setOnKeyPressed { e =>
-        if (e.getCode == javafx.scene.input.KeyCode.ENTER) {
-          val comment = Comment(RmManager.roomInfo.get.userId, album.roomId, s"${commentFiled.getText}", extension = Some(commentPrefix))
-          listener.sendCmt(comment)
-          commentFiled.clear()
-        }
-      }
+//      commentFiled.setPrefWidth(imgView.getWidth * 0.65)
+//      commentFiled.setPrefHeight(30)
+//      commentFiled.setFont(Font.font(emojiFont, 15))
+//      commentFiled.setPromptText("输入你的留言~")
+//      commentFiled.getStyleClass.add("text-area")
+//      commentFiled.setOnKeyPressed { e =>
+//        if (e.getCode == javafx.scene.input.KeyCode.ENTER) {
+//          val comment = Comment(RmManager.roomInfo.get.userId, album.roomId, s"${commentFiled.getText}", extension = Some(commentPrefix))
+//          listener.sendCmt(comment)
+//          commentFiled.clear()
+//        }
+//      }
 
       val emojiBtn = new Button("\uD83D\uDE00")
       emojiBtn.setStyle("-fx-background-radius: 5px;")
@@ -699,7 +699,7 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
     }
 
     val vBox = if (!isRecord) {
-      new VBox(createTopBox(), hBox, commentArea, createWriteLiveComment)
+      new VBox(createTopBox(), hBox, createWriteLiveComment)
     } else {
       new VBox(createTopBox(), hBox, createWriteRecComment)
     }
@@ -730,7 +730,7 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
 
   def removeAllElement(): Unit = {
     group.getChildren.clear()
-    fullScreenImage.getChildren.addAll(imgView, barrageCanvas, statisticsCanvas)
+    fullScreenImage.getChildren.addAll(imgView, statisticsCanvas)
     fullScreenImage.setLayoutX(0)
     fullScreenImage.setLayoutY(0)
     if (isRecord) fullScreenImage.getChildren.addAll(recView, liveBarBox)

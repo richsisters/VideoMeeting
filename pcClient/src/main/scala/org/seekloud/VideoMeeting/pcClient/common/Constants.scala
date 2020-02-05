@@ -53,7 +53,7 @@ object Constants {
   }
   object DefaultPlayer {
     val width = 640
-    val height = 360
+    val height = 480
   }
 
   object HostStatus {
