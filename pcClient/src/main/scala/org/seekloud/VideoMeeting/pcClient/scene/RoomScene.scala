@@ -463,7 +463,7 @@ class RoomScene {
     * update roomList  func
     *
     **/
-  def updateRoomList(roomList: List[RoomInfo] = Nil): Unit = {
+/*  def updateRoomList(roomList: List[RoomInfo] = Nil): Unit = {
     //    log.debug(s"update room list: r$roomList")
     if (roomList.isEmpty) {
       val label = new Label("暂无房间")
@@ -492,7 +492,7 @@ class RoomScene {
       borderPane.setCenter(center)
     }
 
-  }
+  } */
 
   /*record*/
 

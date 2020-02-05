@@ -48,7 +48,7 @@ class RoomController(
           Boot.addToPlatform {
             removeLoading()
             roomScene.roomList = rst.roomList.get
-            roomScene.updateRoomList(roomList = roomScene.roomList)
+//            roomScene.updateRoomList(roomList = roomScene.roomList)
           }
         } else {
           removeLoading()
