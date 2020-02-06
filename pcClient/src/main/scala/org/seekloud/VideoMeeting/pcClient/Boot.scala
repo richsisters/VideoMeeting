@@ -71,9 +71,9 @@ class Boot extends javafx.application.Application {
     rmManager ! RmManager.GetHomeItems(homeScene, homeSceneController)
     homeSceneController.showScene()
 
-    addToPlatform {
-      homeSceneController.loginByTemp()
-    }
+//    addToPlatform {
+//      homeSceneController.loginByTemp()
+//    }
 
     primaryStage.setOnCloseRequest(event => {
       rmManager ! StopSelf

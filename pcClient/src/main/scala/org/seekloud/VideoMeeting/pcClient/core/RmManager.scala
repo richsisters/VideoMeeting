@@ -78,9 +78,9 @@ object RmManager {
 
   final case class GetSender(sender: ActorRef[WsMsgFront]) extends RmCommand
 
-  final case class ChangeHeader(newHeaderUrl: String) extends RmCommand
+//  final case class ChangeHeader(newHeaderUrl: String) extends RmCommand
 
-  final case class ChangeCover(newCoverUrl: String) extends RmCommand
+//  final case class ChangeCover(newCoverUrl: String) extends RmCommand
 
   final case class ChangeUserName(newUserName: String) extends RmCommand
 
@@ -336,16 +336,16 @@ object RmManager {
           }
           switchBehavior(ctx, "audienceBehavior", audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, audienceLiveInfo = None, audienceStatus = AudienceStatus.RECORD))
 
-        case msg: ChangeHeader =>
-          log.info("change header.")
-          this.userInfo = userInfo.map(_.copy(headImgUrl = msg.newHeaderUrl))
-          homeController.foreach(_.showScene())
-          Behaviors.same
+//        case msg: ChangeHeader =>
+//          log.info("change header.")
+//          this.userInfo = userInfo.map(_.copy(headImgUrl = msg.newHeaderUrl))
+//          homeController.foreach(_.showScene())
+//          Behaviors.same
 
-        case msg: ChangeCover =>
-          log.info("change cover.")
-          this.roomInfo = roomInfo.map(_.copy(coverImgUrl = msg.newCoverUrl))
-          Behaviors.same
+//        case msg: ChangeCover =>
+//          log.info("change cover.")
+//          this.roomInfo = roomInfo.map(_.copy(coverImgUrl = msg.newCoverUrl))
+//          Behaviors.same
 
         case msg: ChangeUserName =>
           log.info("change userName.")

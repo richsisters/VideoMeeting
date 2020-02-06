@@ -56,10 +56,9 @@ object RoomManager {
       log.info(s"${ctx.self.path} setup")
       Behaviors.withTimers[Command]{implicit timer =>
 //        idle(mutable.HashMap.empty[Long,RoomInfo])
-        var roomInfo = RoomInfo(Common.TestConfig.TEST_ROOM_ID,"test_room","测试房间",Common.TestConfig.TEST_USER_ID,
-          "byf1",UserInfoDao.getHeadImg(""),
-          UserInfoDao.getCoverImg(""),0,0,
-          Some(Common.getMpdPath(Common.TestConfig.TEST_ROOM_ID))
+        var roomInfo = RoomInfo(Common.TestConfig.TEST_ROOM_ID,"test_room","测试房间",UserInfoDao.getCoverImg(""),
+          Common.TestConfig.TEST_USER_ID, "byf1",UserInfoDao.getHeadImg("")
+          ,Some(Common.getMpdPath(Common.TestConfig.TEST_ROOM_ID))
         )
         /*ProcessorClient.getmpd(Common.TestConfig.TEST_ROOM_ID).map{
           case Right(v) =>
@@ -244,7 +243,7 @@ object RoomManager {
                   log.debug(s"${ctx.self.path}获取录像id${roomId}时长为duration=${rsp.duration}")
                   RecordDao.addRecord(wholeRoomInfo.roomInfo.roomId,
                     wholeRoomInfo.roomInfo.roomName,wholeRoomInfo.roomInfo.roomDes,startTime,
-                    UserInfoDao.getVideoImg(wholeRoomInfo.roomInfo.coverImgUrl),0,wholeRoomInfo.roomInfo.like,rsp.duration)
+                    UserInfoDao.getVideoImg(wholeRoomInfo.roomInfo.coverImgUrl),0,0,rsp.duration)
                   //timer.startSingleTimer(FinishPullKey + roomId.toString + startTime, FinishPull(roomId, startTime, liveId), 5.seconds)
                 case Left(err) =>
                   log.debug(s"${ctx.self.path} 查询录像文件信息失败,error:$err")

@@ -7,8 +7,6 @@ import org.seekloud.VideoMeeting.roomManager.models.SlickTables._
 import org.seekloud.VideoMeeting.roomManager.utils.DBUtil.db
 import slick.jdbc.PostgresProfile.api._
 import org.seekloud.VideoMeeting.roomManager.Boot.executor
-import org.seekloud.VideoMeeting.roomManager.utils.SecureUtil
-
 import scala.concurrent.Future
 
 
@@ -26,17 +24,12 @@ object UserInfoDao {
     if(coverImg == Common.DefaultImg.coverImg)Common.DefaultImg.videoImg else coverImg
   }
 
-  def addUser(email:String, name:String, pw:String, token:String, timeStamp:Long,rtmpToken:String) = {
-    db.run(tUserInfo += rUserInfo(1, name, pw, 1, token, timeStamp,Common.DefaultImg.headImg,Common.DefaultImg.coverImg,email,timeStamp,rtmpToken))
+  def addUser(email:String, name:String, pw:String, token:String, timeStamp:Long) = {
+    db.run(tUserInfo += rUserInfo(0L, name, pw, 1, token, timeStamp, Common.DefaultImg.headImg, email))
   }
 
   def modifyImg4User(userId:Long,fileName:String,imgType:Int) = {
-    if(imgType == CommonInfo.ImgType.coverImg){
-      db.run(tUserInfo.filter(_.uid === userId).map(_.coverImg).update(fileName))
-    }else{
-      db.run(tUserInfo.filter(_.uid === userId).map(_.headImg).update(fileName))
-    }
-
+    db.run(tUserInfo.filter(_.uid === userId).map(_.headImg).update(fileName))
   }
 
   def checkEmail(email:String) ={
@@ -59,7 +52,7 @@ object UserInfoDao {
   def getUserDes(users: List[Long]) = {
     Future.sequence(users.map{uid =>
       db.run(tUserInfo.filter(t => t.uid === uid).result)}).map(_.flatten).map{user =>
-        user.map(r => UserDes(r.uid, r.userName,if(r.headImg == "") Common.DefaultImg.headImg else r.headImg)).toList
+        user.map(r => UserDes(r.uid, r.userName,if(r.headImg == "") Common.DefaultImg.headImg else r.headImg))
     }
   }
 
@@ -100,29 +93,6 @@ object UserInfoDao {
     ).update(psw))
   }
 
-  def updateCoverImg(uid:Long,coverImg:String) = {
-    db.run(tUserInfo.filter(i => i.uid === uid).map(l=> (l.coverImg)
-    ).update(coverImg))
-  }
-
-  def getRtmpToken(userId:Long) = {
-    db.run(tUserInfo.filter(_.uid === userId).map(_.rtmpToken).result)
-  }
-
-  def checkRtmpToken(userId:Long,rtmpToken:String) = {
-    db.run(tUserInfo.filter(t => t.uid === userId && t.rtmpToken === rtmpToken).result.headOption)
-  }
-
-  def updateRtmpToken(userId:Long) = {
-    for{
-      t <- db.run(tUserInfo.filter(_.uid === userId).map(_.rtmpToken).update(SecureUtil.nonceStr(40)))
-      r <- searchById(userId)
-    }yield {
-      r
-    }
-
-  }
-
   def getUserLen = {
     db.run(tUserInfo.length.result)
   }
@@ -135,9 +105,19 @@ object UserInfoDao {
     db.run(tUserInfo.filter(r => r.email === email ).delete)
   }
 
+  def test() = {
+    val q = tLoginEvent += rLoginEvent(0L, 1L, 2L)
+    db.run(q)
+  }
+
   def main(args: Array[String]): Unit = {
-    val a = searchById(100001)
-    Thread.sleep(3000)
-    println(a)
+    println(AppSettings.slickUrl)
+    test().map{r =>
+      println("res" + r)
+    }.recover{
+      case exception: Exception =>
+        println(s"$exception")
+    }
+    println("finish")
   }
 }

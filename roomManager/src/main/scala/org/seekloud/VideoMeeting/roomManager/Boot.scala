@@ -16,6 +16,7 @@ import scala.language.postfixOps
 import org.seekloud.VideoMeeting.roomManager.common.AppSettings
 import org.seekloud.VideoMeeting.roomManager.core.{EmailActor, RegisterManager, RoomManager, UserManager}
 import org.seekloud.VideoMeeting.roomManager.http.HttpService
+import org.seekloud.VideoMeeting.roomManager.utils.MySlickCodeGenerator
 
 /**
   * Author: Tao Zhang
@@ -69,6 +70,7 @@ object Boot extends HttpService {
     //    val https: HttpsConnectionContext = ConnectionContext.https(sslContext)
 
     //    val httpsBinding = Http().bindAndHandle(Routes, AppSettings.httpInterface, AppSettings.httpPort, connectionContext = https)
+
     val httpsBinding = Http().bindAndHandle(Routes, AppSettings.httpInterface, AppSettings.httpPort)
 
     httpsBinding.onComplete {

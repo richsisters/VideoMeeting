@@ -65,11 +65,11 @@ object StatisticDao {
   def AdminGetRecordAll(sortBy:String,pageNum:Int,pageSize:Int) = {
     val tNew = sortBy match {
       case "view" =>
-        (tRecord join tUserInfo on ((a, b) => a.roomid === b.roomid)).sortBy(_._1.viewNum.desc).drop((pageNum - 1) * pageSize).take(pageSize)
+        (tRecord join tUserInfo on ((a, b) => a.roomId === b.roomid)).sortBy(_._1.viewNum.desc).drop((pageNum - 1) * pageSize).take(pageSize)
       case "time" =>
-        (tRecord join tUserInfo on ((a, b) => a.roomid === b.roomid)).sortBy(_._1.startTime.desc).drop((pageNum - 1) * pageSize).take(pageSize)
+        (tRecord join tUserInfo on ((a, b) => a.roomId === b.roomid)).sortBy(_._1.startTime.desc).drop((pageNum - 1) * pageSize).take(pageSize)
       case _ =>
-        (tRecord join tUserInfo on ((a, b) => a.roomid === b.roomid)).sortBy(_._1.likeNum.desc).drop((pageNum - 1) * pageSize).take(pageSize)
+        (tRecord join tUserInfo on ((a, b) => a.roomId === b.roomid)).sortBy(_._1.likeNum.desc).drop((pageNum - 1) * pageSize).take(pageSize)
     }
     val tAll = tNew join tObserveEvent on {case ((a, b), c) => a.id === c.recordid}
     (db.run(tNew.result), db.run(tAll.result))

@@ -130,7 +130,7 @@ trait StatisticService extends ServiceUtils{
                 case (a, b) =>
                   AdminRecordInfo(
                     a.id,
-                    a.roomid,
+                    a.roomId,
                     a.recordName,
                     a.recordDes,
                     b.uid,
@@ -174,7 +174,7 @@ trait StatisticService extends ServiceUtils{
           }yield {
             if (v.nonEmpty) {
               val rsp = WatchProfileInfo(p.getOrElse(0l) / 1000, v.filter(!_.temporary).map(_.uid).toSet.size,v.count(!_.temporary),v.count(_.temporary))
-              val roomId = q.map(_.roomid).getOrElse(-1l)
+              val roomId = q.map(_.roomId).getOrElse(-1l)
               val startTime = q.map(_.startTime).getOrElse(-1l)
               val url = s"https://${AppSettings.distributorDomain}/VideoMeeting/distributor/getRecord/$roomId/$startTime/record.mp4"
               complete(WatchProfileDataByRecordIdRsp(url, Some(rsp)))

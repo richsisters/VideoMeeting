@@ -46,6 +46,10 @@ object SecureUtil {
     DigestUtils.sha1Hex(DigestUtils.md5Hex(timestamp + password) + ip + timestamp)
   }
 
+  def getPoorSecurePassword(password: String, ip: String) = {
+    DigestUtils.sha1Hex(password + ip)
+  }
+
   def checkSignature(parameters: List[String], signature: String, secureKey: String): Boolean = {
     generateSignature(parameters, secureKey) == signature
   }

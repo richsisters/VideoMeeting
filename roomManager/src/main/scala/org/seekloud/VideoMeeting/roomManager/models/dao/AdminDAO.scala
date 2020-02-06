@@ -30,8 +30,8 @@ object AdminDAO {
 
   }
 
-  def updateAllowAnchor(userId:Long,allow:Boolean) = {
-    db.run(tUserInfo.filter(_.uid === userId).map(_.allowAnchor).update(allow))
-  }
+//  def updateAllowAnchor(userId:Long,allow:Boolean) = {
+//    db.run(tUserInfo.filter(_.uid === userId).map(_.allowAnchor).update(allow))
+//  }
 
 }

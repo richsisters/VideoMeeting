@@ -58,12 +58,10 @@ object RegisterManager {
           }
 
 
-
         case RegisterFinished(email) =>
           emailMap -= email
           log.info(s"RegisterManager 不再监管 RegisterActor_$email")
           Behaviors.same
-
 
 
         //未知消息

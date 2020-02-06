@@ -18,7 +18,6 @@ trait HttpService extends ServiceUtils
   with RtpService
   with TestService
   with FileService
-  with RtmpService
   with RecordService
   with AdminService
   with RecordCommentService
@@ -65,7 +64,7 @@ trait HttpService extends ServiceUtils
       pathPrefix("VideoMeeting") {
         home ~ statistics ~
         pathPrefix("roomManager"){
-          resourceRoutes ~ userRoutes ~ rtpRoutes ~ recordRoutes ~ test ~ file ~ rtmp ~ admin ~ recordComment ~ statistic
+          resourceRoutes ~ userRoutes ~ rtpRoutes ~ recordRoutes ~ test ~ file ~ admin ~ recordComment ~ statistic
         }
       }
     }

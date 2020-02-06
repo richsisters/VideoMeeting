@@ -56,18 +56,18 @@ object CommonInfo {
                     )
 
   case class RoomInfo(
+    //房间基本设置
     roomId: Long,
     roomName: String,
     roomDes: String,
-    userId: Long,  //房主id
-    userName:String,
-    headImgUrl:String,
     coverImgUrl:String,
-    var observerNum:Int,
-    var like:Int,
+    //房主（主持人）设置
+    var userId: Long,
+    var userName:String,
+    var headImgUrl:String,
+    //用于客户端显示的房间流信息
     var mpd: Option[String] = None,
     var rtmp: Option[String] = None
-    //var liveAdd: Option[String] = None
   )
 
   case class RecordInfo(
@@ -93,11 +93,11 @@ object CommonInfo {
     liveCode: String
   )
 
-  /*连线者信息*/
+  /*参会者信息*/
   case class AudienceInfo(
     userId: Long,
     userName: String,
-    liveId: String
+    userHeadImg: String
   )
 
 }

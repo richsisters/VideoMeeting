@@ -98,76 +98,76 @@ class HomeController(
 
     }
 
-    override def editInfo(): Unit = {
-      val editInfo = editController.editDialog()
-      if (editInfo.nonEmpty) {
-        log.debug("start changeUserName...")
-        if (editInfo.get._3 != RmManager.userInfo.get.userName) {
-          RMClient.changeUserName(RmManager.userInfo.get.userId, editInfo.get._3).map {
-            case Right(rsp) =>
-              if (rsp.errCode == 0) {
-                rmManager ! RmManager.ChangeUserName(editInfo.get._3)
-                log.debug(s"changeUserName success.")
-              } else {
-                log.error(s"changeUserName error: ${rsp.msg},errCode:${rsp.errCode}")
-                Boot.addToPlatform {
-                  WarningDialog.initWarningDialog(s"${rsp.msg}")
-                }
-              }
-            case Left(error) =>
-              log.error(s"upload header server error:$error")
-              Boot.addToPlatform {
-                WarningDialog.initWarningDialog(s"服务器出错: $error")
-              }
-          }
-        }
-        if (editInfo.get._1 != null) {
-          log.debug("start uploading header...")
-          RMClient.uploadImg(editInfo.get._1, RmManager.userInfo.get.userId, CommonInfo.ImgType.headImg).map {
-            case Right(imgChangeRsp) =>
-              if (imgChangeRsp.errCode == 0) {
-                val headerUrl = imgChangeRsp.url
-                rmManager ! RmManager.ChangeHeader(headerUrl)
-                log.debug(s"upload header success,url:$headerUrl")
-              } else {
-                log.error(s"upload header error: ${imgChangeRsp.msg},errCode:${imgChangeRsp.errCode}")
-                Boot.addToPlatform {
-                  WarningDialog.initWarningDialog(s"${imgChangeRsp.msg}")
-
-                }
-              }
-            case Left(error) =>
-              log.error(s"upload header server error:$error")
-              Boot.addToPlatform {
-                WarningDialog.initWarningDialog(s"服务器出错: $error")
-              }
-          }
-        }
-        if (editInfo.get._2 != null) {
-          log.debug(s"start uploading cover...")
-          RMClient.uploadImg(editInfo.get._2, RmManager.userInfo.get.userId, CommonInfo.ImgType.coverImg).map {
-            case Right(imgChangeRsp) =>
-              if (imgChangeRsp.errCode == 0) {
-                val coverUrl = imgChangeRsp.url
-                rmManager ! RmManager.ChangeCover(coverUrl)
-                log.debug(s"upload cover success,url:$coverUrl")
-              } else {
-                log.error(s"upload cover error: ${imgChangeRsp.msg}")
-                Boot.addToPlatform {
-                  WarningDialog.initWarningDialog(s"${imgChangeRsp.msg}")
-
-                }
-              }
-            case Left(error) =>
-              log.error(s"upload cover server error:$error")
-              Boot.addToPlatform {
-                WarningDialog.initWarningDialog(s"服务器出错: $error")
-              }
-          }
-        }
-      }
-
-    }
+//    override def editInfo(): Unit = {
+//      val editInfo = editController.editDialog()
+//      if (editInfo.nonEmpty) {
+//        log.debug("start changeUserName...")
+//        if (editInfo.get._3 != RmManager.userInfo.get.userName) {
+//          RMClient.changeUserName(RmManager.userInfo.get.userId, editInfo.get._3).map {
+//            case Right(rsp) =>
+//              if (rsp.errCode == 0) {
+//                rmManager ! RmManager.ChangeUserName(editInfo.get._3)
+//                log.debug(s"changeUserName success.")
+//              } else {
+//                log.error(s"changeUserName error: ${rsp.msg},errCode:${rsp.errCode}")
+//                Boot.addToPlatform {
+//                  WarningDialog.initWarningDialog(s"${rsp.msg}")
+//                }
+//              }
+//            case Left(error) =>
+//              log.error(s"upload header server error:$error")
+//              Boot.addToPlatform {
+//                WarningDialog.initWarningDialog(s"服务器出错: $error")
+//              }
+//          }
+//        }
+//        if (editInfo.get._1 != null) {
+//          log.debug("start uploading header...")
+//          RMClient.uploadImg(editInfo.get._1, RmManager.userInfo.get.userId, CommonInfo.ImgType.headImg).map {
+//            case Right(imgChangeRsp) =>
+//              if (imgChangeRsp.errCode == 0) {
+//                val headerUrl = imgChangeRsp.url
+//                rmManager ! RmManager.ChangeHeader(headerUrl)
+//                log.debug(s"upload header success,url:$headerUrl")
+//              } else {
+//                log.error(s"upload header error: ${imgChangeRsp.msg},errCode:${imgChangeRsp.errCode}")
+//                Boot.addToPlatform {
+//                  WarningDialog.initWarningDialog(s"${imgChangeRsp.msg}")
+//
+//                }
+//              }
+//            case Left(error) =>
+//              log.error(s"upload header server error:$error")
+//              Boot.addToPlatform {
+//                WarningDialog.initWarningDialog(s"服务器出错: $error")
+//              }
+//          }
+//        }
+//        if (editInfo.get._2 != null) {
+//          log.debug(s"start uploading cover...")
+//          RMClient.uploadImg(editInfo.get._2, RmManager.userInfo.get.userId, CommonInfo.ImgType.coverImg).map {
+//            case Right(imgChangeRsp) =>
+//              if (imgChangeRsp.errCode == 0) {
+//                val coverUrl = imgChangeRsp.url
+//                rmManager ! RmManager.ChangeCover(coverUrl)
+//                log.debug(s"upload cover success,url:$coverUrl")
+//              } else {
+//                log.error(s"upload cover error: ${imgChangeRsp.msg}")
+//                Boot.addToPlatform {
+//                  WarningDialog.initWarningDialog(s"${imgChangeRsp.msg}")
+//
+//                }
+//              }
+//            case Left(error) =>
+//              log.error(s"upload cover server error:$error")
+//              Boot.addToPlatform {
+//                WarningDialog.initWarningDialog(s"服务器出错: $error")
+//              }
+//          }
+//        }
+//      }
+//
+//    }
   })
 
   def showScene(): Unit = {

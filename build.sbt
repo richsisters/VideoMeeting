@@ -197,13 +197,6 @@ lazy val roomManager = (project in file("roomManager")).enablePlugins(PackPlugin
   )
   .settings(scalaJSUseMainModuleInitializer := false)
   .dependsOn(protocolJvm)
-  
-  .settings(scalaJSUseMainModuleInitializer := false)
-  .dependsOn(protocolJvm)
-
-
-
-
 
 val processorMain = "org.seekloud.VideoMeeting.processor.Boot"
 
@@ -246,7 +239,7 @@ lazy val distributor = (project in file("distributor")).enablePlugins(PackPlugin
   .settings(
     libraryDependencies ++= Dependencies.backendDependencies,
     libraryDependencies ++= Dependencies.bytedecoLibs
-  ).dependsOn(protocolJvm)
+  ).dependsOn(protocolJvm, rtpClient)
 
 val rtpServerMain = "org.seekloud.VideoMeeting.rtpServer.Boot"
 
