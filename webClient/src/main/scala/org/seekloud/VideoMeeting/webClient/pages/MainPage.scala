@@ -32,7 +32,6 @@ object MainPage extends PageSwitcher {
   var adminShowName = if(dom.window.localStorage.getItem("adminName") == null) Var("") else Var(dom.window.localStorage.getItem("adminName"))
   var recordId = -1l
   var recordTime = -1l
-  var preLive: Option[LivePage] = None
   var preRecord: Option[RecordPage] = None
   var showPersonCenter = Var(emptyHTML)
   var showRtmpInfo = Var(emptyHTML)
@@ -44,27 +43,28 @@ object MainPage extends PageSwitcher {
       <div>主页</div>
     </div>
   private val noUserShow: Elem =
-    <div class="header-content-nologin">
-      <div class="header-adminLogin" onclick={() => adminLogin()}>管理员登录</div>
-      {showAdminLogin}
-      <label class="header-login" id="login" for="pop-login">登录</label>
-      {PopWindow.loginPop}
-      {PopWindow.emailLoginPop}
-      <label class="header-register" id="register" for="pop-register">注册</label>
-      {PopWindow.registerPop}
+    <div class="header-content">
+      <div style="display:flex">
+        <div class="obs-anchor">
+          <img src="/VideoMeeting/roomManager/static/img/logo.png"></img>
+          <div class="head-logo">视频会议系统</div>
+        </div>
+      </div>
+      <div style="display:flex">
+        <label class="header-login" id="login" for="pop-login">登录</label>
+          {PopWindow.loginPop}
+          {PopWindow.emailLoginPop}
+        <label class="header-register" id="register" for="pop-register">注册</label>
+          {PopWindow.registerPop}
+      </div>
     </div>
   private val userShow: Elem =
     <div class="header-content">
       <div style="display:flex">
-        <div class="obs-anchor" onclick={(e:Event)=>downLoad(e)}>
-          <img src="/VideoMeeting/roomManager/static/img/下载客户端.png"></img>
-          <div>下载客户端</div>
+        <div class="obs-anchor">
+          <img src="/VideoMeeting/roomManager/static/img/lpgo.png"></img>
+          <div class="head-logo">视频会议系统</div>
         </div>
-        <div class="obs-anchor" onclick={() => connectRTMP()}>
-          <img src="/VideoMeeting/roomManager/static/img/anchor.png"></img>
-          <div style="font-size:14px">我要直播</div>
-        </div>
-        {showRtmpInfo}
       </div>
       <div style="display:flex">
         <div class="header-defaultimg">
@@ -79,25 +79,15 @@ object MainPage extends PageSwitcher {
       </div>
     </div>
 
-  private val adminShow :Elem =
-    <div class="header-content" style="justify-content:flex-end">
-      <div>{adminShowName}</div>
-      <div class="header-button" onclick={() => adminLoginOut()}>登出</div>
-    </div>
 
   private val menuShow = if(dom.window.localStorage.getItem("userName") != null
     && dom.window.localStorage.getItem("isTemUser") == null){
     Var(userShow)
-  } else if(dom.window.localStorage.getItem("adminName") !=null){
-    Var(adminShow)
-  }else Var(noUserShow)
+  } else Var(noUserShow)
   private val exitShow = Var(emptyHTML)
 
-  def adminLogin() = {
-    showAdminLogin := PopWindow.adminLogin()
-  }
+
   def hashChangeHandle(): Unit ={
-    preLive.foreach(_.closeWS())
     preRecord.foreach(_.exitRecord().foreach(_ => preRecord = None))
   }
 
@@ -114,22 +104,11 @@ object MainPage extends PageSwitcher {
             clearRoomInfo()
           }
           new HomePage().render
-        case "Live" :: roomId :: Nil =>
-          clearRecordInfo()
-          exitShow := exitButton
-          //建立新的直播页，存储在MainPage的preObject里
-          val prePage = new LivePage(dom.window.localStorage.getItem("userId").toLong,roomId.toLong)
-          preLive = Some(prePage)
-          preLive.get.render
         case "Record":: roomId :: time :: Nil =>
           clearRoomInfo()
           exitShow := exitButton
           preRecord = Some(new RecordPage(roomId.toLong,time.toLong))
           preRecord.get.render
-        case "Admin" :: Nil =>
-          new AdminHomePage().render
-        case "Admin" :: "People" :: Nil =>
-          new AdminPeoplePage().render
         case x =>
           clearRoomInfo()
           goHome
@@ -173,12 +152,6 @@ object MainPage extends PageSwitcher {
         <div class="header">
           {exitShow}
           {menuShow}
-        </div>
-        <div class="header-backgroudImg">
-          <img src="/VideoMeeting/roomManager/static/img/header_1.jpeg" style="width:100px;height:100px"></img>
-          <img src="/VideoMeeting/roomManager/static/img/header_2.jpeg" style="width:100px;height:100px;margin-top:50px"></img>
-          <img src="/VideoMeeting/roomManager/static/img/header_3.jpeg" style="width:140px;height:140px;margin-top:-20px"></img>
-          <img src="/VideoMeeting/roomManager/static/img/header_5.jpeg" style="width:100px;height:100px;margin-top:40px"></img>
         </div>
         {currentPage}
       </div>
@@ -312,28 +285,6 @@ object MainPage extends PageSwitcher {
     }.foreach(_ => PopWindow.emailLoginButton := <div class="pop-button" onclick={(e: Event) => MainPage.emailLogin(e, "pop-emailLogin")}>GO</div>)
   }
 
-  def adminLogin(e: Event, popId: String):Unit = {
-    val adminName = dom.document.getElementById("adminName").asInstanceOf[Input].value
-    val password = dom.document.getElementById("password").asInstanceOf[Input].value
-    val data = AdminSignIn(adminName,password).asJson.noSpaces
-    Http.postJsonAndParse[CommonRsp](Routes.AdminRoutes.adminSignIn,data).map{
-      case Right(rsp) =>
-        if(rsp.errCode == 0){
-          //进入另一个管理员页面
-          showAdminLogin := emptyHTML
-          dom.window.localStorage.setItem("adminName",adminName)
-          adminShowName := adminName
-          menuShow := adminShow
-          goAdmin
-        }else{
-          PopWindow.commonPop(s"error happened: ${rsp.msg}")
-        }
-      case Left(error) =>
-        PopWindow.commonPop(s"error: $error")
-
-    }
-  }
-
   def loginOut(): Unit = {
     menuShow := noUserShow
     //录像退出需发送消息
@@ -348,11 +299,6 @@ object MainPage extends PageSwitcher {
     refresh()
   }
 
-  def adminLoginOut():Unit = {
-    menuShow :=noUserShow
-    dom.window.localStorage.removeItem("adminName")
-    refresh()
-  }
 
   def refresh() = {
     //登录登出时重置页面
@@ -389,33 +335,8 @@ object MainPage extends PageSwitcher {
     dom.window.location.hash = s"#/Record/$recordId/$recordTime"
   }
 
-  def goLive = {
-    dom.window.location.hash = s"#/Live/${dom.window.localStorage.getItem("roomId")}"
-  }
-
   def goHome = {
     dom.window.location.hash = s"#/Home"
   }
 
-  def goAdmin = {
-    dom.window.location.hash = s"#/Admin"
-  }
-
-  def connectRTMP(): Unit = {
-    val data = GetTokenReq(dom.window.localStorage.getItem("userId").toLong).asJson.noSpaces
-    Http.postJsonAndParse[GetTokenRsp](Routes.getToken, data).map {
-      case Right(rsp) =>
-        if(rsp.errCode==100038){
-          PopWindow.commonPop("您已经被封号，无法直播")
-        }else{
-          showRtmpInfo := PopWindow.rtmpPop(rsp.tokenOpt.get, rsp.SecureKeyOpt.get,
-            dom.window.localStorage.getItem("userId").toLong,
-            dom.window.localStorage.getItem("myRoomId").toLong,
-            dom.window.localStorage.getItem("token"))
-        }
-
-      case Left(error) =>
-        JsFunc.alert("获取token失败！")
-    }
-  }
 }

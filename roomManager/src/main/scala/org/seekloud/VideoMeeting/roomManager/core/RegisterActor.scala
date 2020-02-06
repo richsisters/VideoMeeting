@@ -72,7 +72,7 @@ object RegisterActor {
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
         case SendEmail(code, redirectUrl, email, name, password, replyTo) =>
-          val url = serverProtocol + "://" + serverHost + ":"  + serverPort + "/" + serverUrl + "/org/seekloud/VideoMeeting/roomManager/user/confirmEmail" + s"?email=$email&code=$code"
+          val url = serverProtocol + "://" + serverHost + ":"  + serverPort + "/" + serverUrl + "/VideoMeeting/roomManager/user/confirmEmail" + s"?email=$email&code=$code"
           //todo 取消注释，emailActor设定为新的
           emailActor ! EmailActor.SendConfirmEmail(url, email)
           replyTo ! SignUpRsp(0, "认证邮件已发送，请在注册邮箱中查看")
