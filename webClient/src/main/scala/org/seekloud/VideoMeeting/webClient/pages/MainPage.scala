@@ -62,7 +62,7 @@ object MainPage extends PageSwitcher {
     <div class="header-content">
       <div style="display:flex">
         <div class="obs-anchor">
-          <img src="/VideoMeeting/roomManager/static/img/lpgo.png"></img>
+          <img src="/VideoMeeting/roomManager/static/img/logo.png"></img>
           <div class="head-logo">视频会议系统</div>
         </div>
       </div>
