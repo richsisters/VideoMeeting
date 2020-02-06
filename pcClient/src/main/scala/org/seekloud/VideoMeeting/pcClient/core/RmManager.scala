@@ -16,7 +16,7 @@ import akka.util.{ByteString, ByteStringBuilder}
 import org.seekloud.byteobject.ByteObject._
 import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.VideoMeeting.pcClient.Boot
-import org.seekloud.VideoMeeting.pcClient.controller.{AudienceController, HomeController, HostController, RoomController}
+import org.seekloud.VideoMeeting.pcClient.controller.{AudienceController, HomeController, HostController, RoomController, InviteController}
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol._
 import org.seekloud.VideoMeeting.pcClient.Boot.{executor, materializer, scheduler, system, timeout}
 import org.seekloud.VideoMeeting.pcClient.common.Constants.{AudienceStatus, HostStatus}
@@ -51,7 +51,7 @@ object RmManager {
   //  case class User(username: String, loginInfo: UserInfo)
 
   var userInfo: Option[UserInfo] = Some(UserInfo(100l, "a", "", "", 1000000l, false))
-  var roomInfo: Option[RoomInfo] = Some(RoomInfo(10000l, "as", "", 100l, "a", "", "", 0, 0))
+  var roomInfo: Option[RoomInfo] = Some(RoomInfo(10000l, "as", "", "", 100l, "", ""))
   val likeMap: mutable.HashMap[(Long, Long), Boolean] = mutable.HashMap.empty //(userId,roomId) -> true
   //  var userHeader: Option[ImageView] = None
 
@@ -117,7 +117,7 @@ object RmManager {
 
   final case class StartMeeting(userId: List[Long]) extends RmCommand
 
-  final case class JoinBegin(audienceInfo: AudienceInfo) extends RmCommand //开始和某观众连线
+  final case class JoinBegin(audienceInfo: AudienceInfo, liveInfo: LiveInfo) extends RmCommand //开始和某观众连线
 
   final case object JoinStop extends RmCommand //停止和某观众连线
 
@@ -145,7 +145,7 @@ object RmManager {
 
   final case object StopJoinAndWatch extends RmCommand //停止和主播连线
 
-  final case class ExitJoin(roomId: Long) extends RmCommand //主动关闭和主播的连线
+  final case class ExitJoin(roomId: Long, userId: Long) extends RmCommand //主动关闭和主播的连线
 
   final case class StartRecord(outFilePath: String) extends  RmCommand //开始录制
 
@@ -212,7 +212,8 @@ object RmManager {
 
         case GoToLive =>
           val hostScene = new HostScene(stageCtx.getStage)
-          val hostController = new HostController(stageCtx, hostScene, ctx.self)
+          val inviteController = new InviteController(stageCtx, ctx.self)
+          val hostController = new HostController(stageCtx, hostScene, inviteController, ctx.self)
 
           def callBack(): Unit = Boot.addToPlatform(hostScene.changeToggleAction())
 
@@ -529,11 +530,11 @@ object RmManager {
           sender.foreach(_ ! JoinAccept(roomInfo.get.roomId, msg.userId, ClientType.PC, msg.accept))
           Behaviors.same
 
-        case msg: StartMeeting =>
-          log.debug(s"accept join user-${msg.userId} join.")
-          assert(roomInfo.nonEmpty)
-          sender.foreach(_ ! startMeeting( msg.userId, ClientType.PC))
-          Behaviors.same
+//        case msg: StartMeeting =>
+//          log.debug(s"accept join user-${msg.userId} join.")
+//          assert(roomInfo.nonEmpty)
+//          sender.foreach(_ ! startMeeting( msg.userId, ClientType.PC))
+//          Behaviors.same
 
         case msg: JoinBegin =>
           /*背景改变*/
@@ -544,7 +545,7 @@ object RmManager {
 
           /*拉取观众的rtp流并播放*/
           val joinInfo = JoinInfo(roomInfo.get.roomId, msg.audienceInfo.userId, hostScene.gc)
-          liveManager ! LiveManager.PullStream(msg.audienceInfo.liveId, joinInfo = Some(joinInfo), hostScene = Some(hostScene))
+          liveManager ! LiveManager.PullStream(msg.liveInfo.liveId, joinInfo = Some(joinInfo), hostScene = Some(hostScene))
 
           hostBehavior(stageCtx, homeController, hostScene, hostController, liveManager, mediaPlayer, sender, hostStatus = HostStatus.CONNECT, Some(msg.audienceInfo))
 
@@ -838,7 +839,7 @@ object RmManager {
         case msg: ExitJoin =>
           log.debug("disconnection with host.")
           if (audienceStatus == AudienceStatus.CONNECT) {
-            sender.foreach(_ ! AudienceShutJoin(msg.roomId))
+            sender.foreach(_ ! AudienceShutJoin(msg.roomId, msg.userId))
             ctx.self ! StopJoinAndWatch
           }
           Behaviors.same

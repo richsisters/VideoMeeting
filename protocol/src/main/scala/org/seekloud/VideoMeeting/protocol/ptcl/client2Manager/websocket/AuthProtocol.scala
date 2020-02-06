@@ -129,7 +129,7 @@ object AuthProtocol {
 
   def StartMeetingError(msg: String) = StartMeetingRsp(-1L, "", 400040, msg)
 
-  case class startMeeting(userId: List[Long], clientType: Int) extends WsMsgHost //开始会议，和所有同意的用户进行连线
+//  case class startMeeting(userId: List[Long], clientType: Int) extends WsMsgHost //开始会议，和所有同意的用户进行连线
 
   case class AudienceJoinRsp(
     joinInfo: Option[AudienceInfo] = None, //参会者者信息

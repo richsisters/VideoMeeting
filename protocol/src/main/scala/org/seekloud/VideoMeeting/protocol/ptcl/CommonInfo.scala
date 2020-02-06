@@ -75,13 +75,11 @@ object CommonInfo {
                          roomId:Long,
                          recordName:String,
                          recordDes:String,
+                         coverImg:String,
                          userId:Long,
                          userName:String,
                          startTime:Long,
                          headImg:String,
-                         coverImg:String,
-                         observeNum:Int, //浏览量
-                         likeNum:Int,
                          duration:String = ""
                        )
 

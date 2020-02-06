@@ -86,6 +86,29 @@
 .hostScene-leftArea-wholeBox{
     -fx-background-color: #f2f5fb;
 }
+
+.hostScene-leftArea-invite{
+    -fx-font: 16 arial;
+    -fx-background-radius: 6;
+    -fx-background-color: white;
+    -fx-border-color: #333f50;
+    -fx-border-radius: 6;
+    -fx-border-width: 2;
+    -fx-text-fill: #333f50;
+    -fx-cursor: hand;
+}
+
+.hostScene-leftArea-start{
+    -fx-font: 16 arial;
+    -fx-background-radius: 6;
+    -fx-background-color: white;
+    -fx-border-color: #333f50;
+    -fx-border-radius: 6;
+    -fx-border-width: 2;
+    -fx-text-fill: #333f50;
+    -fx-cursor: hand;
+}
+
 .hostScene-middleArea-hideBtn{
     -fx-background-color: #00000000;
     -fx-border-color: #00000000;
@@ -110,7 +133,7 @@
     -fx-background-color: #f2f5fb;
 }
 .hostScene-rightArea-wholeBox{
-    -fx-background-color: #333f50;
+    -fx-background-color: #878787;
 }
 .hostScene-rightArea-label{
     -fx-font-size: 15 ;

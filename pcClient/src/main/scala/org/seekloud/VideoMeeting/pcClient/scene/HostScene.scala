@@ -101,6 +101,8 @@ object HostScene {
 
     def ask4Loss()
 
+    def gotoInviteDialog()
+
   }
 
 }
@@ -154,8 +156,8 @@ class HostScene(stage: Stage) {
   var roomDesArea = new TextArea(s"${RmManager.roomInfo.get.roomDes}")
   roomDesArea.setPrefSize(width * 0.15, height * 0.1)
 
-  val likeIcon: ImageView = Common.getImageView("img/like.png", 25, 25)
-  val likeLabel = new Label(s"${RmManager.roomInfo.get.like}", likeIcon)
+//  val likeIcon: ImageView = Common.getImageView("img/like.png", 25, 25)
+//  val likeLabel = new Label(s"${RmManager.roomInfo.get.like}", likeIcon)
 
 
   val connectionStateText = new Text("目前状态：无连接")
@@ -165,6 +167,7 @@ class HostScene(stage: Stage) {
   startIcon.setFitHeight(15)
   startIcon.setFitWidth(15)
   val startBtn = new Button("开始会议", startIcon)
+  startBtn.getStyleClass.add("hostScene-leftArea-start")
   val startBox = new HBox()
   startBox.getChildren.add(startBtn)
   startBox.setAlignment(Pos.CENTER_LEFT)
@@ -457,7 +460,7 @@ class HostScene(stage: Stage) {
 
     def createRoomInfoLabel: HBox = {
       val box = new HBox()
-      box.getChildren.addAll(backBtn, likeLabel)
+      box.getChildren.addAll(backBtn)
       box.setSpacing(170)
       box.setAlignment(Pos.CENTER_LEFT)
       box.setPadding(new Insets(0, 0, 0, 5))
@@ -466,10 +469,10 @@ class HostScene(stage: Stage) {
     }
 
     def createRoomInfoBox: VBox = {
-      val roomId = new Text(s"房间 ID：${RmManager.roomInfo.get.roomId}")
+      val roomId = new Text(s"会议 ID：${RmManager.roomInfo.get.roomId}")
       roomId.getStyleClass.add("hostScene-leftArea-text")
 
-      val userId = new Text(s"房主 ID：${RmManager.roomInfo.get.userId}")
+      val userId = new Text(s"主持人 ID：${RmManager.roomInfo.get.userId}")
       userId.getStyleClass.add("hostScene-leftArea-text")
 
       val roomNameText = new Text("房间名:")
@@ -515,8 +518,15 @@ class HostScene(stage: Stage) {
       roomDes.getChildren.addAll(roomDesArea, roomDesBtn)
       roomDes.setSpacing(5)
 
+      val inviteIcon = new ImageView("img/邀请.png")
+      inviteIcon.setFitHeight(30)
+      inviteIcon.setFitWidth(30)
+      val inviteButton = new Button("邀请好友", inviteIcon)
+      inviteButton.getStyleClass.add("hostScene-leftArea-invite")
+      inviteButton.setOnAction(_ => listener.gotoInviteDialog())
+
       val roomInfoBox = new VBox()
-      roomInfoBox.getChildren.addAll(roomId, userId, roomNameText, roomName, roomDesText, roomDes)
+      roomInfoBox.getChildren.addAll(roomId, userId, roomNameText, roomName, roomDesText, roomDes, inviteButton)
       roomInfoBox.setPadding(new Insets(5, 30, 0, 30))
       roomInfoBox.setSpacing(15)
       roomInfoBox

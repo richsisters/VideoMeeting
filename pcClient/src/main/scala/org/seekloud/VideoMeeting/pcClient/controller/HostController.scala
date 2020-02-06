@@ -19,13 +19,14 @@ import org.slf4j.LoggerFactory
 class HostController(
   context: StageContext,
   hostScene: HostScene,
+  inviteController: InviteController,
   rmManager: ActorRef[RmManager.RmCommand]
 ) {
 
   private[this] val log = LoggerFactory.getLogger(this.getClass)
   var isConnecting = false
   var isLive = false
-  var likeNum: Int = RmManager.roomInfo.get.like
+//  var likeNum: Int = RmManager.roomInfo.get.like
 
   def showScene(): Unit = {
     Boot.addToPlatform(
@@ -135,6 +136,38 @@ class HostController(
       rmManager ! RmManager.GetPackageLoss
     }
 
+    override def gotoInviteDialog(): Unit = {
+      //弹出注册窗口
+      val signUpInfo = inviteController.inviteDialog()
+      if (signUpInfo.nonEmpty) {
+//        showLoading()
+        Boot.addToPlatform {
+          WarningDialog.initWarningDialog("邮件已发送至对方邮箱！")
+        }
+//        RMClient.signUp(signUpInfo.get._1.toString, signUpInfo.get._2.toString, signUpInfo.get._3.toString).map {
+//          case Right(signUpRsp) =>
+//            if (signUpRsp.errCode == 0) {
+//              removeLoading()
+//              Boot.addToPlatform {
+//                WarningDialog.initWarningDialog("注册成功！")
+//              }
+//            } else {
+//              log.error(s"sign up error: ${signUpRsp.msg}")
+//              removeLoading()
+//              Boot.addToPlatform {
+//                WarningDialog.initWarningDialog(s"${signUpRsp.msg}")
+//              }
+//            }
+//          case Left(error) =>
+//            log.error(s"sign up server error:$error")
+//            removeLoading()
+//            Boot.addToPlatform {
+//              WarningDialog.initWarningDialog(s"验证超时！")
+//            }
+//        }
+      }
+    }
+
   })
 
 
@@ -192,7 +225,7 @@ class HostController(
       case msg: AudienceJoinRsp =>
         if (msg.errCode == 0) {
           //显示连线观众信息
-          rmManager ! RmManager.JoinBegin(msg.joinInfo.get)
+//          rmManager ! RmManager.JoinBegin(msg.joinInfo.get)
 
           Boot.addToPlatform {
             if (!hostScene.tb3.isSelected) {
@@ -236,12 +269,12 @@ class HostController(
 //        }
 
 
-      case msg: ReFleshRoomInfo =>
-//        log.debug(s"host receive likeNum update: ${msg.roomInfo.like}")
-        likeNum = msg.roomInfo.like
-        Boot.addToPlatform {
-          hostScene.likeLabel.setText(likeNum.toString)
-        }
+//      case msg: ReFleshRoomInfo =>
+////        log.debug(s"host receive likeNum update: ${msg.roomInfo.like}")
+//        likeNum = msg.roomInfo.like
+//        Boot.addToPlatform {
+//          hostScene.likeLabel.setText(likeNum.toString)
+//        }
 
       case HostStopPushStream2Client =>
         Boot.addToPlatform {

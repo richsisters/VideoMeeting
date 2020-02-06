@@ -33,7 +33,7 @@ class AudienceController(
 ) {
 
   private[this] val log = LoggerFactory.getLogger(this.getClass)
-  var likeNum: Int = audienceScene.getRoomInfo.like
+//  var likeNum: Int = audienceScene.getRoomInfo.like
   var updateRecCmt = true
 
   def showScene(): Unit = {
@@ -104,14 +104,14 @@ class AudienceController(
   }
 
   audienceScene.setListener(new AudienceSceneListener {
-    override def sendCmt(comment: Comment): Unit = {
-      if (RmManager.userInfo.nonEmpty) {
-        log.debug(s"audience send comment：$comment")
-        rmManager ! RmManager.SendComment(comment)
-      } else {
-        WarningDialog.initWarningDialog("请先登录哦~")
-      }
-    }
+//    override def sendCmt(comment: Comment): Unit = {
+//      if (RmManager.userInfo.nonEmpty) {
+//        log.debug(s"audience send comment：$comment")
+//        rmManager ! RmManager.SendComment(comment)
+//      } else {
+//        WarningDialog.initWarningDialog("请先登录哦~")
+//      }
+//    }
 
     override def joinReq(roomId: Long): Unit = {
       if (RmManager.userInfo.nonEmpty) {
@@ -123,9 +123,9 @@ class AudienceController(
 
     }
 
-    override def quitJoin(roomId: Long): Unit = {
+    override def quitJoin(roomId: Long, userId: Long): Unit = {
       if (RmManager.userInfo.nonEmpty) {
-        rmManager ! RmManager.ExitJoin(roomId)
+        rmManager ! RmManager.ExitJoin(roomId, userId)
       } else {
         WarningDialog.initWarningDialog("请先登录哦~")
       }
@@ -182,18 +182,18 @@ class AudienceController(
       }
     }
 
-    override def like(userId: Long, roomId: Long, UpDown: Int): Unit = {
-      if (RmManager.userInfo.nonEmpty) {
-        rmManager ! RmManager.SendLikeRoom(LikeRoom(userId, roomId, UpDown))
-        if (UpDown == 1) {
-          log.debug(s"audience send a like.")
-        } else {
-          log.debug(s"audience send un unlike.")
-        }
-      } else {
-        WarningDialog.initWarningDialog("请先登录哦~")
-      }
-    }
+//    override def like(userId: Long, roomId: Long, UpDown: Int): Unit = {
+//      if (RmManager.userInfo.nonEmpty) {
+//        rmManager ! RmManager.SendLikeRoom(LikeRoom(userId, roomId, UpDown))
+//        if (UpDown == 1) {
+//          log.debug(s"audience send a like.")
+//        } else {
+//          log.debug(s"audience send un unlike.")
+//        }
+//      } else {
+//        WarningDialog.initWarningDialog("请先登录哦~")
+//      }
+//    }
 
     override def changeOption(needImage: Boolean, needSound: Boolean): Unit = {
       rmManager ! RmManager.ChangeOption4Audience(needImage, needSound)
@@ -213,16 +213,16 @@ class AudienceController(
 
     }
 
-    override def sendRecCmt(comment:String, commentTime:Long, relativeTime: Long, authorUidOpt:Option[Long]): Unit = {
-      log.debug(s"audience send recCommend: comment:$comment, commentTime: $commentTime, relativeTime: $relativeTime, authorUidOpt: $authorUidOpt")
-      addRecComment(audienceScene.getRecordInfo.roomId, audienceScene.getRecordInfo.startTime, comment, commentTime, relativeTime, RmManager.userInfo.get.userId, authorUidOpt)
+//    override def sendRecCmt(comment:String, commentTime:Long, relativeTime: Long, authorUidOpt:Option[Long]): Unit = {
+//      log.debug(s"audience send recCommend: comment:$comment, commentTime: $commentTime, relativeTime: $relativeTime, authorUidOpt: $authorUidOpt")
+//      addRecComment(audienceScene.getRecordInfo.roomId, audienceScene.getRecordInfo.startTime, comment, commentTime, relativeTime, RmManager.userInfo.get.userId, authorUidOpt)
 
-    }
+//    }
 
-    override def refreshRecCmt(): Unit = {
-//      updateRecCommentList()
-
-    }
+//    override def refreshRecCmt(): Unit = {
+////      updateRecCommentList()
+//
+//    }
 
   })
 
@@ -268,11 +268,11 @@ class AudienceController(
           }
 
 
-        case msg: UpdateAudienceInfo =>
-          //          log.info(s"update audienceList.")
-          Boot.addToPlatform {
-            audienceScene.watchingList.updateWatchingList(msg.AudienceList)
-          }
+//        case msg: UpdateAudienceInfo =>
+//          //          log.info(s"update audienceList.")
+//          Boot.addToPlatform {
+//            audienceScene.watchingList.updateWatchingList(msg.AudienceList)
+//          }
 
         case msg: JudgeLikeRsp =>
           //          log.debug(s"audience receive judgeLikeRsp: ${msg.like}")
@@ -289,12 +289,12 @@ class AudienceController(
         case msg: LikeRoomRsp =>
         //          log.debug(s"audience receive likeRoomRsp: ${msg}")
 
-        case msg: ReFleshRoomInfo =>
-          //          log.debug(s"audience receive likeNum update: ${msg.roomInfo.like}")
-          likeNum = msg.roomInfo.like
-          Boot.addToPlatform {
-            audienceScene.likeNum.setText(likeNum.toString)
-          }
+//        case msg: ReFleshRoomInfo =>
+//          //          log.debug(s"audience receive likeNum update: ${msg.roomInfo.like}")
+//          likeNum = msg.roomInfo.like
+//          Boot.addToPlatform {
+//            audienceScene.likeNum.setText(likeNum.toString)
+//          }
 
         case HostStopPushStream2Client =>
           Boot.addToPlatform({
