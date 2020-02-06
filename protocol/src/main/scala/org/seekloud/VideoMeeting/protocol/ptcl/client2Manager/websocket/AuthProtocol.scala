@@ -117,14 +117,20 @@ object AuthProtocol {
   val ChangeModeError = ChangeModeRsp(errCode = 200020, msg = "change live mode error.")
 
 
-  /*连线控制*/
+  /*会议控制*/
 
-  case class AudienceJoin(userId: Long, userName: String, clientType: Int) extends WsMsgRm2Host //申请连线者信息
+  case class AudienceJoin(userId: Long, userName: String, clientType: Int) extends WsMsgRm2Host //申请加入会议者信息
 
-  case class JoinAccept(roomId: Long, userId: Long, clientType: Int, accept: Boolean) extends WsMsgHost //审批某个用户连线请求
+  case class JoinAccept(roomId: Long, userId: Long, clientType: Int, accept: Boolean) extends WsMsgHost //主持人审批某个用户加入请求
+
+  case class StartMeeting(roomId: Long) extends WsMsgHost //主持人请求开始会议
+
+  case class StartMeetingRsp(roomId: Long, liveId: String, errCode:Int = 0, msg: String = "ok") extends WsMsgRm
+
+  def StartMeetingError(msg: String) = StartMeetingRsp(-1L, "", 400040, msg)
 
   case class AudienceJoinRsp(
-    joinInfo: Option[AudienceInfo] = None, //连线者信息
+    joinInfo: Option[AudienceInfo] = None, //参会者者信息
     errCode: Int = 0,
     msg: String = "ok"
   ) extends WsMsgRm2Host //拒绝成功不发joinInfo，仅发送默认状态信息
@@ -133,7 +139,7 @@ object AuthProtocol {
 
   val NoHostLiveInfoError = AudienceJoinRsp(errCode = 400030, msg = "no liveInfo")
 
-  case class HostShutJoin(roomId: Long) extends WsMsgHost //断开与观众连线请求//fixme 多人连线需要修改消息添加userId
+  case class HostShutJoin(roomId: Long) extends WsMsgHost //断开与观众连线请求
 
   case class AudienceDisconnect(hostLiveId: String) extends WsMsgRm2Host //观众断开连线通知（同时rm断开与观众ws）
 
@@ -196,10 +202,7 @@ object AuthProtocol {
 
   val JoinRefused = JoinRsp(errCode = 300002, msg = "host refuse your request.") //房主拒绝连线申请
 
-  case class AudienceShutJoin(roomId: Long) extends WsMsgAudience //断开与房主的连线请求
-
-  //fixme 切断与某个用户的连线，增加userId，拓展多个用户连线的情况
-  case class AudienceShutJoinPlus(userId:Long) extends WsMsgAudience //断开与房主的连线请求
+  case class AudienceShutJoin(roomId: Long, userId: Long) extends WsMsgAudience //某个用户退出会议
 
   case class HostDisconnect(hostLiveId: String) extends WsMsgRm2Audience //房主断开连线通知 (之后rm断开ws连接)
 

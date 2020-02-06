@@ -52,7 +52,7 @@ object UserInfoDao {
   def getUserDes(users: List[Long]) = {
     Future.sequence(users.map{uid =>
       db.run(tUserInfo.filter(t => t.uid === uid).result)}).map(_.flatten).map{user =>
-        user.map(r => UserDes(r.uid, r.userName,if(r.headImg == "") Common.DefaultImg.headImg else r.headImg)).toList
+        user.map(r => UserDes(r.uid, r.userName,if(r.headImg == "") Common.DefaultImg.headImg else r.headImg))
     }
   }
 

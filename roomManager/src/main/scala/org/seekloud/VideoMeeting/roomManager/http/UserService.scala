@@ -110,7 +110,7 @@ trait UserService extends ServiceUtils {
                 val token = SecureUtil.nonceStr(40)
                 UserInfoDao.updateToken(rst.uid, token, System.currentTimeMillis())
                 val userInfo = UserInfo(rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, token, tokenExistTime)
-                val roomInfo = RoomInfo(rst.roomid, s"${rst.userName}的会议室", "", rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, Common.DefaultImg.coverImg, 0, 0)
+                val roomInfo = RoomInfo(rst.roomid, s"${rst.userName}的会议室", "", Common.DefaultImg.coverImg, rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg)
                 StatisticDao.addLoginEvent(userInfo.userId, System.currentTimeMillis())
                 val session = UserSession(rst.uid.toString, rst.userName, System.currentTimeMillis().toString).toSessionMap
                 addSession(session) {
@@ -120,7 +120,7 @@ trait UserService extends ServiceUtils {
               }
               else {
                 val userInfo = UserInfo(rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, rst.token, tokenExistTime)
-                val roomInfo = RoomInfo(rst.roomid, s"${rst.userName}的会议室", "", rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, Common.DefaultImg.coverImg, 0, 0)
+                val roomInfo = RoomInfo(rst.roomid, s"${rst.userName}的会议室", "", Common.DefaultImg.coverImg, rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg)
                 StatisticDao.addLoginEvent(userInfo.userId, System.currentTimeMillis())
                 val session = UserSession(rst.uid.toString, rst.userName, System.currentTimeMillis().toString).toSessionMap
                 addSession(session) {
@@ -153,7 +153,7 @@ trait UserService extends ServiceUtils {
                 val token = SecureUtil.nonceStr(40)
                 UserInfoDao.updateToken(rst.uid, token, System.currentTimeMillis())
                 val userInfo = UserInfo(rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, token, tokenExistTime)
-                val roomInfo = RoomInfo(rst.roomid, s"${rst.userName}的会议室", "", rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, Common.DefaultImg.coverImg, 0, 0)
+                val roomInfo = RoomInfo(rst.roomid, s"${rst.userName}的会议室", "", Common.DefaultImg.coverImg, rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg)
                 StatisticDao.addLoginEvent(userInfo.userId, System.currentTimeMillis())
                 val session = UserSession(rst.uid.toString, rst.userName, System.currentTimeMillis().toString).toSessionMap
                 addSession(session) {
@@ -164,7 +164,7 @@ trait UserService extends ServiceUtils {
               else {
                 log.info(s"${rst.uid} login success")
                 val userInfo = UserInfo(rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, rst.token, tokenExistTime)
-                val roomInfo = RoomInfo(rst.roomid, s"room:${rst.roomid}", "", rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg, Common.DefaultImg.coverImg, 0, 0)
+                val roomInfo = RoomInfo(rst.roomid, s"room:${rst.roomid}", "", Common.DefaultImg.coverImg, rst.uid, rst.userName, if (rst.headImg == "") Common.DefaultImg.headImg else rst.headImg)
                 StatisticDao.addLoginEvent(userInfo.userId, System.currentTimeMillis())
                 val session = UserSession(rst.uid.toString, rst.userName, System.currentTimeMillis().toString).toSessionMap
                 addSession(session) {
@@ -286,7 +286,7 @@ trait UserService extends ServiceUtils {
               dealFutureResult {
                 UserInfoDao.searchById(req.userId).map { r =>
                   val rsp = r.get
-                  complete(RoomInfoRsp(Some(RoomInfo(rsp.roomid, s"room:${rsp.roomid}", "", rsp.uid, rsp.userName, if (rsp.headImg == "") Common.DefaultImg.headImg else rsp.headImg, Common.DefaultImg.coverImg, 0, 0))))
+                  complete(RoomInfoRsp(Some(RoomInfo(rsp.roomid, s"room:${rsp.roomid}", "", Common.DefaultImg.coverImg, rsp.uid, rsp.userName, if (rsp.headImg == "") Common.DefaultImg.headImg else rsp.headImg))))
                 }
               }
             } else {
