@@ -182,7 +182,7 @@ class HomeScene {
   }
 
   def addBottomArea(): HBox = {
-    val liveIcon = new ImageView("img/live.png")
+    val liveIcon = new ImageView("img/initiate.png")
     liveIcon.setFitHeight(100)
     liveIcon.setFitWidth(100)
     val liveBtn = new Button("", liveIcon)
@@ -199,7 +199,7 @@ class HomeScene {
     liveVBox.setSpacing(10)
     liveVBox.setAlignment(Pos.CENTER)
 
-    val watchIcon = new ImageView("img/watch.png")
+    val watchIcon = new ImageView("img/join.png")
     watchIcon.setFitHeight(100)
     watchIcon.setFitWidth(100)
     val watchBtn = new Button("", watchIcon)

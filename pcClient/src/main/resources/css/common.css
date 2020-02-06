@@ -31,8 +31,8 @@
     -fx-text-fill: #333f50;
 }
 .homeScene-bottomBtn {
-     -fx-background-color: #333f50;
-     -fx-border-color: #333f50;
+     -fx-background-color: #87CEFF;
+     -fx-border-color: #87CEFF;
     -fx-border-radius: 15;
     -fx-background-radius: 15;
     -fx-cursor: hand;
@@ -79,7 +79,7 @@
     -fx-cursor: hand;
 }
 .hostScene-leftArea-toggleButton{
-    -fx-font-size: 13;
+    -fx-font-size: 20;
     /*-fx-min-width: 70px;*/
 }
 

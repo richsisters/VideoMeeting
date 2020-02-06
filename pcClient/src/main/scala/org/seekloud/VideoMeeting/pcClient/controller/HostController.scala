@@ -229,11 +229,11 @@ class HostController(
 //          hostScene.barrage.updateBarrage(msg)
 //        }
 
-      case msg: UpdateAudienceInfo =>
-//        log.info(s"update audienceList.")
-        Boot.addToPlatform {
-          hostScene.watchingList.updateWatchingList(msg.AudienceList)
-        }
+//      case msg: UpdateAudienceInfo =>
+////        log.info(s"update audienceList.")
+//        Boot.addToPlatform {
+//          hostScene.watchingList.updateWatchingList(msg.AudienceList)
+//        }
 
 
       case msg: ReFleshRoomInfo =>

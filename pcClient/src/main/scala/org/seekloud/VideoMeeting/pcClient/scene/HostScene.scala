@@ -248,8 +248,8 @@ class HostScene(stage: Stage) {
   tb2.getStyleClass.add("hostScene-leftArea-toggleButton")
   val tb3 = new ToggleButton("连线 ", connectionIcon)
   tb3.getStyleClass.add("hostScene-leftArea-toggleButton")
-  val tb4 = new ToggleButton("观众 ", audienceIcon)
-  tb4.getStyleClass.add("hostScene-leftArea-toggleButton")
+//  val tb4 = new ToggleButton("观众 ", audienceIcon)
+//  tb4.getStyleClass.add("hostScene-leftArea-toggleButton")
 
   /**
     * emoji
@@ -293,9 +293,9 @@ class HostScene(stage: Stage) {
   }
 
   /*观看列表*/
-  val watchingList = new WatchingList(width * 0.1, width * 0.15, height * 0.8, Some(tb4))
-  val watchingState: Text = watchingList.watchingState
-  val watchingTable: TableView[WatchingList.WatchingListInfo] = watchingList.watchingTable
+//  val watchingList = new WatchingList(width * 0.1, width * 0.15, height * 0.8, Some(tb4))
+//  val watchingState: Text = watchingList.watchingState
+//  val watchingTable: TableView[WatchingList.WatchingListInfo] = watchingList.watchingTable
 
   /*屏幕下方功能条*/
   val liveBar = new LiveBar(Constants.WindowStatus.HOST, liveImage.getWidth, liveImage.getHeight * 0.1)
@@ -394,16 +394,16 @@ class HostScene(stage: Stage) {
     tb1.setToggleGroup(group)
     tb2.setToggleGroup(group)
     tb3.setToggleGroup(group)
-    tb4.setToggleGroup(group)
+//    tb4.setToggleGroup(group)
 
     val tbBox = new HBox()
-    tbBox.getChildren.addAll(tb1, tb2, tb3, tb4)
+    tbBox.getChildren.addAll(tb1, tb2, tb3)
 
     val content = new VBox()
     val left1Area = addLeftChild1Area()
     val left2Area = addLeftChild2Area()
     val left3Area = addLeftChild3Area()
-    val left4Area = addLeftChild4Area()
+//    val left4Area = addLeftChild4Area()
     content.getChildren.add(left1Area)
     content.setPrefSize(width * 0.27, height)
 
@@ -426,12 +426,12 @@ class HostScene(stage: Stage) {
       content.getChildren.add(left3Area)
     }
                     )
-    tb4.setOnAction(_ => {
-      tb4.setGraphic(audienceIcon)
-      content.getChildren.clear()
-      content.getChildren.add(left4Area)
-    }
-                    )
+//    tb4.setOnAction(_ => {
+//      tb4.setGraphic(audienceIcon)
+//      content.getChildren.clear()
+//      content.getChildren.add(left4Area)
+//    }
+//                    )
     val leftArea = new VBox()
     leftArea.getChildren.addAll(tbBox, content)
 
@@ -853,16 +853,16 @@ class HostScene(stage: Stage) {
 
   }
 
-  def addLeftChild4Area(): VBox = {
-    val vBox = new VBox()
-    vBox.getChildren.addAll(watchingState, watchingTable)
-    vBox.setSpacing(20)
-    vBox.setPrefHeight(height)
-    vBox.setPadding(new Insets(20, 10, 5, 10))
-    vBox.getStyleClass.add("hostScene-leftArea-wholeBox")
-
-    vBox
-  }
+//  def addLeftChild4Area(): VBox = {
+//    val vBox = new VBox()
+//    vBox.getChildren.addAll(watchingState, watchingTable)
+//    vBox.setSpacing(20)
+//    vBox.setPrefHeight(height)
+//    vBox.setPadding(new Insets(20, 10, 5, 10))
+//    vBox.getStyleClass.add("hostScene-leftArea-wholeBox")
+//
+//    vBox
+//  }
 
   def addRightArea(): VBox = {
 
