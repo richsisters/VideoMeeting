@@ -123,6 +123,8 @@ object AuthProtocol {
 
   case class JoinAccept(roomId: Long, userId: Long, clientType: Int, accept: Boolean) extends WsMsgHost //审批某个用户连线请求
 
+  case class startMeeting(userId: List[Long], clientType: Int) extends WsMsgHost //开始会议，和所有同意的用户进行连线
+
   case class AudienceJoinRsp(
     joinInfo: Option[AudienceInfo] = None, //连线者信息
     errCode: Int = 0,

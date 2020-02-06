@@ -83,6 +83,8 @@ object HostScene {
 
     def audienceAcceptance(userId: Long, accept: Boolean, newRequest: AudienceListInfo)
 
+    def startMeeting(userId: List[Long])
+
     def shutJoin()
 
     def gotoHomeScene()
@@ -268,10 +270,6 @@ class HostScene(stage: Stage) {
   val connectionBg = new Image("img/connectionBg.jpg")
   gc.drawImage(backImg, 0, 0, Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
 
-
-//  val barrage: Barrage = new Barrage(Constants.WindowStatus.HOST, liveImage.getWidth, liveImage.getHeight)
-//  val barrageCanvas: Canvas = barrage.barrageView
-
   val statisticsCanvas = new Canvas(Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
   val ctx: GraphicsContext = statisticsCanvas.getGraphicsContext2D
 
@@ -293,10 +291,6 @@ class HostScene(stage: Stage) {
     val sHeight = gc.getCanvas.getHeight
     gc.drawImage(waitPulling, 0, 0, sWidth, sHeight)
   }
-
-  /*留言板*/
-//  val commentBoard = new CommentBoard(liveImage.getWidth, height * 0.18)
-//  val commentArea: VBox = commentBoard.commentArea
 
   /*观看列表*/
   val watchingList = new WatchingList(width * 0.1, width * 0.15, height * 0.8, Some(tb4))
@@ -926,81 +920,6 @@ class HostScene(stage: Stage) {
 
       livePane
     }
-
-    val effectOptions: ObservableList[String] =
-      FXCollections.observableArrayList(
-        "普通弹幕",
-        "放大缩小",
-        "闪入闪出",
-        "定点放缩"
-        )
-    val effectChoiceCBx = new ComboBox(effectOptions)
-    effectChoiceCBx.setValue("普通弹幕")
-
-    effectChoiceCBx.setOnAction {
-      _ =>{
-        effectChoiceCBx.getValue match{
-          case "普通弹幕" =>
-            commentPrefix = "effectType0"
-          case "放大缩小" =>
-            commentPrefix = "effectType1"
-          case "闪入闪出" =>
-            commentPrefix = "effectType2"
-          case "定点放缩" =>
-            commentPrefix = "effectType3"
-          case _ =>
-            commentPrefix = "effectType0"
-        }
-      }
-    }
-
-//    commentFiled.setFont(Font.font(emojiFont, 15))
-//    commentFiled.setPre输入你的留言fWidth(liveImage.getWidth * 0.65)
-//    commentFiled.setPrefHeight(30)
-//    commentFiled.setPromptText("~")
-//    commentFiled.getStyleClass.add("text-area")
-//    commentFiled.setOnKeyPressed { e =>
-//      if (e.getCode == javafx.scene.input.KeyCode.ENTER) {
-//        val comment = Comment(RmManager.roomInfo.get.userId, RmManager.roomInfo.get.roomId, s"${commentFiled.getText}", extension = Some(commentPrefix))
-//        listener.sendCmt(comment)
-//        commentFiled.clear()
-//      }
-//    }
-//    val emojiBtn = new Button("\uD83D\uDE00")
-//    emojiBtn.setStyle("-fx-background-radius: 5px;")
-//    emojiBtn.setFont(Font.font(emojiFont, 15))
-//    var emojiBtnClick = true
-//    val emojiArea = emoji.getEmojiGridPane
-
-//    emojiBtn.setOnAction { _ =>
-//      if (emojiBtnClick) {
-//        group.getChildren.add(1, emojiArea)
-//      } else {
-//        group.getChildren.remove(emojiArea)
-//      }
-//      emojiBtnClick = !emojiBtnClick
-//    }
-//    Common.addButtonEffect(emojiBtn)
-
-    val sendIcon = new ImageView("img/confirm.png")
-    sendIcon.setFitHeight(20)
-    sendIcon.setFitWidth(20)
-    val sendBtn = new Button("发送", sendIcon)
-    sendBtn.getStyleClass.add("audienceScene-leftArea-sendBtn")
-    sendBtn.setOnAction { _ =>
-      if (commentFiled.getText() != null) {
-        val comment = Comment(RmManager.roomInfo.get.userId, RmManager.roomInfo.get.roomId, s"${commentFiled.getText}", extension = Some(commentPrefix))
-//        listener.sendCmt(comment)
-        commentFiled.clear()
-      }
-    }
-    Common.addButtonEffect(sendBtn)
-
-
-//    val commentBox = new HBox(commentFiled, effectChoiceCBx, sendBtn)
-//    commentBox.setAlignment(Pos.CENTER)
-//    commentBox.setSpacing(8)
-
 
     val vBox = new VBox(createUpBox, createLivePane)
     vBox.getStyleClass.add("hostScene-rightArea-wholeBox")
