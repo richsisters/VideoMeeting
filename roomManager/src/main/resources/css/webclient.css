@@ -405,7 +405,7 @@ body{
     margin-left: 10px;
 }
 .noallowC{
-    background: #ef7d41;
+    background: #4876FF;
     border-radius: 5px;
     color: white;
     padding: 5px 10px;
@@ -995,8 +995,8 @@ ul,li{
     margin-right: 5px;
 }
 .header-login{
-    width: 60px;
-    background: #ef7d41;
+    width: 75px;
+    background: #4876FF;
     height: 65px;
     color: white;
     text-align: center;
@@ -1038,12 +1038,16 @@ ul,li{
     height: 60px;
 }
 .obs-anchor img{
-    width: 20px;
-    height: 20px;
+    width: 50px;
+    height: 50px;
     margin-right: 5px;
 }
 .obs-anchor:hover{
     background: rgba(256,256,256,.6);
+}
+
+.head-logo {
+    font-size: 20px;
 }
 /*----------------------------------homePage---------------------------*/
 
@@ -1054,6 +1058,7 @@ ul,li{
     align-items: stretch;
     max-width: 1080px;
     margin: 80px auto 10px auto;
+    min-height: 200px;
 }
 .zone-title {
     display: flex;
@@ -1490,7 +1495,7 @@ ul#bp-3-element {
 }
 .header-adminLogin{
     width: 100px;
-    border:1px solid #ef7d41;
+    border:1px solid #4876FF;
     height: 65px;
     color: rgba(0,0,0,.5);
     text-align: center;

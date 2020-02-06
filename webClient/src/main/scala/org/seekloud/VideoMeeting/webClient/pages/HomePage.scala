@@ -87,72 +87,6 @@ class HomePage extends Page{
     }
     getRecordList("time",goToPage,perPageSize)
   }
-  //观看直播
-  def watchLive(room:RoomInfo) = {
-    //跳转进入audience页面
-    dom.window.localStorage.setItem("roomId",room.roomId.toString)
-    dom.window.localStorage.setItem("coverImgUrl",room.coverImgUrl)
-    dom.window.localStorage.setItem("headImgUrl",room.headImgUrl)
-    dom.window.localStorage.setItem("roomName",room.roomName)
-    if(dom.window.localStorage.getItem("userName") == null){
-      //如果没有登录，就获取临时用户信息
-      MainPage.temUserLogin(room.roomId)
-    }else{
-      //若已经登录，就直接跳转进入观众页
-      dom.window.location.hash = s"#/Live/${room.roomId}"
-    }
-  }
-
-  private val liveArea:Rx[Elem] = liveList.map{list =>
-
-    def createLiveItem(item: RoomInfo)={
-      <div class="recordItem" onclick={()=>watchLive(item)}>
-        <div class="recordVideo">
-          <img class="record-img" src={item.coverImgUrl}></img>
-          <div class="s-info">
-            <div class="record-user">{item.userName}</div>
-            <img class="img-dianzan" src="/VideoMeeting/roomManager/static/img/homePage/like.png"></img>
-            <div class="record-like">{item.like}</div>
-          </div>
-        </div>
-        <div class="recordDesc">
-          <div class="r-title">{item.roomName}</div>
-        </div>
-      </div>
-    }
-
-    <div class="record">
-      <div class="zone-title">
-        <div class="record-head-img">
-          <img class="img-record" src="/VideoMeeting/roomManager/static/img/正在直播.gif"></img>
-        </div>
-        <div class="record-head-text">直播</div>
-        <div class="record-head-number">当前共有<span>{liveNumber}</span>个直播</div>
-        <div class="record-head-refresh">
-          <img class="img-refresh" src="/VideoMeeting/roomManager/static/img/homePage/refresh.png" style="float: right;" onclick={()=>getRoomList()}></img>
-        </div>
-      </div>
-      <div class="recordItem-list">
-        {list.map(createLiveItem)}
-      </div>
-    </div>
-  }
-
-  def getRoomList():Unit = {
-    Http.getAndParse[RoomListRsp](Routes.UserRoutes.getRoomList).map{
-      case Right(rsp) =>
-        if(rsp.errCode == 0){
-          if(rsp.roomList.isDefined){
-            liveList := rsp.roomList.get
-            liveNumber := rsp.roomList.get.length
-          }
-        }else{
-          println("RoomListRsp error")
-        }
-      case Left(e) =>
-        println(s"RoomListRsp error: $e")
-    }
-  }
 
   def getRecordList(sortBy:String,pageNum:Int,pageSize:Int):Unit={
     val recordListUrl = Routes.UserRoutes.getRecordList(sortBy,pageNum,pageSize)
@@ -171,11 +105,9 @@ class HomePage extends Page{
 
   override def render: Elem = {
     //获取所有直播
-    getRoomList()
     //获取第一页的录像
     getRecordList("time",1,perPageSize)
-    <div>
-      {liveArea}
+    <div style="min-height: 800px">
       {recordArea}
       <div id="record-pageContainer">
         <ul id="bp-4-element" onclick={()=>goToNextPage()}></ul>

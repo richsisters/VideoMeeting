@@ -11,7 +11,6 @@ import org.seekloud.VideoMeeting.webClient.util.{Globals, Http}
 import io.circe.syntax._
 import io.circe.generic.auto._
 import mhtml.Var
-import org.seekloud.VideoMeeting.webClient.pages.{LivePage, MainPage}
 import org.scalajs.dom.raw._
 
 import scala.concurrent.ExecutionContext.Implicits.global
