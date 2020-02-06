@@ -158,6 +158,15 @@ class HostScene(stage: Stage) {
 
   val connectionStateText = new Text("目前状态：无连接")
   connectionStateText.getStyleClass.add("hostScene-leftArea-text")
+
+  val startIcon = new ImageView("img/会议.png")
+  startIcon.setFitHeight(15)
+  startIcon.setFitWidth(15)
+  val startBtn = new Button("开始会议", startIcon)
+  val startBox = new HBox()
+  startBox.getChildren.add(startBtn)
+  startBox.setAlignment(Pos.CENTER_LEFT)
+
   val shutConnectionBtn = new Button("中断")
   shutConnectionBtn.getStyleClass.add("hostScene-middleArea-shutConnectionBtn")
   Common.addButtonEffect(shutConnectionBtn)
@@ -818,7 +827,7 @@ class HostScene(stage: Stage) {
 
   def addLeftChild3Area(): VBox = {
     val vBox = new VBox()
-    vBox.getChildren.addAll(connectStateBox, createCntTbArea)
+    vBox.getChildren.addAll(startBox, connectStateBox, createCntTbArea)
     vBox.setSpacing(20)
     vBox.setPrefHeight(height)
     vBox.setPadding(new Insets(20, 10, 5, 10))
