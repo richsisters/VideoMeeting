@@ -587,33 +587,33 @@ class HostScene(stage: Stage) {
       toggleIcon3.setFitHeight(20)
       toggleIcon3.setFitWidth(30)
 
-      val toggleGroup = new ToggleGroup()
-      val rb1 = new RadioButton("对等窗口")
-      rb1.setSelected(true)
-      rb1.setGraphic(toggleIcon1)
-      rb1.setToggleGroup(toggleGroup)
-      rb1.setOnAction(_ =>
-                        listener.changeRoomMode(screenLayout = Option(CommonInfo.ScreenLayout.EQUAL))
-                      )
+//      val toggleGroup = new ToggleGroup()
+//      val rb1 = new RadioButton("对等窗口")
+//      rb1.setSelected(true)
+//      rb1.setGraphic(toggleIcon1)
+//      rb1.setToggleGroup(toggleGroup)
+//      rb1.setOnAction(_ =>
+//                        listener.changeRoomMode(screenLayout = Option(CommonInfo.ScreenLayout.EQUAL))
+//                      )
 
-      val rb2 = new RadioButton("主播大")
-      rb2.setGraphic(toggleIcon2)
-      rb2.setToggleGroup(toggleGroup)
-      rb2.setOnAction(_ =>
-                        listener.changeRoomMode(screenLayout = Option(CommonInfo.ScreenLayout.HOST_MAIN_RIGHT))
-                      )
+//      val rb2 = new RadioButton("主播大")
+//      rb2.setGraphic(toggleIcon2)
+//      rb2.setToggleGroup(toggleGroup)
+//      rb2.setOnAction(_ =>
+//                        listener.changeRoomMode(screenLayout = Option(CommonInfo.ScreenLayout.HOST_MAIN_RIGHT))
+//                      )
 
-      val rb3 = new RadioButton("观众大")
-      rb3.setGraphic(toggleIcon3)
-      rb3.setToggleGroup(toggleGroup)
-      rb3.setOnAction(_ =>
-                        listener.changeRoomMode(screenLayout = Option(CommonInfo.ScreenLayout.AUDIENCE_MAIN_RIGHT))
-                      )
+//      val rb3 = new RadioButton("观众大")
+//      rb3.setGraphic(toggleIcon3)
+//      rb3.setToggleGroup(toggleGroup)
+//      rb3.setOnAction(_ =>
+//                        listener.changeRoomMode(screenLayout = Option(CommonInfo.ScreenLayout.AUDIENCE_MAIN_RIGHT))
+//                      )
 
 
-      val rbBox = new VBox()
-      rbBox.setSpacing(10)
-      rbBox.getChildren.addAll(rb1, rb2, rb3)
+//      val rbBox = new VBox()
+//      rbBox.setSpacing(10)
+//      rbBox.getChildren.addAll(rb1, rb2, rb3)
 
 
       val AIOptions: ObservableList[String] =
@@ -713,10 +713,10 @@ class HostScene(stage: Stage) {
       allowConnectionCheckBox.setOnAction {
         _ =>
           if (allowConnectionCheckBox.isSelected) {
-            liveStateBox.getChildren.addAll(rbBox)
+//            liveStateBox.getChildren.addAll(rbBox)
             listener.changeRoomMode(isJoinOpen = Option(true)) //允许观众连线
           } else {
-            liveStateBox.getChildren.removeAll(rbBox)
+//            liveStateBox.getChildren.removeAll(rbBox)
             listener.changeRoomMode(isJoinOpen = Option(false))
           }
       }
@@ -724,7 +724,7 @@ class HostScene(stage: Stage) {
       allowConnect = () => {
         if (!allowConnectionCheckBox.isSelected){
           allowConnectionCheckBox.setSelected(true)
-          liveStateBox.getChildren.addAll(rbBox)
+//          liveStateBox.getChildren.addAll(rbBox)
           listener.changeRoomMode(isJoinOpen = Option(true)) //允许观众连线
         }
       }
