@@ -156,10 +156,6 @@ class HostScene(stage: Stage) {
   var roomDesArea = new TextArea(s"${RmManager.roomInfo.get.roomDes}")
   roomDesArea.setPrefSize(width * 0.15, height * 0.1)
 
-//  val likeIcon: ImageView = Common.getImageView("img/like.png", 25, 25)
-//  val likeLabel = new Label(s"${RmManager.roomInfo.get.like}", likeIcon)
-
-
   val connectionStateText = new Text("目前状态：无连接")
   connectionStateText.getStyleClass.add("hostScene-leftArea-text")
 
@@ -251,9 +247,6 @@ class HostScene(stage: Stage) {
   tb2.getStyleClass.add("hostScene-leftArea-toggleButton")
   val tb3 = new ToggleButton("连线 ", connectionIcon)
   tb3.getStyleClass.add("hostScene-leftArea-toggleButton")
-//  val tb4 = new ToggleButton("观众 ", audienceIcon)
-//  tb4.getStyleClass.add("hostScene-leftArea-toggleButton")
-
   /**
     * emoji
     *
@@ -429,12 +422,7 @@ class HostScene(stage: Stage) {
       content.getChildren.add(left3Area)
     }
                     )
-//    tb4.setOnAction(_ => {
-//      tb4.setGraphic(audienceIcon)
-//      content.getChildren.clear()
-//      content.getChildren.add(left4Area)
-//    }
-//                    )
+
     val leftArea = new VBox()
     leftArea.getChildren.addAll(tbBox, content)
 
@@ -863,16 +851,6 @@ class HostScene(stage: Stage) {
 
   }
 
-//  def addLeftChild4Area(): VBox = {
-//    val vBox = new VBox()
-//    vBox.getChildren.addAll(watchingState, watchingTable)
-//    vBox.setSpacing(20)
-//    vBox.setPrefHeight(height)
-//    vBox.setPadding(new Insets(20, 10, 5, 10))
-//    vBox.getStyleClass.add("hostScene-leftArea-wholeBox")
-//
-//    vBox
-//  }
 
   def addRightArea(): VBox = {
 

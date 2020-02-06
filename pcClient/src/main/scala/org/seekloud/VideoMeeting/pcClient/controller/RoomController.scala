@@ -65,34 +65,6 @@ class RoomController(
     }
   }
 
- /* def updateRecordList(sortBy: String = "time", pageNum: Int = 1, pageSize: Int = roomScene.recordsPerPage): Unit = {
-    RMClient.getRecordList(sortBy: String, pageNum: Int, pageSize: Int).map {
-      case Right(rst) =>
-        if (rst.errCode == 0) {
-          Boot.addToPlatform {
-            roomScene.recordList = (pageNum, rst.recordInfo) :: roomScene.recordList
-            roomScene.recordsSize = rst.recordNum
-            if (roomScene.recordList.size % roomScene.maxPagiNum == 0) {
-              removeLoading()
-//              roomScene.updateRecordList()
-            }
-          }
-        } else {
-          removeLoading()
-          Boot.addToPlatform(
-            WarningDialog.initWarningDialog(s"${rst.msg}")
-          )
-        }
-      case Left(e) =>
-        log.error(s"get record list error: $e")
-        removeLoading()
-        Boot.addToPlatform {
-          WarningDialog.initWarningDialog("获取录像列表失败")
-        }
-    }
-  }*/
-
-
   roomScene.setListener(new RoomSceneListener {
     override def enter(roomId: Long, timestamp: Long = 0L): Unit = {
       Boot.addToPlatform {

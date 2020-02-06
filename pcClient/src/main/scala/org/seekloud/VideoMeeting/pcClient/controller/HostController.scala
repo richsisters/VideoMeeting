@@ -254,21 +254,6 @@ class HostController(
 //          isConnecting = false
 //        }
 
-//      case msg: RcvComment =>
-        //判断userId是否为-1，是的话当广播处理
-//        log.info(s"receive comment msg: ${msg.userName}-${msg.comment}")
-//        Boot.addToPlatform {
-//          hostScene.commentBoard.updateComment(msg)
-//          hostScene.barrage.updateBarrage(msg)
-//        }
-
-//      case msg: UpdateAudienceInfo =>
-////        log.info(s"update audienceList.")
-//        Boot.addToPlatform {
-//          hostScene.watchingList.updateWatchingList(msg.AudienceList)
-//        }
-
-
 //      case msg: ReFleshRoomInfo =>
 ////        log.debug(s"host receive likeNum update: ${msg.roomInfo.like}")
 //        likeNum = msg.roomInfo.like
