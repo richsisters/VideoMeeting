@@ -29,12 +29,12 @@ object RecordDao {
         val r = resOpt.get
         val res = UserInfoDao.searchByRoomId(r.roomId).map{w =>
           if(w.nonEmpty){
-            Some(RecordInfo(r.id,r.roomId,r.recordName,r.recordDes,w.get.uid,w.get.userName,r.startTime,
-              UserInfoDao.getHeadImg(w.get.headImg),UserInfoDao.getCoverImg(r.coverImg),r.viewNum,r.likeNum,r.duration))
+            Some(RecordInfo(r.id,r.roomId,r.recordName,r.recordDes,UserInfoDao.getCoverImg(r.coverImg),
+              w.get.uid,w.get.userName,r.startTime, UserInfoDao.getHeadImg(w.get.headImg),r.duration))
           }else{
             log.debug("获取主播信息失败，主播不存在")
-            Some(RecordInfo(r.id,r.roomId,r.recordName,r.recordDes,-1l,"",r.startTime,
-              UserInfoDao.getHeadImg(""),UserInfoDao.getCoverImg(r.coverImg),r.viewNum,r.likeNum,r.duration))
+            Some(RecordInfo(r.id,r.roomId,r.recordName,r.recordDes,UserInfoDao.getCoverImg(r.coverImg), -1l,"",r.startTime,
+              UserInfoDao.getHeadImg(""),r.duration))
           }
         }
         res
@@ -74,12 +74,12 @@ object RecordDao {
       val res = ls.map{r =>
         UserInfoDao.searchByRoomId(r.roomId).map{w =>
           if(w.nonEmpty){
-            RecordInfo(r.id,r.roomId,r.recordName,r.recordDes,w.get.uid,w.get.userName,r.startTime,
-              UserInfoDao.getHeadImg(w.get.headImg),UserInfoDao.getCoverImg(r.coverImg),r.viewNum,r.likeNum,r.duration)
+            RecordInfo(r.id,r.roomId,r.recordName,r.recordDes,UserInfoDao.getCoverImg(r.coverImg),w.get.uid,w.get.userName,r.startTime,
+              UserInfoDao.getHeadImg(w.get.headImg),r.duration)
           }else{
             log.debug("获取主播信息失败，主播不存在")
-            RecordInfo(r.id,r.roomId,r.recordName,r.recordDes,-1l,"",r.startTime,
-              UserInfoDao.getHeadImg(""),UserInfoDao.getCoverImg(r.coverImg),r.viewNum,r.likeNum,r.duration)
+            RecordInfo(r.id,r.roomId,r.recordName,r.recordDes,UserInfoDao.getCoverImg(r.coverImg),-1l,"",r.startTime,
+              UserInfoDao.getHeadImg(""),r.duration)
           }
         }
       }.toList
@@ -103,8 +103,8 @@ object RecordDao {
         val records = db.run(tRecord.filter(_.roomId === roomId).sortBy(_.startTime.reverse).result)
         records.map{ls =>
           val res = ls.map{r =>
-            RecordInfo(r.id,r.roomId,r.recordName,r.recordDes,author.uid,author.userName,r.startTime,
-              UserInfoDao.getHeadImg(author.headImg),UserInfoDao.getCoverImg(r.coverImg),r.viewNum,r.likeNum,r.duration)
+            RecordInfo(r.id,r.roomId,r.recordName,r.recordDes,UserInfoDao.getCoverImg(r.coverImg),author.uid,author.userName,r.startTime,
+              UserInfoDao.getHeadImg(author.headImg),r.duration)
           }.toList
           res
         }
