@@ -74,7 +74,7 @@ object RoomScene {
 
     def gotoHomeScene()
 
-    def find(meeting: String)
+    def find(meeting: String, timestamp: Long = 0L)
   }
 
 }

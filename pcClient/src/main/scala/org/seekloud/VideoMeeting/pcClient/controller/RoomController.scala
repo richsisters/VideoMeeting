@@ -100,13 +100,20 @@ class RoomController(
       rmManager ! RmManager.BackToHome
     }
 
-    override def find(meeting: String) = {
-//      println("wwwwwww" + meeting)
+    override def find(meeting: String, timestamp: Long = 0L) = {
+      //      println("wwwwwww" + meeting)
       Boot.addToPlatform{
         if(meeting == ""){
           WarningDialog.initWarningDialog("会议号不能为空")
-        }else{
-          rmManager ! GetRoomDetail(roomScene.roomList.find(_.roomId == meeting.toLong).get.roomId)//进入会议室
+        }
+        else{
+          showLoading()
+          if (roomScene.liveMode && roomScene.roomList.exists(_.roomId.toString == meeting)) {
+            rmManager ! GetRoomDetail(roomScene.roomList.find(_.roomId.toString == meeting).get.roomId)
+          } else {
+            WarningDialog.initWarningDialog("会议号不存在")
+//            removeLoading()
+          }
         }
       }
     }
