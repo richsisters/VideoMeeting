@@ -182,13 +182,13 @@ class HostScene(stage: Stage) {
 
   /*录像相关*/
   val recordRadioBtn1 = new RadioButton("录制自己")
-  val recordRadioBtn2 = new RadioButton("录制别人")
+//  val recordRadioBtn2 = new RadioButton("录制别人")
 
   val recordToggle = new ToggleGroup()
   recordRadioBtn1.setToggleGroup(recordToggle)
-  recordRadioBtn2.setToggleGroup(recordToggle)
+//  recordRadioBtn2.setToggleGroup(recordToggle)
 
-  val recordRadioBox = new HBox(10, recordRadioBtn1, recordRadioBtn2)
+  val recordRadioBox = new HBox(10, recordRadioBtn1)
   private var recordType = "录制自己"
 
   recordToggle.selectedToggleProperty().addListener(new ChangeListener[Toggle]() {
@@ -201,8 +201,7 @@ class HostScene(stage: Stage) {
 
   val recordOptions: ObservableList[String] =
     FXCollections.observableArrayList(
-      "录制自己",
-      "录制别人"
+      "录制自己"
       )
   val recordChoiceCBx = new ComboBox(recordOptions)
   recordChoiceCBx.setValue("无模式")
@@ -245,7 +244,7 @@ class HostScene(stage: Stage) {
   tb1.getStyleClass.add("hostScene-leftArea-toggleButton")
   val tb2 = new ToggleButton("设置 ", setIcon)
   tb2.getStyleClass.add("hostScene-leftArea-toggleButton")
-  val tb3 = new ToggleButton("连线 ", connectionIcon)
+  val tb3 = new ToggleButton("开会 ", connectionIcon)
   tb3.getStyleClass.add("hostScene-leftArea-toggleButton")
   /**
     * emoji
@@ -540,7 +539,7 @@ class HostScene(stage: Stage) {
 
     def createLabel: HBox = {
 
-      val liveStateLabel = new Label("直播设置")
+      val liveStateLabel = new Label("会议设置")
       liveStateLabel.getStyleClass.add("hostScene-leftArea-label")
 
       val liveStateIcon = new ImageView("img/liveState1.png")
@@ -966,7 +965,7 @@ class HostScene(stage: Stage) {
         if (liveBar.recordToggleButton.isSelected) {
           val fix = recordType match {
             case "录制自己" => "self"
-            case "录制别人" => "others"
+//            case "录制别人" => "others"
           }
           listener.recordOption(recordOrNot = true, recordType, Some(pathField.getText + s"\\VideoMeeting-$fix-${TimeUtil.timeStamp2DetailDate(System.currentTimeMillis()).replaceAll("-", "").replaceAll(":", "").replaceAll(" ", "")}.ts"))
           liveBar.resetStartRecTime(System.currentTimeMillis())
