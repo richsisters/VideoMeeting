@@ -48,7 +48,6 @@ class HomePage extends Page{
           <div class="s-info">
             <div class="record-user">{item.userName}</div>
             <img class="img-dianzan" src="/VideoMeeting/roomManager/static/img/homePage/like.png"></img>
-            <div class="record-like">{item.likeNum}</div>
           </div>
         </div>
         <div class="recordDesc">

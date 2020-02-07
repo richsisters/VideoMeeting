@@ -47,7 +47,7 @@ class AudienceController(
           }
         }
       }
-      context.switchScene(audienceScene.getScene, title = s"${audienceScene.getRoomInfo.userId}的直播间-${audienceScene.getRoomInfo.roomId}")
+      context.switchScene(audienceScene.getScene, title = s"${audienceScene.getRoomInfo.roomId}")
     }
 
   }

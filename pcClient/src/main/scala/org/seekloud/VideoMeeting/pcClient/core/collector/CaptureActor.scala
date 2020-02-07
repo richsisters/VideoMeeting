@@ -8,6 +8,7 @@ import akka.actor.typed.scaladsl.{Behaviors, TimerScheduler}
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.image.Image
 import org.seekloud.VideoMeeting.capture.core.CaptureManager
+import org.seekloud.VideoMeeting.capture.core.CaptureManager.StartedDesktopFailed
 import org.seekloud.VideoMeeting.capture.protocol.Messages
 import org.seekloud.VideoMeeting.capture.protocol.Messages._
 import org.seekloud.VideoMeeting.capture.sdk.{DeviceUtil, MediaCapture}
@@ -100,6 +101,10 @@ object CaptureActor {
 
         case msg: CannotAccessImage =>
           log.info(s"Image unavailable.")
+          Behaviors.same
+
+        case msg:CannotAccessDesktop =>
+          log.info(s"deskTop unavailable.")
           Behaviors.same
 
         case CaptureStartFailed =>

@@ -105,6 +105,7 @@ object LiveManager {
     Behaviors.receive[LiveCommand] { (ctx, msg) =>
       msg match {
         case msg: DevicesOn =>
+          log.debug("########turn on the device")
           val captureActor = getCaptureActor(ctx, msg.gc, msg.isJoin, msg.callBackFunc)
           val mediaCapture = MediaCapture(captureActor, debug = AppSettings.captureDebug, needTimestamp = AppSettings.needTimestamp)
           captureActor ! CaptureActor.GetMediaCapture(mediaCapture)

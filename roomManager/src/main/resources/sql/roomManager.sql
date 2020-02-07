@@ -19,6 +19,8 @@ create table user_info (
 );
 create unique index USER_INFO_USER_NAME_uindex
 on USER_INFO (USER_NAME);
+alter table USER_INFO alter column UID BIGINT default NEXT VALUE FOR "PUBLIC"."USER_INFO_UID_SEQ" auto_increment;
+alter table USER_INFO alter column ROOMID BIGINT default NEXT VALUE FOR "PUBLIC"."USER_INFO_RID_SEQ" auto_increment;
 
 -- 录像表
 create table record(
@@ -53,6 +55,7 @@ create table login_event (
    uid bigint not null,
    login_time bigint default 0 not null
 );
+alter table LOGIN_EVENT alter column ID BIGINT default NEXT VALUE FOR "PUBLIC"."LOGIN_EVENT_ID_SEQ" auto_increment;
 
 --观看事件表
 create sequence observe_event_id_seq START WITH 40001;
@@ -65,3 +68,4 @@ create table observe_event (
    in_time bigint default 0 not null,
    out_time bigint default 0 not null
 );
+alter table OBSERVE_EVENT alter column ID BIGINT default NEXT VALUE FOR "PUBLIC"."OBSERVE_EVENT_ID_SEQ" auto_increment;

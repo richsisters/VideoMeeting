@@ -279,6 +279,7 @@ object UserActor {
                         clientActor !Wrap(AuthProtocol.AccountSealed.asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
                         ctx.self ! SwitchBehavior("audience",audience(userId,temporary,clientActor,roomId))
                       }else{
+                        log.debug(s"########${ctx.self.path} 接收到ws消息")
                         req match{
                           case StartLiveReq(`userId`,token,clientType) =>
                             roomManager ! ActorProtocol.StartRoom4Anchor(userId,roomId,ctx.self)

@@ -1,4 +1,5 @@
 package org.seekloud.VideoMeeting.roomManager.models
+
 // AUTO-GENERATED Slick data model
 /** Stand-alone Slick data model for immediate use */
 object SlickTables extends {
@@ -19,14 +20,14 @@ trait SlickTables {
   def ddl = schema
 
   /** Entity class storing rows of table tLoginEvent
-    *  @param id Database column ID SqlType(BIGINT), PrimaryKey
-    *  @param uid Database column UID SqlType(BIGINT)
-    *  @param loginTime Database column LOGIN_TIME SqlType(BIGINT), Default(0) */
+   *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param uid Database column UID SqlType(BIGINT)
+   *  @param loginTime Database column LOGIN_TIME SqlType(BIGINT), Default(0) */
   case class rLoginEvent(id: Long, uid: Long, loginTime: Long = 0L)
   /** GetResult implicit for fetching rLoginEvent objects using plain SQL queries */
   implicit def GetResultrLoginEvent(implicit e0: GR[Long]): GR[rLoginEvent] = GR{
     prs => import prs._
-      rLoginEvent.tupled((<<[Long], <<[Long], <<[Long]))
+    rLoginEvent.tupled((<<[Long], <<[Long], <<[Long]))
   }
   /** Table description of table LOGIN_EVENT. Objects of this class serve as prototypes for rows in queries. */
   class tLoginEvent(_tableTag: Tag) extends profile.api.Table[rLoginEvent](_tableTag, "LOGIN_EVENT") {
@@ -34,8 +35,8 @@ trait SlickTables {
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = ((Rep.Some(id), Rep.Some(uid), Rep.Some(loginTime))).shaped.<>({r=>import r._; _1.map(_=> rLoginEvent.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
-    /** Database column ID SqlType(BIGINT), PrimaryKey */
-    val id: Rep[Long] = column[Long]("ID", O.PrimaryKey)
+    /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
+    val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
     /** Database column UID SqlType(BIGINT) */
     val uid: Rep[Long] = column[Long]("UID")
     /** Database column LOGIN_TIME SqlType(BIGINT), Default(0) */
@@ -45,18 +46,18 @@ trait SlickTables {
   lazy val tLoginEvent = new TableQuery(tag => new tLoginEvent(tag))
 
   /** Entity class storing rows of table tObserveEvent
-    *  @param id Database column ID SqlType(BIGINT), PrimaryKey
-    *  @param uid Database column UID SqlType(BIGINT)
-    *  @param recordid Database column RECORDID SqlType(BIGINT)
-    *  @param inAnchor Database column IN_ANCHOR SqlType(BOOLEAN), Default(false)
-    *  @param temporary Database column TEMPORARY SqlType(BOOLEAN), Default(false)
-    *  @param inTime Database column IN_TIME SqlType(BIGINT), Default(0)
-    *  @param outTime Database column OUT_TIME SqlType(BIGINT), Default(0) */
+   *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param uid Database column UID SqlType(BIGINT)
+   *  @param recordid Database column RECORDID SqlType(BIGINT)
+   *  @param inAnchor Database column IN_ANCHOR SqlType(BOOLEAN), Default(false)
+   *  @param temporary Database column TEMPORARY SqlType(BOOLEAN), Default(false)
+   *  @param inTime Database column IN_TIME SqlType(BIGINT), Default(0)
+   *  @param outTime Database column OUT_TIME SqlType(BIGINT), Default(0) */
   case class rObserveEvent(id: Long, uid: Long, recordid: Long, inAnchor: Boolean = false, temporary: Boolean = false, inTime: Long = 0L, outTime: Long = 0L)
   /** GetResult implicit for fetching rObserveEvent objects using plain SQL queries */
   implicit def GetResultrObserveEvent(implicit e0: GR[Long], e1: GR[Boolean]): GR[rObserveEvent] = GR{
     prs => import prs._
-      rObserveEvent.tupled((<<[Long], <<[Long], <<[Long], <<[Boolean], <<[Boolean], <<[Long], <<[Long]))
+    rObserveEvent.tupled((<<[Long], <<[Long], <<[Long], <<[Boolean], <<[Boolean], <<[Long], <<[Long]))
   }
   /** Table description of table OBSERVE_EVENT. Objects of this class serve as prototypes for rows in queries. */
   class tObserveEvent(_tableTag: Tag) extends profile.api.Table[rObserveEvent](_tableTag, "OBSERVE_EVENT") {
@@ -64,8 +65,8 @@ trait SlickTables {
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = ((Rep.Some(id), Rep.Some(uid), Rep.Some(recordid), Rep.Some(inAnchor), Rep.Some(temporary), Rep.Some(inTime), Rep.Some(outTime))).shaped.<>({r=>import r._; _1.map(_=> rObserveEvent.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
-    /** Database column ID SqlType(BIGINT), PrimaryKey */
-    val id: Rep[Long] = column[Long]("ID", O.PrimaryKey)
+    /** Database column ID SqlType(BIGINT), AutoInc, PrimaryKey */
+    val id: Rep[Long] = column[Long]("ID", O.AutoInc, O.PrimaryKey)
     /** Database column UID SqlType(BIGINT) */
     val uid: Rep[Long] = column[Long]("UID")
     /** Database column RECORDID SqlType(BIGINT) */
@@ -83,21 +84,21 @@ trait SlickTables {
   lazy val tObserveEvent = new TableQuery(tag => new tObserveEvent(tag))
 
   /** Entity class storing rows of table tRecord
-    *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
-    *  @param roomId Database column ROOM_ID SqlType(BIGINT), Default(0)
-    *  @param startTime Database column START_TIME SqlType(BIGINT), Default(0)
-    *  @param coverImg Database column COVER_IMG SqlType(VARCHAR), Length(256,true), Default()
-    *  @param recordName Database column RECORD_NAME SqlType(VARCHAR), Default()
-    *  @param recordDes Database column RECORD_DES SqlType(VARCHAR), Default()
-    *  @param viewNum Database column VIEW_NUM SqlType(INTEGER), Default(0)
-    *  @param likeNum Database column LIKE_NUM SqlType(INTEGER), Default(0)
-    *  @param duration Database column DURATION SqlType(VARCHAR), Length(100,true), Default()
-    *  @param recordAddr Database column RECORD_ADDR SqlType(VARCHAR), Length(100,true), Default() */
+   *  @param id Database column ID SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param roomId Database column ROOM_ID SqlType(BIGINT), Default(0)
+   *  @param startTime Database column START_TIME SqlType(BIGINT), Default(0)
+   *  @param coverImg Database column COVER_IMG SqlType(VARCHAR), Length(256,true), Default()
+   *  @param recordName Database column RECORD_NAME SqlType(VARCHAR), Default()
+   *  @param recordDes Database column RECORD_DES SqlType(VARCHAR), Default()
+   *  @param viewNum Database column VIEW_NUM SqlType(INTEGER), Default(0)
+   *  @param likeNum Database column LIKE_NUM SqlType(INTEGER), Default(0)
+   *  @param duration Database column DURATION SqlType(VARCHAR), Length(100,true), Default()
+   *  @param recordAddr Database column RECORD_ADDR SqlType(VARCHAR), Length(100,true), Default() */
   case class rRecord(id: Long, roomId: Long = 0L, startTime: Long = 0L, coverImg: String = "", recordName: String = "", recordDes: String = "", viewNum: Int = 0, likeNum: Int = 0, duration: String = "", recordAddr: String = "")
   /** GetResult implicit for fetching rRecord objects using plain SQL queries */
   implicit def GetResultrRecord(implicit e0: GR[Long], e1: GR[String], e2: GR[Int]): GR[rRecord] = GR{
     prs => import prs._
-      rRecord.tupled((<<[Long], <<[Long], <<[Long], <<[String], <<[String], <<[String], <<[Int], <<[Int], <<[String], <<[String]))
+    rRecord.tupled((<<[Long], <<[Long], <<[Long], <<[String], <<[String], <<[String], <<[Int], <<[Int], <<[String], <<[String]))
   }
   /** Table description of table RECORD. Objects of this class serve as prototypes for rows in queries. */
   class tRecord(_tableTag: Tag) extends profile.api.Table[rRecord](_tableTag, "RECORD") {
@@ -130,19 +131,19 @@ trait SlickTables {
   lazy val tRecord = new TableQuery(tag => new tRecord(tag))
 
   /** Entity class storing rows of table tRecordComment
-    *  @param commentId Database column COMMENT_ID SqlType(BIGINT), AutoInc, PrimaryKey
-    *  @param roomId Database column ROOM_ID SqlType(BIGINT)
-    *  @param recordTime Database column RECORD_TIME SqlType(BIGINT)
-    *  @param comment Database column COMMENT SqlType(VARCHAR), Default()
-    *  @param commentTime Database column COMMENT_TIME SqlType(BIGINT)
-    *  @param commentUid Database column COMMENT_UID SqlType(BIGINT)
-    *  @param authorUid Database column AUTHOR_UID SqlType(BIGINT)
-    *  @param relativeTime Database column RELATIVE_TIME SqlType(BIGINT), Default(0) */
+   *  @param commentId Database column COMMENT_ID SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param roomId Database column ROOM_ID SqlType(BIGINT)
+   *  @param recordTime Database column RECORD_TIME SqlType(BIGINT)
+   *  @param comment Database column COMMENT SqlType(VARCHAR), Default()
+   *  @param commentTime Database column COMMENT_TIME SqlType(BIGINT)
+   *  @param commentUid Database column COMMENT_UID SqlType(BIGINT)
+   *  @param authorUid Database column AUTHOR_UID SqlType(BIGINT)
+   *  @param relativeTime Database column RELATIVE_TIME SqlType(BIGINT), Default(0) */
   case class rRecordComment(commentId: Long, roomId: Long, recordTime: Long, comment: String = "", commentTime: Long, commentUid: Long, authorUid: Option[Long], relativeTime: Long = 0L)
   /** GetResult implicit for fetching rRecordComment objects using plain SQL queries */
   implicit def GetResultrRecordComment(implicit e0: GR[Long], e1: GR[String], e2: GR[Option[Long]]): GR[rRecordComment] = GR{
     prs => import prs._
-      rRecordComment.tupled((<<[Long], <<[Long], <<[Long], <<[String], <<[Long], <<[Long], <<?[Long], <<[Long]))
+    rRecordComment.tupled((<<[Long], <<[Long], <<[Long], <<[String], <<[Long], <<[Long], <<?[Long], <<[Long]))
   }
   /** Table description of table RECORD_COMMENT. Objects of this class serve as prototypes for rows in queries. */
   class tRecordComment(_tableTag: Tag) extends profile.api.Table[rRecordComment](_tableTag, "RECORD_COMMENT") {
@@ -171,38 +172,38 @@ trait SlickTables {
   lazy val tRecordComment = new TableQuery(tag => new tRecordComment(tag))
 
   /** Entity class storing rows of table tUserInfo
-    *  @param uid Database column UID SqlType(BIGINT), PrimaryKey
-    *  @param userName Database column USER_NAME SqlType(VARCHAR), Length(100,true)
-    *  @param password Database column PASSWORD SqlType(VARCHAR), Length(100,true)
-    *  @param roomid Database column ROOMID SqlType(BIGINT)
-    *  @param token Database column TOKEN SqlType(VARCHAR), Length(63,true), Default()
-    *  @param tokenCreateTime Database column TOKEN_CREATE_TIME SqlType(BIGINT)
-    *  @param headImg Database column HEAD_IMG SqlType(VARCHAR), Length(256,true), Default()
-    *  @param email Database column EMAIL SqlType(VARCHAR), Length(256,true), Default()
-    *  @param role Database column ROLE SqlType(BOOLEAN), Default(false)
-    *  @param `sealed` Database column SEALED SqlType(BOOLEAN), Default(false)
-    *  @param sealedUtilTime Database column SEALED_UTIL_TIME SqlType(BIGINT), Default(0) */
+   *  @param uid Database column UID SqlType(BIGINT), AutoInc, PrimaryKey
+   *  @param userName Database column USER_NAME SqlType(VARCHAR), Length(100,true)
+   *  @param password Database column PASSWORD SqlType(VARCHAR), Length(100,true)
+   *  @param roomid Database column ROOMID SqlType(BIGINT), AutoInc
+   *  @param token Database column TOKEN SqlType(VARCHAR), Length(63,true), Default()
+   *  @param tokenCreateTime Database column TOKEN_CREATE_TIME SqlType(BIGINT)
+   *  @param headImg Database column HEAD_IMG SqlType(VARCHAR), Length(256,true), Default()
+   *  @param email Database column EMAIL SqlType(VARCHAR), Length(256,true), Default()
+   *  @param role Database column ROLE SqlType(BOOLEAN), Default(false)
+   *  @param `sealed` Database column SEALED SqlType(BOOLEAN), Default(false)
+   *  @param sealedUtilTime Database column SEALED_UTIL_TIME SqlType(BIGINT), Default(0) */
   case class rUserInfo(uid: Long, userName: String, password: String, roomid: Long, token: String = "", tokenCreateTime: Long, headImg: String = "", email: String = "", role: Boolean = false, `sealed`: Boolean = false, sealedUtilTime: Long = 0L)
   /** GetResult implicit for fetching rUserInfo objects using plain SQL queries */
   implicit def GetResultrUserInfo(implicit e0: GR[Long], e1: GR[String], e2: GR[Boolean]): GR[rUserInfo] = GR{
     prs => import prs._
-      rUserInfo.tupled((<<[Long], <<[String], <<[String], <<[Long], <<[String], <<[Long], <<[String], <<[String], <<[Boolean], <<[Boolean], <<[Long]))
+    rUserInfo.tupled((<<[Long], <<[String], <<[String], <<[Long], <<[String], <<[Long], <<[String], <<[String], <<[Boolean], <<[Boolean], <<[Long]))
   }
   /** Table description of table USER_INFO. Objects of this class serve as prototypes for rows in queries.
-    *  NOTE: The following names collided with Scala keywords and were escaped: sealed */
+   *  NOTE: The following names collided with Scala keywords and were escaped: sealed */
   class tUserInfo(_tableTag: Tag) extends profile.api.Table[rUserInfo](_tableTag, "USER_INFO") {
     def * = (uid, userName, password, roomid, token, tokenCreateTime, headImg, email, role, `sealed`, sealedUtilTime) <> (rUserInfo.tupled, rUserInfo.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
     def ? = ((Rep.Some(uid), Rep.Some(userName), Rep.Some(password), Rep.Some(roomid), Rep.Some(token), Rep.Some(tokenCreateTime), Rep.Some(headImg), Rep.Some(email), Rep.Some(role), Rep.Some(`sealed`), Rep.Some(sealedUtilTime))).shaped.<>({r=>import r._; _1.map(_=> rUserInfo.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get, _9.get, _10.get, _11.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
-    /** Database column UID SqlType(BIGINT), PrimaryKey */
-    val uid: Rep[Long] = column[Long]("UID", O.PrimaryKey)
+    /** Database column UID SqlType(BIGINT), AutoInc, PrimaryKey */
+    val uid: Rep[Long] = column[Long]("UID", O.AutoInc, O.PrimaryKey)
     /** Database column USER_NAME SqlType(VARCHAR), Length(100,true) */
     val userName: Rep[String] = column[String]("USER_NAME", O.Length(100,varying=true))
     /** Database column PASSWORD SqlType(VARCHAR), Length(100,true) */
     val password: Rep[String] = column[String]("PASSWORD", O.Length(100,varying=true))
-    /** Database column ROOMID SqlType(BIGINT) */
-    val roomid: Rep[Long] = column[Long]("ROOMID")
+    /** Database column ROOMID SqlType(BIGINT), AutoInc */
+    val roomid: Rep[Long] = column[Long]("ROOMID", O.AutoInc)
     /** Database column TOKEN SqlType(VARCHAR), Length(63,true), Default() */
     val token: Rep[String] = column[String]("TOKEN", O.Length(63,varying=true), O.Default(""))
     /** Database column TOKEN_CREATE_TIME SqlType(BIGINT) */
@@ -214,10 +215,13 @@ trait SlickTables {
     /** Database column ROLE SqlType(BOOLEAN), Default(false) */
     val role: Rep[Boolean] = column[Boolean]("ROLE", O.Default(false))
     /** Database column SEALED SqlType(BOOLEAN), Default(false)
-      *  NOTE: The name was escaped because it collided with a Scala keyword. */
+     *  NOTE: The name was escaped because it collided with a Scala keyword. */
     val `sealed`: Rep[Boolean] = column[Boolean]("SEALED", O.Default(false))
     /** Database column SEALED_UTIL_TIME SqlType(BIGINT), Default(0) */
     val sealedUtilTime: Rep[Long] = column[Long]("SEALED_UTIL_TIME", O.Default(0L))
+
+    /** Uniqueness Index over (userName) (database name USER_INFO_USER_NAME_UINDEX) */
+    val index1 = index("USER_INFO_USER_NAME_UINDEX", userName, unique=true)
   }
   /** Collection-like TableQuery object for table tUserInfo */
   lazy val tUserInfo = new TableQuery(tag => new tUserInfo(tag))
