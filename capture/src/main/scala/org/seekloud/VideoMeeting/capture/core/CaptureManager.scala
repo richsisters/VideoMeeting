@@ -146,9 +146,11 @@ object CaptureManager {
         val dataLineInfo = new DataLine.Info(classOf[TargetDataLine], audioFormat)
 
         Future {
+          debug(s"audioSystem is starting...")
           val line = AudioSystem.getLine(dataLineInfo).asInstanceOf[TargetDataLine]
           line.open(audioFormat)
           line.start()
+          debug(s"audioSystem started")
           line
         }.onComplete {
           case Success(line) => ctx.self ! TargetDataLineStarted(line)
@@ -185,7 +187,7 @@ object CaptureManager {
 
         case CameraGrabberStarted(g) =>
           log.info(s"Start camera success.")
-          if ((line.nonEmpty || soundFail || !mediaSettings.needSound) && desktopGrabber.nonEmpty) {
+          if ((line.nonEmpty || soundFail || !mediaSettings.needSound)) {
             ctx.self ! StartCapture
             if (soundFail)
               replyTo ! Messages.CannotAccessSound(ctx.self)
@@ -239,6 +241,7 @@ object CaptureManager {
           init(replyTo, mediaSettings, outputStream, outputFile, grabber, Some(g), line, imageFail, soundFail)
 
         case StartedDesktopFailed(ex) =>
+          log.info(s"Start desktop failed: $ex")
           replyTo ! Messages.CannotAccessDesktop(ctx.self)
           Behaviors.same
 

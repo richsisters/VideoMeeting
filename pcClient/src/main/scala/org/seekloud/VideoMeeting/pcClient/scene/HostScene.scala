@@ -935,6 +935,7 @@ class HostScene(stage: Stage) {
   }
 
   def changeToggleAction(): Unit = {
+    log.debug("########init mediaCapture successfullly change toggle action")
     liveBar.liveToggleButton.setDisable(false)
     liveBar.startTimer()
 

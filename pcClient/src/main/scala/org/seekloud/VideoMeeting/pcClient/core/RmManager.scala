@@ -211,7 +211,7 @@ object RmManager {
           Behaviors.same
 
         case GoToLive =>
-          log.debug(s"########user${userInfo.get.userName} start to live")
+          log.debug(s"########user-${userInfo.get.userName} start to live")
           val hostScene = new HostScene(stageCtx.getStage)
           val inviteController = new InviteController(stageCtx, ctx.self)
           val hostController = new HostController(stageCtx, hostScene, inviteController, ctx.self)
