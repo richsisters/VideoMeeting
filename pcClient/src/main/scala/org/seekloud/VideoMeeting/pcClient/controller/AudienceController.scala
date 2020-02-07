@@ -104,14 +104,6 @@ class AudienceController(
   }
 
   audienceScene.setListener(new AudienceSceneListener {
-//    override def sendCmt(comment: Comment): Unit = {
-//      if (RmManager.userInfo.nonEmpty) {
-//        log.debug(s"audience send comment：$comment")
-//        rmManager ! RmManager.SendComment(comment)
-//      } else {
-//        WarningDialog.initWarningDialog("请先登录哦~")
-//      }
-//    }
 
     override def joinReq(roomId: Long): Unit = {
       if (RmManager.userInfo.nonEmpty) {
@@ -166,8 +158,6 @@ class AudienceController(
       if (audienceScene.isFullScreen) {
         audienceScene.imgView.setWidth(Constants.DefaultPlayer.width)
         audienceScene.imgView.setHeight(Constants.DefaultPlayer.height)
-//        audienceScene.barrageCanvas.setWidth(Constants.DefaultPlayer.width)
-//        audienceScene.barrageCanvas.setHeight(Constants.DefaultPlayer.height)
         audienceScene.statisticsCanvas.setWidth(Constants.DefaultPlayer.width)
         audienceScene.statisticsCanvas.setHeight(Constants.DefaultPlayer.height)
 
@@ -181,19 +171,6 @@ class AudienceController(
         audienceScene.isFullScreen = false
       }
     }
-
-//    override def like(userId: Long, roomId: Long, UpDown: Int): Unit = {
-//      if (RmManager.userInfo.nonEmpty) {
-//        rmManager ! RmManager.SendLikeRoom(LikeRoom(userId, roomId, UpDown))
-//        if (UpDown == 1) {
-//          log.debug(s"audience send a like.")
-//        } else {
-//          log.debug(s"audience send un unlike.")
-//        }
-//      } else {
-//        WarningDialog.initWarningDialog("请先登录哦~")
-//      }
-//    }
 
     override def changeOption(needImage: Boolean, needSound: Boolean): Unit = {
       rmManager ! RmManager.ChangeOption4Audience(needImage, needSound)
@@ -212,17 +189,6 @@ class AudienceController(
       rmManager ! RmManager.PausePlayRec(recordInfo)
 
     }
-
-//    override def sendRecCmt(comment:String, commentTime:Long, relativeTime: Long, authorUidOpt:Option[Long]): Unit = {
-//      log.debug(s"audience send recCommend: comment:$comment, commentTime: $commentTime, relativeTime: $relativeTime, authorUidOpt: $authorUidOpt")
-//      addRecComment(audienceScene.getRecordInfo.roomId, audienceScene.getRecordInfo.startTime, comment, commentTime, relativeTime, RmManager.userInfo.get.userId, authorUidOpt)
-
-//    }
-
-//    override def refreshRecCmt(): Unit = {
-////      updateRecCommentList()
-//
-//    }
 
   })
 
@@ -273,18 +239,6 @@ class AudienceController(
 //          Boot.addToPlatform {
 //            audienceScene.watchingList.updateWatchingList(msg.AudienceList)
 //          }
-
-        case msg: JudgeLikeRsp =>
-          //          log.debug(s"audience receive judgeLikeRsp: ${msg.like}")
-          Boot.addToPlatform {
-            if (msg.like) { //已经点过赞
-              audienceScene.likeBtn.setSelected(true)
-              audienceScene.likeBtn.setGraphic(audienceScene.likeIcon)
-            } else { //没有点过赞
-              audienceScene.likeBtn.setSelected(false)
-              audienceScene.likeBtn.setGraphic(audienceScene.unLikeIcon)
-            }
-          }
 
         case msg: LikeRoomRsp =>
         //          log.debug(s"audience receive likeRoomRsp: ${msg}")

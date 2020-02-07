@@ -156,10 +156,6 @@ class HostScene(stage: Stage) {
   var roomDesArea = new TextArea(s"${RmManager.roomInfo.get.roomDes}")
   roomDesArea.setPrefSize(width * 0.15, height * 0.1)
 
-//  val likeIcon: ImageView = Common.getImageView("img/like.png", 25, 25)
-//  val likeLabel = new Label(s"${RmManager.roomInfo.get.like}", likeIcon)
-
-
   val connectionStateText = new Text("目前状态：无连接")
   connectionStateText.getStyleClass.add("hostScene-leftArea-text")
 
@@ -251,9 +247,6 @@ class HostScene(stage: Stage) {
   tb2.getStyleClass.add("hostScene-leftArea-toggleButton")
   val tb3 = new ToggleButton("连线 ", connectionIcon)
   tb3.getStyleClass.add("hostScene-leftArea-toggleButton")
-//  val tb4 = new ToggleButton("观众 ", audienceIcon)
-//  tb4.getStyleClass.add("hostScene-leftArea-toggleButton")
-
   /**
     * emoji
     *
@@ -429,12 +422,7 @@ class HostScene(stage: Stage) {
       content.getChildren.add(left3Area)
     }
                     )
-//    tb4.setOnAction(_ => {
-//      tb4.setGraphic(audienceIcon)
-//      content.getChildren.clear()
-//      content.getChildren.add(left4Area)
-//    }
-//                    )
+
     val leftArea = new VBox()
     leftArea.getChildren.addAll(tbBox, content)
 
@@ -475,7 +463,7 @@ class HostScene(stage: Stage) {
       val userId = new Text(s"主持人 ID：${RmManager.roomInfo.get.userId}")
       userId.getStyleClass.add("hostScene-leftArea-text")
 
-      val roomNameText = new Text("房间名:")
+      val roomNameText = new Text("会议名称:")
       roomNameText.getStyleClass.add("hostScene-leftArea-text")
 
       val confirmIcon1 = new ImageView("img/confirm.png")
@@ -496,7 +484,7 @@ class HostScene(stage: Stage) {
       roomName.getChildren.addAll(roomNameField, roomNameBtn)
       roomName.setSpacing(5)
 
-      val roomDesText = new Text("房间描述:")
+      val roomDesText = new Text("会议描述:")
       roomDesText.getStyleClass.add("hostScene-leftArea-text")
 
       val confirmIcon2 = new ImageView("img/confirm.png")
@@ -841,7 +829,7 @@ class HostScene(stage: Stage) {
       val AudienceTable = new TableView[AudienceListInfo]()
       AudienceTable.getStyleClass.add("table-view")
 
-      val userInfoCol = new TableColumn[AudienceListInfo, String]("连线用户")
+      val userInfoCol = new TableColumn[AudienceListInfo, String]("会议成员")
       userInfoCol.setPrefWidth(width * 0.15)
       userInfoCol.setCellValueFactory(new PropertyValueFactory[AudienceListInfo, String]("userInfo"))
 
@@ -863,16 +851,6 @@ class HostScene(stage: Stage) {
 
   }
 
-//  def addLeftChild4Area(): VBox = {
-//    val vBox = new VBox()
-//    vBox.getChildren.addAll(watchingState, watchingTable)
-//    vBox.setSpacing(20)
-//    vBox.setPrefHeight(height)
-//    vBox.setPadding(new Insets(20, 10, 5, 10))
-//    vBox.getStyleClass.add("hostScene-leftArea-wholeBox")
-//
-//    vBox
-//  }
 
   def addRightArea(): VBox = {
 
