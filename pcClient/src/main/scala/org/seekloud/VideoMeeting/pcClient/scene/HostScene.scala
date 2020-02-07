@@ -463,7 +463,7 @@ class HostScene(stage: Stage) {
       val userId = new Text(s"主持人 ID：${RmManager.roomInfo.get.userId}")
       userId.getStyleClass.add("hostScene-leftArea-text")
 
-      val roomNameText = new Text("房间名:")
+      val roomNameText = new Text("会议名称:")
       roomNameText.getStyleClass.add("hostScene-leftArea-text")
 
       val confirmIcon1 = new ImageView("img/confirm.png")
@@ -484,7 +484,7 @@ class HostScene(stage: Stage) {
       roomName.getChildren.addAll(roomNameField, roomNameBtn)
       roomName.setSpacing(5)
 
-      val roomDesText = new Text("房间描述:")
+      val roomDesText = new Text("会议描述:")
       roomDesText.getStyleClass.add("hostScene-leftArea-text")
 
       val confirmIcon2 = new ImageView("img/confirm.png")
@@ -829,7 +829,7 @@ class HostScene(stage: Stage) {
       val AudienceTable = new TableView[AudienceListInfo]()
       AudienceTable.getStyleClass.add("table-view")
 
-      val userInfoCol = new TableColumn[AudienceListInfo, String]("连线用户")
+      val userInfoCol = new TableColumn[AudienceListInfo, String]("会议成员")
       userInfoCol.setPrefWidth(width * 0.15)
       userInfoCol.setCellValueFactory(new PropertyValueFactory[AudienceListInfo, String]("userInfo"))
 
