@@ -307,13 +307,17 @@ class RoomScene {
   findBtn.getStyleClass.add("enter")
   findBtn.setOnAction(_ => listener.find(findField.getText))
 
-  val find = new HBox()
-  find.getChildren.addAll(findLabel, findField, findBtn)
-  find.setPadding(new Insets(200, 0, 0, 300))
+  val findGrid = new GridPane
+  findGrid.setHgap(10)
+  findGrid.add(findLabel, 0, 0)
+  findGrid.add(findField, 1, 0)
+  findGrid.add(findBtn, 2, 0)
+  findGrid.setPadding(new Insets(200, 0, 0, 300))
+
 
   val borderPane = new BorderPane()
   borderPane.setTop(topBox)
-  borderPane.setCenter(find)
+  borderPane.setCenter(findGrid)
   group.getChildren.addAll(borderPane)
 
   /**
