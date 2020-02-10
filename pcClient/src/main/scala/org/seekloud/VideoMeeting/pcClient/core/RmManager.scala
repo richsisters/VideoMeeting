@@ -50,8 +50,8 @@ object RmManager {
 
   //  case class User(username: String, loginInfo: UserInfo)
 
-  var userInfo: Option[UserInfo] = Some(UserInfo(100l, "a", "", "", 1000000l, false))
-  var roomInfo: Option[RoomInfo] = Some(RoomInfo(10000l, "as", "", "", 100l, "", ""))
+  var userInfo: Option[UserInfo] = None
+  var roomInfo: Option[RoomInfo] = None
   val likeMap: mutable.HashMap[(Long, Long), Boolean] = mutable.HashMap.empty //(userId,roomId) -> true
   //  var userHeader: Option[ImageView] = None
 
