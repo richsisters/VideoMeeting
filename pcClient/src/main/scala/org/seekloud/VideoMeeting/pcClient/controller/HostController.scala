@@ -62,14 +62,14 @@ class HostController(
 //        rmManager ! RmManager.AudienceAcceptance(userId, accept)
 //        hostScene.audObservableList.remove(newRequest)
 //      } else {
-        if ( !accept) {
+//        if ( !accept) {
           rmManager ! RmManager.AudienceAcceptance(userId, accept)
           hostScene.audObservableList.remove(newRequest)
-        } else {
-          Boot.addToPlatform {
-            WarningDialog.initWarningDialog(s"无法重复连线，请先断开当前连线。")
-          }
-        }
+//        } else {
+//          Boot.addToPlatform {
+//            WarningDialog.initWarningDialog(s"无法重复连线，请先断开当前连线。")
+//          }
+//        }
 //      }
     }
 
