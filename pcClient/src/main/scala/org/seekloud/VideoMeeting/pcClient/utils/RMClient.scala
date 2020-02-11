@@ -128,6 +128,24 @@ object RMClient extends HttpUtil {
 
   }
 
+  //邀请好友
+  def invite(email: String, meetingNum: String): Future[Either[Throwable, InviteRsp]] = {
+
+    val methodName = "invite"
+    val url = Routes.invite
+
+    val data = Invite(email, meetingNum).asJson.noSpaces
+
+    postJsonRequestSend(methodName, url, Nil, data, timeOut = 60 * 1000, needLogRsp = false).map {
+      case Right(jsonStr) =>
+        decode[InviteRsp](jsonStr)
+      case Left(error) =>
+        log.debug(s"invite error: $error")
+        Left(error)
+    }
+  }
+
+
   //获取录像列表及地址
   def getRecordList(sortBy: String, pageNum: Int, pageSize: Int): Future[Either[Throwable, GetRecordListRsp]] = {
     val methodName = "getRecordList"

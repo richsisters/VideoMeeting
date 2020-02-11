@@ -60,7 +60,7 @@ class RoomController(
         log.error(s"get room list error: $e")
         removeLoading()
         Boot.addToPlatform(
-          WarningDialog.initWarningDialog("获取房间列表失败")
+          WarningDialog.initWarningDialog("获取会议列表失败")
         )
     }
   }
@@ -112,7 +112,7 @@ class RoomController(
             rmManager ! GetRoomDetail(roomScene.roomList.find(_.roomId.toString == meeting).get.roomId)
           } else {
             WarningDialog.initWarningDialog("会议号不存在")
-//            removeLoading()
+            removeLoading()
           }
         }
       }
@@ -123,8 +123,8 @@ class RoomController(
 
   def showScene(): Unit = {
     Boot.addToPlatform {
-//      if (roomScene.liveMode) updateRoomList()
-      context.switchScene(roomScene.getScene, title = "直播间online")
+      if (roomScene.liveMode) updateRoomList()
+      context.switchScene(roomScene.getScene, title = "加入会议室")
     }
   }
 

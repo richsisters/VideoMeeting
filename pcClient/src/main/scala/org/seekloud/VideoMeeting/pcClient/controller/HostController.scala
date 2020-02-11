@@ -9,6 +9,8 @@ import org.seekloud.VideoMeeting.pcClient.core.RmManager.HeartBeat
 import org.seekloud.VideoMeeting.pcClient.scene.HostScene
 import org.seekloud.VideoMeeting.pcClient.scene.HostScene.{AudienceListInfo, HostSceneListener}
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol._
+import org.seekloud.VideoMeeting.pcClient.utils.RMClient
+import scala.concurrent.ExecutionContext.Implicits.global
 import org.slf4j.LoggerFactory
 
 /**
@@ -137,34 +139,34 @@ class HostController(
     }
 
     override def gotoInviteDialog(): Unit = {
-      //弹出注册窗口
-      val signUpInfo = inviteController.inviteDialog()
-      if (signUpInfo.nonEmpty) {
+      //弹出邀请窗口
+      val inviteInfo = inviteController.inviteDialog()
+      if (inviteInfo.nonEmpty) {
 //        showLoading()
         Boot.addToPlatform {
           WarningDialog.initWarningDialog("邮件已发送至对方邮箱！")
         }
-//        RMClient.signUp(signUpInfo.get._1.toString, signUpInfo.get._2.toString, signUpInfo.get._3.toString).map {
-//          case Right(signUpRsp) =>
-//            if (signUpRsp.errCode == 0) {
+        RMClient.invite(inviteInfo.get._1.toString, inviteInfo.get._2.toString).map {
+          case Right(inviteRsp) =>
+            if (inviteRsp.errCode == 0) {
 //              removeLoading()
-//              Boot.addToPlatform {
-//                WarningDialog.initWarningDialog("注册成功！")
-//              }
-//            } else {
-//              log.error(s"sign up error: ${signUpRsp.msg}")
+              Boot.addToPlatform {
+                WarningDialog.initWarningDialog("邀请成功！")
+              }
+            } else {
+              log.error(s"invite error: ${inviteRsp.msg}")
 //              removeLoading()
-//              Boot.addToPlatform {
-//                WarningDialog.initWarningDialog(s"${signUpRsp.msg}")
-//              }
-//            }
-//          case Left(error) =>
-//            log.error(s"sign up server error:$error")
+              Boot.addToPlatform {
+                WarningDialog.initWarningDialog(s"${inviteRsp.msg}")
+              }
+            }
+          case Left(error) =>
+            log.error(s"invite server error:$error")
 //            removeLoading()
-//            Boot.addToPlatform {
-//              WarningDialog.initWarningDialog(s"验证超时！")
-//            }
-//        }
+            Boot.addToPlatform {
+              WarningDialog.initWarningDialog(s"验证超时！")
+            }
+        }
       }
     }
 
