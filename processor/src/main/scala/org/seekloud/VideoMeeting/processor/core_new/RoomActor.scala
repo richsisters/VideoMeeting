@@ -103,8 +103,8 @@ object RoomActor {
           val recorderActor = getRecorderActor(ctx, msg.roomId, msg.host, msg.clientInfo, msg.pushLiveId, msg.pushLiveCode, msg.layout, pushOut)
           val grabber4host = getGrabberActor(ctx, msg.roomId, msg.host, pullInput4Host, recorderActor)
 
-          //grabberMap.put(msg.roomId, List(grabber4host)) //fixme
-          grabberMap(msg.roomId).put(msg.host, grabber4host)
+          grabberMap.put(msg.roomId, mutable.Map(msg.host -> grabber4host)) //fixme
+          //grabberMap(msg.roomId).put(msg.host, grabber4host)
 
           roomLiveMap.put(msg.roomId,List(msg.host, msg.pushLiveId) ::: msg.clientInfo)
 
