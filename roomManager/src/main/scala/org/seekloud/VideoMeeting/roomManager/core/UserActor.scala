@@ -10,9 +10,10 @@ import akka.stream.typed.scaladsl.{ActorSink, ActorSource}
 import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo._
+import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.http.CommonProtocol.Invite
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol._
-import org.seekloud.VideoMeeting.roomManager.Boot.{executor, roomManager, scheduler}
+import org.seekloud.VideoMeeting.roomManager.Boot.{executor, roomManager, scheduler, emailActor}
 import org.seekloud.VideoMeeting.roomManager.common.Common
 import org.seekloud.VideoMeeting.roomManager.models.dao.UserInfoDao
 import org.seekloud.VideoMeeting.roomManager.protocol.ActorProtocol
@@ -175,6 +176,10 @@ object UserActor {
                       req match {
                         case StartLiveReq(`userId`,token,clientType) =>
                           roomManager ! ActorProtocol.StartLiveAgain(roomId)
+                          ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
+
+                        case Invite(email, meetingNumber) =>
+                          emailActor ! EmailActor.SendInviteEmail(email, meetingNumber)
                           ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
 
                         case x =>

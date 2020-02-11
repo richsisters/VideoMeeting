@@ -22,6 +22,8 @@ object EmailActor {
 
   case class SendConfirmEmail(url: String, email: String) extends Command
 
+  case class SendInviteEmail(email: String, meetingNumber: String) extends Command
+
   val behavior = idle()
 
   def idle(): Behavior[Command] = {
@@ -38,6 +40,23 @@ object EmailActor {
           val mainPart = new MimeMultipart
           val html = new MimeBodyPart
           val content = getRegisterEamilHtml(url, email)
+          html.setContent(content, "text/html; charset=utf-8")
+          mainPart.addBodyPart(html)
+          message.setContent(mainPart)
+          Transport.send(message)
+          Behaviors.same
+
+        case x@SendInviteEmail(email, meetingNumber) =>
+          log.info(s"I receive msg:$x")
+          val session = getEbuptSession
+          val message = new MimeMessage(session)
+          message.setFrom(new InternetAddress(AppSettings.emailAddresserEmail))
+          message.setRecipient(RecipientType.TO,new InternetAddress(email))
+          message.setSubject(s"您的好友邀请您加入VideoMeeting会议！")
+          message.setSentDate(new Date)
+          val mainPart = new MimeMultipart
+          val html = new MimeBodyPart
+          val content = getInviteEmailHtml(meetingNumber)
           html.setContent(content, "text/html; charset=utf-8")
           mainPart.addBodyPart(html)
           message.setContent(mainPart)
@@ -75,6 +94,14 @@ object EmailActor {
     sb.append(s"""<tr><td height="80" valign="top"><font size="2" color="#909090" face="Arial, Helvetica, sans-serif">如果你没有注册过VideoMeeting平台，请忽略此邮件。<br>""")
     sb.append("""</tbody></table>""")
 
+    sb.append("</body></html>")
+    sb.toString()
+  }
+
+  def getInviteEmailHtml(meetingNumber: String) = {
+    val sb: StringBuilder = new StringBuilder
+    sb.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/></head><body>")
+    sb.append(s"""<p>您好，</p><p>邀请您加入<span>VideoMeeting</span>会议</p><p>会议号<span>$meetingNumber</span></p>""")
     sb.append("</body></html>")
     sb.toString()
   }
