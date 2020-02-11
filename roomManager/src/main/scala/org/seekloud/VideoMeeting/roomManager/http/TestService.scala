@@ -50,6 +50,8 @@ trait TestService extends ServiceUtils{
               complete(s"$e")
           }
         }
+      case Left(_) =>
+        complete("")
     }
   }
 
