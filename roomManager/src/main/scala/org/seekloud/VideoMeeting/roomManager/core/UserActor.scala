@@ -174,7 +174,9 @@ object UserActor {
                           ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
 
                         case Invite(email, meetingNumber) =>
+                          log.debug("recv invite msg! and send email to email actor")
                           emailActor ! EmailActor.SendInviteEmail(email, meetingNumber)
+                          clientActor ! Wrap(AuthProtocol.InviteRsp.asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
                           ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
 
                         case x =>
@@ -190,6 +192,7 @@ object UserActor {
                     ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
                 }
                 switchBehavior(ctx,"busy",busy(),BusyTime,TimeOut("busy"))
+
               case None =>
                 log.debug(s"${ctx.self.path} there is no web socket msg in anchor state")
                 Behaviors.same
@@ -279,10 +282,15 @@ object UserActor {
                         clientActor !Wrap(AuthProtocol.AccountSealed.asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
                         ctx.self ! SwitchBehavior("audience",audience(userId,temporary,clientActor,roomId))
                       }else{
-                        log.debug(s"########${ctx.self.path} 接收到ws消息")
                         req match{
                           case StartLiveReq(`userId`,token,clientType) =>
                             roomManager ! ActorProtocol.StartRoom4Anchor(userId,roomId,ctx.self)
+                            ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
+
+                          case Invite(email, meetingNumber) =>
+//                            log.debug("recv invite msg! and send email to email actor")
+                            emailActor ! EmailActor.SendInviteEmail(email, meetingNumber)
+                            clientActor ! Wrap(AuthProtocol.InviteRsp.asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
                             ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
 
                           case x =>
@@ -300,7 +308,7 @@ object UserActor {
                 }
 
               case None =>
-                log.debug(s"${ctx.self.path} there is no web socket msg in anchor state")
+                log.debug(s"${ctx.self.path} there is no web socket msg in audience state")
                 Behaviors.same
             }
           }

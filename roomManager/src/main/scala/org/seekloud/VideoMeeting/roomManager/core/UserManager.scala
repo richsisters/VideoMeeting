@@ -259,6 +259,7 @@ object UserManager {
           None
       }
     }
+
     Flow[Message]
       .collect {
         case TextMessage.Strict(m) =>

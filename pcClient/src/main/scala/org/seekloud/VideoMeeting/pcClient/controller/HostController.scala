@@ -142,14 +142,9 @@ class HostController(
       //弹出邀请窗口
       val inviteInfo = inviteController.inviteDialog()
       if (inviteInfo.nonEmpty) {
-//        showLoading()
-        Boot.addToPlatform {
-          WarningDialog.initWarningDialog("邮件已发送至对方邮箱！")
-        }
         rmManager ! RmManager.InviteReq(inviteInfo.get._1.toString, inviteInfo.get._2.toString)
       }
     }
-
   })
 
 
@@ -171,11 +166,11 @@ class HostController(
         }
 
       case msg: InviteRsp =>
-        if(msg.errCode != 0){
-          Boot.addToPlatform {
-            WarningDialog.initWarningDialog(s"发送邀请函失败，${msg.msg}")
-          }
+        log.debug(s"get InviteRsp: $msg")
+        Boot.addToPlatform {
+          WarningDialog.initWarningDialog(if(msg.errCode == 0) "邀请邮件已发送" else "发送邀请邮件失败，请重新发送")
         }
+
 
       case msg: ModifyRoomRsp =>
         //若失败，信息改成之前的信息
