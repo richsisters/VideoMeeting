@@ -26,7 +26,7 @@ class HostController(
 ) {
 
   private[this] val log = LoggerFactory.getLogger(this.getClass)
-  var isConnecting = false
+//  var isConnecting = false
   var isLive = false
 //  var likeNum: Int = RmManager.roomInfo.get.like
 
@@ -58,11 +58,11 @@ class HostController(
     }
 
     override def audienceAcceptance(userId: Long, accept: Boolean, newRequest: AudienceListInfo): Unit = {
-      if (!isConnecting) {
-        rmManager ! RmManager.AudienceAcceptance(userId, accept)
-        hostScene.audObservableList.remove(newRequest)
-      } else {
-        if (isConnecting && !accept) {
+//      if (!isConnecting) {
+//        rmManager ! RmManager.AudienceAcceptance(userId, accept)
+//        hostScene.audObservableList.remove(newRequest)
+//      } else {
+        if ( !accept) {
           rmManager ! RmManager.AudienceAcceptance(userId, accept)
           hostScene.audObservableList.remove(newRequest)
         } else {
@@ -70,7 +70,7 @@ class HostController(
             WarningDialog.initWarningDialog(s"无法重复连线，请先断开当前连线。")
           }
         }
-      }
+//      }
     }
 
     override def startMeeting(roomId: Long): Unit = {
@@ -235,7 +235,7 @@ class HostController(
             }
             hostScene.connectionStateText.setText(s"与${msg.joinInfo.get.userName}连线中")
             hostScene.connectStateBox.getChildren.add(hostScene.shutConnectionBtn)
-            isConnecting = true
+//            isConnecting = true
           }
 
         } else {
