@@ -252,7 +252,7 @@ class AudienceController(
 
         case HostStopPushStream2Client =>
           Boot.addToPlatform({
-            WarningDialog.initWarningDialog("主播已停止直播，请换个房间观看哦~")
+            WarningDialog.initWarningDialog("主持人结束会议了哦~")
           })
 
         case x =>

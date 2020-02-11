@@ -83,7 +83,7 @@ object HostScene {
 
     def audienceAcceptance(userId: Long, accept: Boolean, newRequest: AudienceListInfo)
 
-    def startMeeting(userId: List[Long])
+    def startMeeting(roomId: Long)
 
     def shutJoin()
 
@@ -164,6 +164,13 @@ class HostScene(stage: Stage) {
   startIcon.setFitWidth(15)
   val startBtn = new Button("开始会议", startIcon)
   startBtn.getStyleClass.add("hostScene-leftArea-start")
+
+  startBtn.setOnAction {
+    _ =>
+      listener.startMeeting(RmManager.roomInfo.get.roomId)
+  }
+
+
   val startBox = new HBox()
   startBox.getChildren.add(startBtn)
   startBox.setAlignment(Pos.CENTER_LEFT)

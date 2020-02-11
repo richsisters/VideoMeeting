@@ -115,7 +115,7 @@ object RmManager {
 
   final case class AudienceAcceptance(userId: Long, accept: Boolean) extends RmCommand
 
-  final case class StartMeeting(userId: List[Long]) extends RmCommand
+  final case class HostStartMeeting(roomId: Long) extends RmCommand
 
   final case class JoinBegin(audienceInfo: AudienceInfo, liveInfo: LiveInfo) extends RmCommand //开始和某观众连线
 
@@ -531,11 +531,11 @@ object RmManager {
           sender.foreach(_ ! JoinAccept(roomInfo.get.roomId, msg.userId, ClientType.PC, msg.accept))
           Behaviors.same
 
-//        case msg: StartMeeting =>
-//          log.debug(s"accept join user-${msg.userId} join.")
-//          assert(roomInfo.nonEmpty)
-//          sender.foreach(_ ! startMeeting( msg.userId, ClientType.PC))
-//          Behaviors.same
+        case msg: HostStartMeeting =>
+          log.debug(s"videoMeeting ${msg.roomId} begin.")
+          assert(roomInfo.nonEmpty)
+          sender.foreach(_ ! StartMeeting( msg.roomId))
+          Behaviors.same
 
         case msg: JoinBegin =>
           /*背景改变*/

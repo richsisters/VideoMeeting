@@ -73,8 +73,8 @@ class HostController(
       }
     }
 
-    override def startMeeting(userId: List[Long]): Unit = {
-      rmManager ! RmManager.StartMeeting(userId)
+    override def startMeeting(roomId: Long): Unit = {
+      rmManager ! RmManager.HostStartMeeting(roomId)
     }
 
     override def shutJoin(): Unit = {
