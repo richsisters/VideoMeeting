@@ -187,7 +187,7 @@ object CaptureManager {
 
         case CameraGrabberStarted(g) =>
           log.info(s"Start camera success.")
-          if ((line.nonEmpty || soundFail || !mediaSettings.needSound)) {
+          if (line.nonEmpty || soundFail || !mediaSettings.needSound) {
             ctx.self ! StartCapture
             if (soundFail)
               replyTo ! Messages.CannotAccessSound(ctx.self)

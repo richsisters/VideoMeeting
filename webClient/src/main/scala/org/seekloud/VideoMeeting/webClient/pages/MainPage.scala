@@ -37,6 +37,10 @@ object MainPage extends PageSwitcher {
   var showRtmpInfo = Var(emptyHTML)
   val showAdminLogin = Var(emptyHTML)
   val fileName = "pcClient-19.9.24.zip"
+
+  def isTemUser(): Boolean ={
+    dom.window.localStorage.getItem("isTemUser") != null
+  }
   private val exitButton: Elem =
     <div class="header-exit" onclick={()=> dom.window.location.hash = "#/Home"}>
       <img src="/VideoMeeting/roomManager/static/img/logo.png" title="主页"></img>
@@ -68,8 +72,8 @@ object MainPage extends PageSwitcher {
       </div>
       <div style="display:flex">
         <div class="header-defaultimg">
-          <img src={userShowImg} onclick={() => showPersonCenter := PopWindow.personalCenter(dom.window.localStorage.getItem("userId").toLong,
-            dom.window.localStorage.getItem("userName"))} id="userHeadImg"></img>
+          <img src={userShowImg} onclick={() => showPersonCenter := PopWindow.personalCenter(if(isTemUser()) dom.window.sessionStorage.getItem("userId").toLong else dom.window.localStorage.getItem("userId").toLong,
+            if(isTemUser()) dom.window.sessionStorage.getItem("userName") else dom.window.localStorage.getItem("userName"))} id="userHeadImg"></img>
           <div class="header-user">
             {userShowName}
           </div>

@@ -10,7 +10,7 @@ import io.circe.syntax._
 import io.circe.generic.auto._
 
 import scala.xml.Elem
-import MainPage.{showPersonCenter, showRtmpInfo, userShowName, showAdminLogin}
+import MainPage.{showAdminLogin, showPersonCenter, showRtmpInfo, userShowImg, userShowName}
 import org.scalajs.dom.html
 import org.scalajs.dom.raw.{File, FileList, FileReader, FormData, HTMLElement}
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonRsp
@@ -134,7 +134,7 @@ object PopWindow {
 
 
   var currImgNum = Math.floor(Math.random()*8)+1
-  var initHeadImg = "/VideoMeeting/roomManager/static/img/headPortrait/"+currImgNum+".jpg"
+  val initHeadImg = if(userShowImg == null) Var("/VideoMeeting/roomManager/static/img/上传.png") else  userShowImg
   def changeHeadImg()={
     //    dom.document.getElementById("imgBubble").setAttribute("style","display:none")
     var headNum = Math.floor(Math.random()*9)
@@ -189,6 +189,8 @@ object PopWindow {
     Http.postFormAndParse[ImgChangeRsp](Routes.UserRoutes.uploadImg(0,userId.toString),form).map{
       case Right(imgRsp)=>
         JsFunc.alert("更改个人信息成功！")
+        userShowImg := imgRsp.url
+        initHeadImg := imgRsp.url
         showPersonCenter := emptyHTML
       case Left(value)=>
         JsFunc.alert("更改个人信息失败")
@@ -201,8 +203,8 @@ object PopWindow {
       <div class="pop-main" onclick={(e: Event)=>e.stopPropagation()} style="padding-top:50px">
         <div class="change-userImg">
           <input style="display: none" type="file" id="userImg-file" onchange={(e: Event)=>changeImgByFile(userId, e.target.asInstanceOf[Input].value, e.target.asInstanceOf[Input].files)}>okokok</input>
-          <img src={initHeadImg} onclick={()=>changeHeadImg()} id="random-head"></img>
-          <!--<div class="change-userImg-file" onclick={()=>dom.document.getElementById("userImg-file").asInstanceOf[HTMLElement].click()}>选择文件</div>-->
+          <img src={initHeadImg}  class="change-userImg-file" onclick={()=>dom.document.getElementById("userImg-file").asInstanceOf[HTMLElement].click()}></img>
+          <div style="text-align: center">上传头像</div>
         </div>
         <input class="pop-input" id="change-username" placeholder="修改昵称" value={userName}></input>
         <div class="pop-button" onclick={()=>changeUserInfo(userId)}>确认修改</div>
