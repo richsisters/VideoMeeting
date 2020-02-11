@@ -23,10 +23,11 @@ object ProcessorClient extends HttpUtil{
   private val log = LoggerFactory.getLogger(this.getClass)
 
   val processorBaseUrl = s"http://${AppSettings.processorIp}:${AppSettings.processorPort}/VideoMeeting/processor"
-  val distributorBaseUrl = s"https://$distributorDomain/VideoMeeting/distributor"
+//  val distributorBaseUrl = s"https://$distributorDomain/VideoMeeting/distributor"
 
   def newConnect(roomId:Long, liveId4host: String, liveId4Client: List[String], liveId4push: String, liveCode4push: String, layout: Int):Future[Either[String,newConnectRsp]] = {
     val url = processorBaseUrl + "/newConnect"
+    log.debug(s"new connect url $url")
     val jsonString = newConnectInfo(roomId, liveId4host, liveId4Client, liveId4push, liveCode4push, layout).asJson.noSpaces
     postJsonRequestSend("newConnect",url,List(),jsonString,timeOut = 60 * 1000,needLogRsp = false).map{
       case Right(v) =>

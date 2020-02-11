@@ -1,16 +1,11 @@
 package org.seekloud.VideoMeeting.roomManager.core
 
-import akka.actor.Cancellable
-import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.stream.OverflowStrategy
 import akka.stream.scaladsl.Flow
 import akka.stream.typed.scaladsl.{ActorSink, ActorSource}
 import org.seekloud.byteobject.MiddleBufferInJvm
-import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo
-import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo._
-import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.http.CommonProtocol.Invite
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol._
 import org.seekloud.VideoMeeting.roomManager.Boot.{executor, roomManager, scheduler, emailActor}

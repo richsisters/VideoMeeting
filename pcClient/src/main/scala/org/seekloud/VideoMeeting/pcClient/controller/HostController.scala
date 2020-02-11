@@ -146,27 +146,7 @@ class HostController(
         Boot.addToPlatform {
           WarningDialog.initWarningDialog("邮件已发送至对方邮箱！")
         }
-        RMClient.invite(inviteInfo.get._1.toString, inviteInfo.get._2.toString).map {
-          case Right(inviteRsp) =>
-            if (inviteRsp.errCode == 0) {
-//              removeLoading()
-              Boot.addToPlatform {
-                WarningDialog.initWarningDialog("邀请成功！")
-              }
-            } else {
-              log.error(s"invite error: ${inviteRsp.msg}")
-//              removeLoading()
-              Boot.addToPlatform {
-                WarningDialog.initWarningDialog(s"${inviteRsp.msg}")
-              }
-            }
-          case Left(error) =>
-            log.error(s"invite server error:$error")
-//            removeLoading()
-            Boot.addToPlatform {
-              WarningDialog.initWarningDialog(s"验证超时！")
-            }
-        }
+        rmManager ! RmManager.InviteReq(inviteInfo.get._1.toString, inviteInfo.get._2.toString)
       }
     }
 
@@ -187,6 +167,13 @@ class HostController(
         } else {
           Boot.addToPlatform {
             WarningDialog.initWarningDialog(s"${msg.msg}")
+          }
+        }
+
+      case msg: InviteRsp =>
+        if(msg.errCode != 0){
+          Boot.addToPlatform {
+            WarningDialog.initWarningDialog(s"发送邀请函失败，${msg.msg}")
           }
         }
 

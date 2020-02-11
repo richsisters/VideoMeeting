@@ -48,7 +48,7 @@ object AppSettings {
 
 
   val log = LoggerFactory.getLogger(this.getClass)
-  val config = ConfigFactory.parseResources("application.conf").withFallback(ConfigFactory.load())
+  val config = ConfigFactory.parseResources("product.conf").withFallback(ConfigFactory.load())
 
   val appConfig = config.getConfig("app")
 

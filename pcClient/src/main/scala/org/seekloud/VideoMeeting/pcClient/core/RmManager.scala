@@ -123,6 +123,8 @@ object RmManager {
 
   final case object ShutJoin extends RmCommand //主动关闭和某观众的连线
 
+  final case class InviteReq(email: String, meeting: String) extends RmCommand
+
 
   /*观众*/
   final case object GetPackageLoss extends RmCommand
@@ -499,6 +501,10 @@ object RmManager {
           hostController.isLive = false
           Behaviors.same
 
+        case InviteReq(email, meeting) =>
+          sender.foreach(_ ! Invite(email, meeting))
+          Behaviors.same
+
         case StartRecord(outFilePath) =>
           mediaPlayer.startRecord(outFilePath)
           log.debug(s"rmManager send startRecord.")
@@ -557,7 +563,7 @@ object RmManager {
             Boot.addToPlatform {
               hostScene.connectionStateText.setText(s"目前状态：无连接~")
               hostScene.connectStateBox.getChildren.remove(hostScene.shutConnectionBtn)
-              hostController.isConnecting = false
+//              hostController.isConnecting = false
             }
             sender.foreach(_ ! HostShutJoin(roomInfo.get.roomId))
             ctx.self ! JoinStop

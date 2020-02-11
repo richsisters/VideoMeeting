@@ -36,7 +36,7 @@ object AuthProtocol {
 
   /**
     *
-    * 主播端
+    * 主持人端
     *
     **/
 
@@ -147,10 +147,21 @@ object AuthProtocol {
 
   case class HostStopPushStream(roomId: Long) extends WsMsgHost //房主停止推流
 
+  //邀请好友
+  case class Invite(
+                     email: String,
+                     meetingNum: String //会议号
+                   ) extends WsMsgHost
+
+
+  case class InviteRsp(
+                        errCode: Int = 0,
+                        msg: String = "ok"
+                      ) extends WsMsgRm2Host
 
   /**
     *
-    * 观众端
+    * 参会者端
     *
     **/
 

@@ -76,17 +76,6 @@ object CommonProtocol {
     msg: String = "ok"
   ) extends Response
 
-  //邀请好友
-  case class Invite(
-    email: String,
-    meetingNum: String //会议号
-  ) extends Request
-
-  case class InviteRsp(
-    errCode: Int = 0,
-    msg: String = "ok"
-  ) extends Response
-
   /**
     * 录像
     */

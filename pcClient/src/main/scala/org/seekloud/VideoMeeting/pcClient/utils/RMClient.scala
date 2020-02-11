@@ -10,7 +10,6 @@ import io.circe.{Encoder, Json}
 import io.circe.syntax._
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonRsp
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.http.RecordCommentProtocol.{AddRecordCommentReq, GetRecordCommentListReq, GetRecordCommentListRsp}
-
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
@@ -128,22 +127,22 @@ object RMClient extends HttpUtil {
 
   }
 
-  //邀请好友
-  def invite(email: String, meetingNum: String): Future[Either[Throwable, InviteRsp]] = {
-
-    val methodName = "invite"
-    val url = Routes.invite
-
-    val data = Invite(email, meetingNum).asJson.noSpaces
-
-    postJsonRequestSend(methodName, url, Nil, data, timeOut = 60 * 1000, needLogRsp = false).map {
-      case Right(jsonStr) =>
-        decode[InviteRsp](jsonStr)
-      case Left(error) =>
-        log.debug(s"invite error: $error")
-        Left(error)
-    }
-  }
+  //邀请好友 更换为使用ws消息
+//  def invite(email: String, meetingNum: String): Future[Either[Throwable, InviteRsp]] = {
+//
+//    val methodName = "invite"
+//    val url = Routes.invite
+//
+//    val data = Invite(email, meetingNum).asJson.noSpaces
+//
+//    postJsonRequestSend(methodName, url, Nil, data, timeOut = 60 * 1000, needLogRsp = false).map {
+//      case Right(jsonStr) =>
+//        decode[InviteRsp](jsonStr)
+//      case Left(error) =>
+//        log.debug(s"invite error: $error")
+//        Left(error)
+//    }
+//  }
 
 
   //获取录像列表及地址
