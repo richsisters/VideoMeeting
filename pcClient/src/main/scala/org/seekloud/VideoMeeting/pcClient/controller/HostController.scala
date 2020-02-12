@@ -9,8 +9,6 @@ import org.seekloud.VideoMeeting.pcClient.core.RmManager.HeartBeat
 import org.seekloud.VideoMeeting.pcClient.scene.HostScene
 import org.seekloud.VideoMeeting.pcClient.scene.HostScene.{AudienceListInfo, HostSceneListener}
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol._
-import org.seekloud.VideoMeeting.pcClient.utils.RMClient
-import scala.concurrent.ExecutionContext.Implicits.global
 import org.slf4j.LoggerFactory
 
 /**
@@ -149,6 +147,7 @@ class HostController(
 
 
   def wsMessageHandle(data: WsMsgRm): Unit = {
+    log.debug(s"test $data")
     data match {
 
       case msg: HeatBeat =>
@@ -165,10 +164,9 @@ class HostController(
           }
         }
 
-      case msg: InviteRsp =>
-        log.debug(s"get InviteRsp: $msg")
+      case InviteRsp =>
         Boot.addToPlatform {
-          WarningDialog.initWarningDialog(if(msg.errCode == 0) "邀请邮件已发送" else "发送邀请邮件失败，请重新发送")
+          WarningDialog.initWarningDialog("邀请邮件已发送")
         }
 
 

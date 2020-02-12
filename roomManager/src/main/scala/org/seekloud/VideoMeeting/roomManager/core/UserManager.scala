@@ -180,8 +180,8 @@ object UserManager {
                     log.debug(s"${ctx.self.path} setup websocket error:该账户已经登录userId=$userId,temporary=$temporary")
                     //TODO 重复登录相关处理
 //                    actor ! UserActor.UserLogin(roomId,userId)
-//                    replyTo ! Some(setupWebSocketFlow(actor))
-                    replyTo ! None
+                    replyTo ! Some(setupWebSocketFlow(actor))
+//                    replyTo ! None
                   case None =>
                     val userActor = getUserActor(userId, temporary,ctx)
                     userActor ! UserActor.UserLogin(roomId,userId)
@@ -305,7 +305,6 @@ object UserManager {
           TextMessage.apply("")
 
       }
-
       .withAttributes(ActorAttributes.supervisionStrategy(decider = decider))
   }
 

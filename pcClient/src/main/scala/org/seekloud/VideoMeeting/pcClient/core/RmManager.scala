@@ -986,10 +986,11 @@ object RmManager {
       case BinaryMessage.Strict(bMsg) =>
         val buffer = new MiddleBufferInJvm(bMsg.asByteBuffer)
         val message = bytesDecode[WsMsgRm](buffer) match {
-          case Right(rst) => rst
-          case Left(_) => DecodeError
+          case Right(rst) =>
+            rst
+          case Left(_) =>
+            DecodeError
         }
-
         hController.foreach(_.wsMessageHandle(message))
         aController.foreach(_.wsMessageHandle(message))
 
@@ -1010,6 +1011,7 @@ object RmManager {
 
 
       case _ => //do nothing
+      log.debug("nothing")
 
     }
   }

@@ -154,9 +154,7 @@ object AuthProtocol {
                    ) extends WsMsgHost
 
 
-  case class InviteRsp(
-                        errCode: Int = 0
-                      ) extends WsMsgRm2Host
+  case object InviteRsp extends WsMsgRm2Host
 
   /**
     *
