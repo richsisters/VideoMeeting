@@ -165,7 +165,7 @@ class HostScene(stage: Stage) {
   var roomDesArea = new TextArea(s"${RmManager.roomInfo.get.roomDes}")
   roomDesArea.setPrefSize(width * 0.15, height * 0.1)
 
-  val connectionStateText = new Text("目前状态：无连接")
+  val connectionStateText = new Text("目前状态：会议未开始～")
   connectionStateText.getStyleClass.add("hostScene-leftArea-text")
 
   val startIcon = new ImageView("img/会议.png")

@@ -583,7 +583,7 @@ object RmManager {
           assert(roomInfo.nonEmpty)
           if (hostStatus == HostStatus.CONNECT) {
             Boot.addToPlatform {
-              hostScene.connectionStateText.setText(s"目前状态：无连接~")
+              hostScene.connectionStateText.setText(s"目前状态：会议未开始~")
               hostScene.connectStateBox.getChildren.remove(hostScene.shutConnectionBtn)
 //              hostController.isConnecting = false
             }

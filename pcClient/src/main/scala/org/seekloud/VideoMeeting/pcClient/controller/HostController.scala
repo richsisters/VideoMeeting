@@ -166,6 +166,9 @@ class HostController(
       case msg:StartMeetingRsp =>
         if (msg.errCode == 0) {
           rmManager ! RmManager.PullFromProcessor(msg.liveId)
+          Boot.addToPlatform{
+            hostScene.connectionStateText.setText(s"会议进行中")
+          }
         }else{
           WarningDialog.initWarningDialog("转接错误 test")
         }
