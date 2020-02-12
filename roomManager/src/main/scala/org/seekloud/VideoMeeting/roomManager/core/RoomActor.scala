@@ -211,7 +211,7 @@ object RoomActor {
                       val hostLive = wholeRoomInfo.liveInfo
                       //TODO 当一个用户发起离开房间请求后，整个房间关闭，应该更改为其余人继续开会
                       liveInfoMap.clear()
-                      ProcessorClient.closeRoom(roomId)
+                     // ProcessorClient.closeRoom(roomId)
                       ctx.self ! UpdateRTMP(hostLive.liveId)
                       dispatch(subscribe)(AuthProtocol.AudienceDisconnect(hostLive.liveId))
                       dispatch(subscribe)(RcvComment(-1l, "", s"the audience has shut the join in room $roomId"))
