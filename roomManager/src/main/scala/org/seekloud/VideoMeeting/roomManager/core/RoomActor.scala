@@ -377,7 +377,7 @@ object RoomActor {
                   log.info(s"user$userId4Audience 申请liveInfo成功" + rsp.liveInfo)
                   if (userInfoOpt.nonEmpty) {
                     liveInfoMap.put(userId4Audience, rsp.liveInfo)
-                    val audienceInfo = AudienceInfo(userId4Audience, userInfoOpt.get.userName, userInfoOpt.get.headImg)
+                    val audienceInfo = AudienceInfo(userId4Audience, userInfoOpt.get.userName, userInfoOpt.get.headImg, rsp.liveInfo.liveId )
                     dispatch(RcvComment(-1l, "", s"user:$userId join in room:$roomId")) //群发评论
                     dispatch(AudienceJoinRsp(Some(audienceInfo)))
                   } else {
