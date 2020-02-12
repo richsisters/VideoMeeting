@@ -84,7 +84,7 @@ object StreamPullActor {
       Behaviors.withTimers[Command] {
         implicit timer =>
           log.info(s"stramPullActor start----")
-          val pullStreamDst = new InetSocketAddress(rtpToHost, 61040)
+          val pullStreamDst = new InetSocketAddress(rtpToHost, 42018)
           val host = "0.0.0.0"
           val port = getRandomPort()
           val client = new PullStreamClient(host, port, pullStreamDst, ctx.self, rtpServerDst)

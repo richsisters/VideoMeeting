@@ -69,7 +69,7 @@ object StreamPushActor {
           log.info(s"StreamPushActor start----")
           val pushStreamChannel = DatagramChannel.open()
           pushStreamChannel.socket().setReuseAddress(true)
-          val pushStreamDst = new InetSocketAddress(rtpToHost, 61041)
+          val pushStreamDst = new InetSocketAddress(rtpToHost, 42019)
           val host = "0.0.0.0"
           val port = getRandomPort()
           val client = new PushStreamClient(host,port,pushStreamDst,ctx.self,rtpServerDst)

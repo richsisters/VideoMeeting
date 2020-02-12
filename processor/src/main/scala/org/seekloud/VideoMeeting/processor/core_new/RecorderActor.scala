@@ -83,7 +83,7 @@ object RecorderActor {
         implicit timer =>
           log.info(s"recorderActor start----")
           avutil.av_log_set_level(-8)
-          val recorder4ts = new FFmpegFrameRecorder(output, 640, 480, clientInfo.size)
+          val recorder4ts = new FFmpegFrameRecorder(output, 640, 480, clientInfo.size + 1)
           recorder4ts.setFrameRate(frameRate)
           recorder4ts.setVideoBitrate(bitRate)
           recorder4ts.setVideoCodec(avcodec.AV_CODEC_ID_MPEG2VIDEO)
@@ -119,10 +119,10 @@ object RecorderActor {
           if (ffFilter != null) {
             ffFilter.close()
           }
-          val ffFilterN = new FFmpegFrameFilter("[0:a][1:a] amix=inputs=2:duration=longest:dropout_transition=3:weights=1 1[a]", clientInfo.size)
-          ffFilterN.setAudioChannels(clientInfo.size)
+          val ffFilterN = new FFmpegFrameFilter("[0:a][1:a] amix=inputs=2:duration=longest:dropout_transition=3:weights=1 1[a]", clientInfo.size + 1)
+          ffFilterN.setAudioChannels(clientInfo.size + 1)
           ffFilterN.setSampleFormat(sampleFormat)
-          ffFilterN.setAudioInputs(clientInfo.size)
+          ffFilterN.setAudioInputs(clientInfo.size + 1)
           ffFilterN.start()
           single(roomId,  host, clientInfo,layout, recorder4ts, ffFilterN, drawer, ts4Host, ts4Client, clientImage, out, tsDiffer, canvasSize)
 
