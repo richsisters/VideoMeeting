@@ -95,7 +95,8 @@ object CommonInfo {
   case class AudienceInfo(
     userId: Long,
     userName: String,
-    userHeadImg: String
+    userHeadImg: String,
+    liveId: String
   )
 
 }

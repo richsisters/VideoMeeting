@@ -7,10 +7,8 @@ import org.seekloud.VideoMeeting.pcClient.component.WarningDialog
 import org.seekloud.VideoMeeting.pcClient.core.RmManager
 import org.seekloud.VideoMeeting.pcClient.core.RmManager.HeartBeat
 import org.seekloud.VideoMeeting.pcClient.scene.HostScene
-import org.seekloud.VideoMeeting.pcClient.scene.HostScene.{AudienceListInfo, HostSceneListener}
+import org.seekloud.VideoMeeting.pcClient.scene.HostScene.{HostSceneListener, AudienceListInfo}
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol._
-import org.seekloud.VideoMeeting.pcClient.utils.RMClient
-import scala.concurrent.ExecutionContext.Implicits.global
 import org.slf4j.LoggerFactory
 
 /**
@@ -153,7 +151,7 @@ class HostController(
   })
 
 
-  def wsMessageHandle(data: WsMsgRm): Unit = {
+  def wsMessageHandle(data: WsMsgRm, userInfo: Map[Long, String] = Map()): Unit = {
     data match {
 
       case msg: HeatBeat =>
@@ -214,13 +212,19 @@ class HostController(
       case msg: AudienceJoinRsp =>
         if (msg.errCode == 0) {
           //显示连线观众信息
-//          rmManager ! RmManager.JoinBegin(msg.joinInfo.get)
-
+          rmManager ! RmManager.JoinBegin(msg.joinInfo.get)
           Boot.addToPlatform {
             if (!hostScene.tb3.isSelected) {
               hostScene.tb3.setGraphic(hostScene.connectionIcon1)
             }
+
+//            Boot.addToPlatform {
+              val userId = msg.joinInfo.get.userId
+              val userName = msg.joinInfo.get.userName
+              hostScene.updateAudienceList(userId, userName)
+//            }
             hostScene.connectionStateText.setText(s"与${msg.joinInfo.get.userName}连线中")
+//            hostScene.connectionStateText.setText(s"与${userList.map(l => l._2)}连线中")
             hostScene.connectStateBox.getChildren.add(hostScene.shutConnectionBtn)
 //            isConnecting = true
           }
