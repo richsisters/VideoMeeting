@@ -65,7 +65,12 @@ object HostScene {
 
   case class AcceptList(
                          userInfo: StringProperty
-                       )
+                       ){
+    def getUserInfo: String = userInfo.get()
+
+    def setUserInfo(info: String): Unit = userInfo.set(info)
+
+  }
 
   trait HostSceneListener {
 
@@ -390,37 +395,11 @@ class HostScene(stage: Stage) {
     if (!tb3.isSelected) {
       tb3.setGraphic(connectionIcon1)
     }
-//    val agreeBtn = new Button("", new ImageView("img/agreeBtn.png"))
-//    val refuseBtn = new Button("", new ImageView("img/refuseBtn.png"))
 
-//    agreeBtn.getStyleClass.add("hostScene-middleArea-tableBtn")
-//    refuseBtn.getStyleClass.add("hostScene-middleArea-tableBtn")
-//    val glow = new Glow()
-//    agreeBtn.addEventHandler(MouseEvent.MOUSE_ENTERED, (_: MouseEvent) => {
-//      agreeBtn.setEffect(glow)
-//    })
-//    agreeBtn.addEventHandler(MouseEvent.MOUSE_EXITED, (_: MouseEvent) => {
-//      agreeBtn.setEffect(null)
-//    })
-//    refuseBtn.addEventHandler(MouseEvent.MOUSE_ENTERED, (_: MouseEvent) => {
-//      refuseBtn.setEffect(glow)
-//    })
-//    refuseBtn.addEventHandler(MouseEvent.MOUSE_EXITED, (_: MouseEvent) => {
-//      refuseBtn.setEffect(null)
-//    })
       val newRequest = AcceptList(
           new SimpleStringProperty(s"$userName($userId)")
       )
        audAcceptList.add(newRequest)
-
-//    agreeBtn.setOnAction {
-//      _ =>
-//        listener.audienceAcceptance(userId = audienceId, accept = true, newRequest)
-//    }
-//    refuseBtn.setOnAction {
-//      _ =>
-//        listener.audienceAcceptance(userId = audienceId, accept = false, newRequest)
-//    }
 
   }
 
