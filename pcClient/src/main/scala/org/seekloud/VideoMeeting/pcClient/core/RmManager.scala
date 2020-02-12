@@ -16,7 +16,7 @@ import akka.util.{ByteString, ByteStringBuilder}
 import org.seekloud.byteobject.ByteObject._
 import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.VideoMeeting.pcClient.Boot
-import org.seekloud.VideoMeeting.pcClient.controller.{AudienceController, HomeController, HostController, RoomController, InviteController}
+import org.seekloud.VideoMeeting.pcClient.controller.{AudienceController, HomeController, HostController, InviteController, RoomController}
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol._
 import org.seekloud.VideoMeeting.pcClient.Boot.{executor, materializer, scheduler, system, timeout}
 import org.seekloud.VideoMeeting.pcClient.common.Constants.{AudienceStatus, HostStatus}
@@ -84,6 +84,10 @@ object RmManager {
 
   final case class ChangeUserName(newUserName: String) extends RmCommand
 
+  final case class PullFromProcessor(newId:String) extends RmCommand
+
+  final case class PullConnectStream(newId:String) extends RmCommand
+
   final case object BackToHome extends RmCommand
 
   final case object HeartBeat extends RmCommand
@@ -93,6 +97,8 @@ object RmManager {
   final case object StopSelf extends RmCommand
 
   final case object Logout extends RmCommand
+
+  final case object PullDelay extends RmCommand
 
 
   /*主播*/
@@ -480,6 +486,21 @@ object RmManager {
           System.gc()
           switchBehavior(ctx, "idle", idle(stageCtx, liveManager, mediaPlayer, homeController))
 
+        case msg:PullFromProcessor =>
+          log.debug("pull from processor")
+          hostStatus match {
+            case HostStatus.LIVE =>
+              log.debug("ready to send pull connect stream")
+              timer.startSingleTimer(PullDelay, PullConnectStream(msg.newId), 10.seconds)
+          }
+          Behaviors.same
+
+        case msg:PullConnectStream =>
+          timer.cancel(PullDelay)
+          val joinInfo = JoinInfo(roomInfo.get.roomId, 0L, hostScene.gc)
+          liveManager ! LiveManager.PullStream(msg.newId, joinInfo = Some(joinInfo), hostScene = Some(hostScene))
+          switchBehavior(ctx, "hostBehavior", hostBehavior(stageCtx, homeController, hostScene, hostController, liveManager, mediaPlayer, sender, hostStatus = HostStatus.CONNECT, None))
+
         case HostLiveReq =>
           log.debug(s"Host req live.")
           assert(userInfo.nonEmpty && roomInfo.nonEmpty)
@@ -551,10 +572,11 @@ object RmManager {
           liveManager ! LiveManager.SwitchMediaMode(isJoin = true, reset = hostScene.resetBack)
 
           /*拉取观众的rtp流并播放*/
-          val joinInfo = JoinInfo(roomInfo.get.roomId, msg.audienceInfo.userId, hostScene.gc)
-          liveManager ! LiveManager.PullStream(msg.audienceInfo.liveId, joinInfo = Some(joinInfo), hostScene = Some(hostScene))
+//          val joinInfo = JoinInfo(roomInfo.get.roomId, msg.audienceInfo.userId, hostScene.gc)
+//          liveManager ! LiveManager.PullStream(msg.audienceInfo.liveId, joinInfo = Some(joinInfo), hostScene = Some(hostScene))
+          Behaviors.same
 
-          hostBehavior(stageCtx, homeController, hostScene, hostController, liveManager, mediaPlayer, sender, hostStatus = HostStatus.CONNECT, Some(msg.audienceInfo))
+//          hostBehavior(stageCtx, homeController, hostScene, hostController, liveManager, mediaPlayer, sender, hostStatus = HostStatus.CONNECT, Some(msg.audienceInfo))
 
         case ShutJoin =>
           log.debug("disconnection with current audience.")
@@ -722,6 +744,21 @@ object RmManager {
           audienceScene.finalize()
           System.gc()
           switchBehavior(ctx, "idle", idle(stageCtx, liveManager, mediaPlayer, homeController, roomController))
+
+        case msg:PullFromProcessor =>
+          audienceStatus match {
+            case AudienceStatus.LIVE =>
+              timer.startSingleTimer(PullDelay, PullConnectStream(msg.newId), 10.seconds)
+          }
+          Behaviors.same
+
+        case msg:PullConnectStream =>
+          timer.cancel(PullDelay)
+          liveManager ! LiveManager.StopPull
+          audienceScene.liveId=Some(msg.newId)
+          val info = WatchInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
+          liveManager ! LiveManager.PullStream(msg.newId,watchInfo = Some(info), audienceScene = Some(audienceScene))
+          switchBehavior(ctx, "audienceBehavior", audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, audienceLiveInfo = None, audienceStatus = AudienceStatus.LIVE))
 
         case msg: SendComment =>
           sender.foreach(_ ! msg.comment)

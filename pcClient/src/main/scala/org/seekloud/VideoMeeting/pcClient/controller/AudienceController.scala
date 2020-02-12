@@ -197,12 +197,10 @@ class AudienceController(
     Boot.addToPlatform {
       data match {
         case msg: HeatBeat =>
-//          log.debug(s"heartbeat: ${msg.ts}")
+          //          log.debug(s"heartbeat: ${msg.ts}")
           rmManager ! HeartBeat
 
         case msg: RcvComment =>
-          //判断userId是否为-1，是的话当广播处理
-//          log.debug(s"receive comment: ${msg.comment}")
           Boot.addToPlatform {
 //            audienceScene.commentBoard.updateComment(msg)
 //            audienceScene.barrage.updateBarrage(msg)
@@ -221,11 +219,18 @@ class AudienceController(
             audienceScene.hasReqJoin = false
           }
 
-//        case HostDisconnect =>
-//          Boot.addToPlatform {
-//            WarningDialog.initWarningDialog("主播已断开连线~")
-//          }
-//          rmManager ! RmManager.StopJoinAndWatch
+        case msg:StartMeetingRsp =>
+          if (msg.errCode == 0) {
+            rmManager ! RmManager.PullFromProcessor(msg.liveId)
+          }else{
+            WarningDialog.initWarningDialog("转接错误 test")
+          }
+
+        case HostDisconnect(hostLiveId) =>
+          Boot.addToPlatform {
+            WarningDialog.initWarningDialog("主播已断开连线~")
+          }
+          rmManager ! RmManager.StopJoinAndWatch
 
 
         case HostCloseRoom =>
@@ -233,26 +238,9 @@ class AudienceController(
             WarningDialog.initWarningDialog("房主连接断开，互动功能已关闭！")
           }
 
-
-//        case msg: UpdateAudienceInfo =>
-//          //          log.info(s"update audienceList.")
-//          Boot.addToPlatform {
-//            audienceScene.watchingList.updateWatchingList(msg.AudienceList)
-//          }
-
-        case msg: LikeRoomRsp =>
-        //          log.debug(s"audience receive likeRoomRsp: ${msg}")
-
-//        case msg: ReFleshRoomInfo =>
-//          //          log.debug(s"audience receive likeNum update: ${msg.roomInfo.like}")
-//          likeNum = msg.roomInfo.like
-//          Boot.addToPlatform {
-//            audienceScene.likeNum.setText(likeNum.toString)
-//          }
-
         case HostStopPushStream2Client =>
           Boot.addToPlatform({
-            WarningDialog.initWarningDialog("主持人结束会议了哦~")
+            WarningDialog.initWarningDialog("主播已停止直播，请换个房间观看哦~")
           })
 
         case x =>

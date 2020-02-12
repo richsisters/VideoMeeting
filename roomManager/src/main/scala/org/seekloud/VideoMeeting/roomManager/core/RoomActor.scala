@@ -16,6 +16,7 @@ import org.seekloud.VideoMeeting.roomManager.protocol.ActorProtocol.BanOnAnchor
 import org.seekloud.VideoMeeting.roomManager.protocol.CommonInfoProtocol.WholeRoomInfo
 import org.seekloud.VideoMeeting.roomManager.utils.{DistributorClient, ProcessorClient, RtpClient}
 import org.slf4j.LoggerFactory
+
 import scala.collection.mutable
 import scala.concurrent.duration.{FiniteDuration, _}
 import scala.util.{Failure, Success}
@@ -379,7 +380,10 @@ object RoomActor {
                     liveInfoMap.put(userId4Audience, rsp.liveInfo)
                     val audienceInfo = AudienceInfo(userId4Audience, userInfoOpt.get.userName, userInfoOpt.get.headImg, rsp.liveInfo.liveId )
                     dispatch(RcvComment(-1l, "", s"user:$userId join in room:$roomId")) //群发评论
+                    log.debug("群发观众信息....")
                     dispatch(AudienceJoinRsp(Some(audienceInfo)))
+                    log.debug("向该用户发送JoinRsp...")
+                    dispatchTo(List((userId4Audience, false)), JoinRsp(Some(wholeRoomInfo.liveInfo.liveId), Some(rsp.liveInfo)))
                   } else {
                     log.debug(s"${ctx.self.path} 错误的userId,可能是数据库里没有用户,userId=$userId4Audience")
                     dispatchTo(List((wholeRoomInfo.roomInfo.userId, false)), AudienceJoinError)
@@ -415,6 +419,7 @@ object RoomActor {
               ProcessorClient.newConnect(roomId, liveIdHost, liveIdAudience, liveIdMix.liveId, liveIdMix.liveCode, wholeRoomInfo.layout)
               ctx.self ! UpdateRTMP(liveIdMix.liveId)
               dispatch(RcvComment(-1l, "", s"roomId$roomId start the meeting!"))
+              log.debug("send start meeting rsp...")
               dispatch(StartMeetingRsp(roomId, liveIdMix.liveId))
             } else{
               log.error(s"start a meeting error, error:${rsp.msg}")
