@@ -83,7 +83,7 @@ class RoomController(
       Boot.addToPlatform {
         showLoading()
         if (roomScene.liveMode) {
-          //          updateRoomList()
+          updateRoomList()
         } else {
           if (!hasWaitingGif) {
             roomScene.recordList = Nil
