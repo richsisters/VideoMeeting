@@ -44,7 +44,11 @@ class HomeController(
     }
 
     override def gotoRoomPage(): Unit = {
-      rmManager ! RmManager.GoToRoomHall
+      if (RmManager.userInfo.nonEmpty && RmManager.roomInfo.nonEmpty) {
+        rmManager ! RmManager.GoToRoomHall
+      } else {
+        gotoLoginDialog(isToWatch = true)
+      }
     }
 
     override def gotoLoginDialog(
