@@ -112,7 +112,7 @@ trait ProcessorService extends ServiceUtils {
 //    updateRoomInfo ~ closeRoom ~ getMpd ~ getRtmpUrl ~ getDash ~ getMpd4Record ~ getRecordList ~ upLoadImg ~ streamLog
 //  }
 
-  val processorRoute:Route = pathPrefix("org/seekloud/VideoMeeting/processor") {
+  val processorRoute:Route = pathPrefix("processor") {
    newConnect  ~ closeRoom ~ updateRoomInfo  ~ upLoadImg ~ streamLog
   }
 }

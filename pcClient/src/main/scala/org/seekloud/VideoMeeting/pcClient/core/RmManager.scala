@@ -117,7 +117,7 @@ object RmManager {
 
   final case class HostStartMeeting(roomId: Long) extends RmCommand
 
-  final case class JoinBegin(audienceInfo: AudienceInfo, liveInfo: LiveInfo) extends RmCommand //开始和某观众连线
+  final case class JoinBegin(audienceInfo: AudienceInfo) extends RmCommand //开始和某观众连线
 
   final case object JoinStop extends RmCommand //停止和某观众连线
 
@@ -552,7 +552,7 @@ object RmManager {
 
           /*拉取观众的rtp流并播放*/
           val joinInfo = JoinInfo(roomInfo.get.roomId, msg.audienceInfo.userId, hostScene.gc)
-          liveManager ! LiveManager.PullStream(msg.liveInfo.liveId, joinInfo = Some(joinInfo), hostScene = Some(hostScene))
+          liveManager ! LiveManager.PullStream(msg.audienceInfo.liveId, joinInfo = Some(joinInfo), hostScene = Some(hostScene))
 
           hostBehavior(stageCtx, homeController, hostScene, hostController, liveManager, mediaPlayer, sender, hostStatus = HostStatus.CONNECT, Some(msg.audienceInfo))
 

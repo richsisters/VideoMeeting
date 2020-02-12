@@ -66,7 +66,7 @@ object RoomActor {
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       Behaviors.withTimers[Command] {
         implicit timer =>
-          log.info(s"grabberManager start----")
+          log.info(s"roomActor start----")
           work(mutable.Map[Long, mutable.Map[String, ActorRef[GrabberActor.Command]]](), mutable.Map[Long,ActorRef[RecorderActor.Command]](), mutable.Map[Long, List[String]]())
       }
     }
@@ -103,8 +103,8 @@ object RoomActor {
           val recorderActor = getRecorderActor(ctx, msg.roomId, msg.host, msg.clientInfo, msg.pushLiveId, msg.pushLiveCode, msg.layout, pushOut)
           val grabber4host = getGrabberActor(ctx, msg.roomId, msg.host, pullInput4Host, recorderActor)
 
-          //grabberMap.put(msg.roomId, List(grabber4host)) //fixme
-          grabberMap(msg.roomId).put(msg.host, grabber4host)
+          grabberMap.put(msg.roomId, mutable.Map(msg.host -> grabber4host)) //fixme
+          //grabberMap(msg.roomId).put(msg.host, grabber4host)
 
           roomLiveMap.put(msg.roomId,List(msg.host, msg.pushLiveId) ::: msg.clientInfo)
 

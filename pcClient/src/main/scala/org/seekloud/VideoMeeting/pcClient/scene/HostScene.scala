@@ -63,6 +63,9 @@ object HostScene {
 
   }
 
+  case class AcceptList(
+                         userInfo: StringProperty
+                       )
 
   trait HostSceneListener {
 
@@ -145,6 +148,7 @@ class HostScene(stage: Stage) {
   var isFullScreen = false
   var roomInfoMap = Map.empty[Long, List[String]]
   val audObservableList: ObservableList[AudienceListInfo] = FXCollections.observableArrayList()
+  val audAcceptList: ObservableList[AcceptList] = FXCollections.observableArrayList()
   var commentPrefix = "effectType0"
 
   var listener: HostSceneListener = _
@@ -169,7 +173,6 @@ class HostScene(stage: Stage) {
     _ =>
       listener.startMeeting(RmManager.roomInfo.get.roomId)
   }
-
 
   val startBox = new HBox()
   startBox.getChildren.add(startBtn)
@@ -380,6 +383,44 @@ class HostScene(stage: Stage) {
       _ =>
         listener.audienceAcceptance(userId = audienceId, accept = false, newRequest)
     }
+
+  }
+
+  def updateAcceptList(userId: Long, userName: String): Unit = {
+    if (!tb3.isSelected) {
+      tb3.setGraphic(connectionIcon1)
+    }
+//    val agreeBtn = new Button("", new ImageView("img/agreeBtn.png"))
+//    val refuseBtn = new Button("", new ImageView("img/refuseBtn.png"))
+
+//    agreeBtn.getStyleClass.add("hostScene-middleArea-tableBtn")
+//    refuseBtn.getStyleClass.add("hostScene-middleArea-tableBtn")
+//    val glow = new Glow()
+//    agreeBtn.addEventHandler(MouseEvent.MOUSE_ENTERED, (_: MouseEvent) => {
+//      agreeBtn.setEffect(glow)
+//    })
+//    agreeBtn.addEventHandler(MouseEvent.MOUSE_EXITED, (_: MouseEvent) => {
+//      agreeBtn.setEffect(null)
+//    })
+//    refuseBtn.addEventHandler(MouseEvent.MOUSE_ENTERED, (_: MouseEvent) => {
+//      refuseBtn.setEffect(glow)
+//    })
+//    refuseBtn.addEventHandler(MouseEvent.MOUSE_EXITED, (_: MouseEvent) => {
+//      refuseBtn.setEffect(null)
+//    })
+      val newRequest = AcceptList(
+          new SimpleStringProperty(s"$userName($userId)")
+      )
+       audAcceptList.add(newRequest)
+
+//    agreeBtn.setOnAction {
+//      _ =>
+//        listener.audienceAcceptance(userId = audienceId, accept = true, newRequest)
+//    }
+//    refuseBtn.setOnAction {
+//      _ =>
+//        listener.audienceAcceptance(userId = audienceId, accept = false, newRequest)
+//    }
 
   }
 
@@ -825,7 +866,7 @@ class HostScene(stage: Stage) {
 
   def addLeftChild3Area(): VBox = {
     val vBox = new VBox()
-    vBox.getChildren.addAll(startBox, connectStateBox, createCntTbArea)
+    vBox.getChildren.addAll(startBox, connectStateBox, createCntTbArea, createAcceptArea)
     vBox.setSpacing(20)
     vBox.setPrefHeight(height)
     vBox.setPadding(new Insets(20, 10, 5, 10))
@@ -849,8 +890,22 @@ class HostScene(stage: Stage) {
 
       AudienceTable.setItems(audObservableList)
       AudienceTable.getColumns.addAll(userInfoCol, agreeBtnCol, refuseBtnCol)
-      AudienceTable.setPrefHeight(height * 0.8)
+      AudienceTable.setPrefHeight(height * 0.4)
       AudienceTable
+    }
+
+    def createAcceptArea: TableView[AcceptList] = {
+      val AcceptTable = new TableView[AcceptList]()
+      AcceptTable.getStyleClass.add("table-view")
+
+      val userInfoCol = new TableColumn[AcceptList, String]("已加入成员")
+      userInfoCol.setPrefWidth(width * 0.15)
+      userInfoCol.setCellValueFactory(new PropertyValueFactory[AcceptList, String]("userInfo"))
+
+      AcceptTable.setItems(audAcceptList)
+      AcceptTable.getColumns.addAll(userInfoCol)
+      AcceptTable.setPrefHeight(height * 0.3)
+      AcceptTable
     }
 
     vBox
