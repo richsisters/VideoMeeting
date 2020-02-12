@@ -122,7 +122,7 @@ object RecorderActor {
           val ffFilterN = new FFmpegFrameFilter("[0:a][1:a] amix=inputs=2:duration=longest:dropout_transition=3:weights=1 1[a]", clientInfo.size + 1)
           ffFilterN.setAudioChannels(clientInfo.size + 1)
           ffFilterN.setSampleFormat(sampleFormat)
-          ffFilterN.setAudioInputs(clientInfo.size + 1)
+          ffFilterN.setAudioInputs(2)
           ffFilterN.start()
           single(roomId,  host, clientInfo,layout, recorder4ts, ffFilterN, drawer, ts4Host, ts4Client, clientImage, out, tsDiffer, canvasSize)
 
