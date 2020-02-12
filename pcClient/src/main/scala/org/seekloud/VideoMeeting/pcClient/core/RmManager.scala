@@ -749,13 +749,16 @@ object RmManager {
           audienceStatus match {
             case AudienceStatus.LIVE =>
               timer.startSingleTimer(PullDelay, PullConnectStream(msg.newId), 10.seconds)
+            case _ =>
+              log.debug(s"==========current audience state is $audienceScene")
+              timer.startSingleTimer(PullDelay, PullConnectStream(msg.newId), 10.seconds)
           }
           Behaviors.same
 
         case msg:PullConnectStream =>
           timer.cancel(PullDelay)
           liveManager ! LiveManager.StopPull
-          audienceScene.liveId=Some(msg.newId)
+          audienceScene.liveId = Some(msg.newId)
           val info = WatchInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
           liveManager ! LiveManager.PullStream(msg.newId,watchInfo = Some(info), audienceScene = Some(audienceScene))
           switchBehavior(ctx, "audienceBehavior", audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, audienceLiveInfo = None, audienceStatus = AudienceStatus.LIVE))

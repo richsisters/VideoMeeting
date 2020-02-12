@@ -40,7 +40,6 @@ object StreamPusher {
   final case object StopSelf extends PushCommand
 
   private object PUSH_STREAM_TIMER_KEY
-
   def create(
     liveId: String,
     liveCode: String,
