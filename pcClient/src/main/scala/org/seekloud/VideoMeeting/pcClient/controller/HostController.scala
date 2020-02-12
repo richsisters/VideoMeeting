@@ -146,7 +146,7 @@ class HostController(
   })
 
 
-  def wsMessageHandle(data: WsMsgRm, userInfo: Map[Long, String] = Map()): Unit = {
+  def wsMessageHandle(data: WsMsgRm): Unit = {
     data match {
 
       case msg: HeatBeat =>
@@ -212,14 +212,12 @@ class HostController(
               hostScene.tb3.setGraphic(hostScene.connectionIcon1)
             }
 
-//            Boot.addToPlatform {
               val userId = msg.joinInfo.get.userId
               val userName = msg.joinInfo.get.userName
-              hostScene.updateAudienceList(userId, userName)
-//            }
-            hostScene.connectionStateText.setText(s"与${msg.joinInfo.get.userName}连线中")
-//            hostScene.connectionStateText.setText(s"与${userList.map(l => l._2)}连线中")
-            hostScene.connectStateBox.getChildren.add(hostScene.shutConnectionBtn)
+              hostScene.updateAcceptList(userId, userName)
+
+//            hostScene.connectionStateText.setText(s"与${msg.joinInfo.get.userName}连线中")
+//            hostScene.connectStateBox.getChildren.add(hostScene.shutConnectionBtn)
 //            isConnecting = true
           }
 
