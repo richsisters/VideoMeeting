@@ -280,6 +280,7 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
       new SimpleStringProperty(s"$userName($userId)")
     )
     audAcceptList.add(newRequest)
+    println("11111" + audAcceptList)
 
   }
 
@@ -403,7 +404,7 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
 
       AcceptTable.setItems(audAcceptList)
       AcceptTable.getColumns.addAll(userInfoCol)
-      AcceptTable.setPrefHeight(height * 0.8)
+      AcceptTable.setPrefHeight(height * 0.3)
       AcceptTable
     }
 

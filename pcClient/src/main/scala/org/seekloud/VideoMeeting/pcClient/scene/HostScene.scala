@@ -296,6 +296,7 @@ class HostScene(stage: Stage) {
     gc.fillText(s"连线中", liveImage.getWidth / 2 - 40, liveImage.getHeight / 8)
   }
 
+
   def resetLoading(): Unit = {
     val sWidth = gc.getCanvas.getWidth
     val sHeight = gc.getCanvas.getHeight

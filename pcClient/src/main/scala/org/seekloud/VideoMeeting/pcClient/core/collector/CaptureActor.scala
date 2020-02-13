@@ -215,7 +215,7 @@ object CaptureActor {
         case msg: DrawImage =>
           val sWidth = gc.getCanvas.getWidth
           val sHeight = gc.getCanvas.getHeight
-          if (needImage) {
+//          if (needImage) {
             if (!isJoin) {
               Boot.addToPlatform {
                 gc.drawImage(msg.image, 0.0, 0.0, sWidth, sHeight)
@@ -226,7 +226,7 @@ object CaptureActor {
 //                gc.drawImage(msg.image, 0.0, sHeight / 4, sWidth / 2, sHeight / 2)
 //              }
 //            }
-          }
+//          }
           Behaviors.same
 
         case msg: SwitchMode =>
