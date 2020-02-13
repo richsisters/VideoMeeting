@@ -278,10 +278,10 @@ object RecorderActor {
             if(client == t.liveId){
               val clientConvert = new Java2DFrameConverter()
               val clientImg = clientConvert.convert(t.frame)
-              ctx.self ! StartDrawing
               clientFrame.put(client, clientImg)
             }
           }
+          ctx.self ! StartDrawing
           draw(canvas, graph, lastTime, hostFrame, clientFrame, clientInfo, recorder4ts, convert4Host, convert, layout, bgImg, roomId, canvasSize)
 
 
