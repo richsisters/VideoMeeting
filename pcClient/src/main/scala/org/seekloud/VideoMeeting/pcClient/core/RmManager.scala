@@ -572,7 +572,7 @@ object RmManager {
           log.debug(s"======== ${msg.audienceInfo.userName} join begin")
           //TODO 根据人数的增加更改画面
           /*背景改变*/
-          hostScene.resetBack()
+//          hostScene.resetBack()
 
           /*媒体画面模式更改*/
           liveManager ! LiveManager.SwitchMediaMode(isJoin = true, reset = hostScene.resetBack)
