@@ -149,7 +149,7 @@ object StreamPullActor {
           val infoOpt = liveInfoMap.get(liveId)
           if(infoOpt.isDefined) {
             val roomId = infoOpt.get
-            roomManager ! CloseRoom(roomId)
+            //roomManager ! CloseRoom(roomId)
             liveInfoMap.remove(liveId)
             livePipeMap.remove(liveId)
             liveCountMap.remove(liveId)

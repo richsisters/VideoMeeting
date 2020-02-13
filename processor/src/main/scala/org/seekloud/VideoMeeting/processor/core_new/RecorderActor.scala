@@ -4,8 +4,8 @@ import java.awt.Graphics
 import java.awt.image.BufferedImage
 import java.io.{File, FileOutputStream, OutputStream}
 import java.nio.{ByteBuffer, ShortBuffer}
-import scala.collection.mutable
 
+import scala.collection.mutable
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{Behaviors, StashBuffer, TimerScheduler}
 import org.bytedeco.ffmpeg.global.{avcodec, avutil}
@@ -29,7 +29,7 @@ import scala.concurrent.duration._
   */
 object RecorderActor {
 
-  var audioChannels = 4 //todo 待议
+  var audioChannels = 2 //todo 待议
   val sampleFormat = 1 //todo 待议
   var frameRate = 30
 
@@ -61,6 +61,8 @@ object RecorderActor {
 
   case class Image4Client(frame: Frame, liveId: String) extends VideoCommand
 
+  case object StartDrawing extends  VideoCommand
+
   case object Close extends VideoCommand
 
   case class Ts4Host(var time: Long = 0)
@@ -83,7 +85,7 @@ object RecorderActor {
         implicit timer =>
           log.info(s"recorderActor start----")
           avutil.av_log_set_level(-8)
-          val recorder4ts = new FFmpegFrameRecorder(output, 640, 480, clientInfo.size + 1)
+          val recorder4ts = new FFmpegFrameRecorder(output, 640, 480, audioChannels)
           recorder4ts.setFrameRate(frameRate)
           recorder4ts.setVideoBitrate(bitRate)
           recorder4ts.setVideoCodec(avcodec.AV_CODEC_ID_MPEG2VIDEO)
@@ -98,7 +100,7 @@ object RecorderActor {
           }
           roomManager ! RoomManager.RecorderRef(roomId, ctx.self)
           ctx.self ! Init
-          single(roomId,  host, clientInfo, layout, recorder4ts, null, null, null, null, null, output, 30000, (0, 0))
+          single(roomId,  host, clientInfo, layout, recorder4ts, null, null, null,  null,null, mutable.Map[String, BufferedImage](), output, 30000, (0, 0))
       }
     }
   }
@@ -109,7 +111,8 @@ object RecorderActor {
   drawer: ActorRef[VideoCommand],
   ts4Host: Ts4Host,
   ts4Client: mutable.Map[String,Ts4Client],
-  clientImage: mutable.Map[String, Image],
+  hostImage: BufferedImage,
+  clientImage: mutable.Map[String, BufferedImage],
   out: OutputStream,
   tsDiffer: Int = 30000, canvasSize: (Int, Int))(implicit timer: TimerScheduler[Command],
   stashBuffer: StashBuffer[Command]): Behavior[Command] = {
@@ -119,12 +122,12 @@ object RecorderActor {
           if (ffFilter != null) {
             ffFilter.close()
           }
-          val ffFilterN = new FFmpegFrameFilter("[0:a][1:a] amix=inputs=2:duration=longest:dropout_transition=3:weights=1 1[a]", clientInfo.size + 1)
-          ffFilterN.setAudioChannels(clientInfo.size + 1)
+          val ffFilterN = new FFmpegFrameFilter("[0:a][1:a] amix=inputs=2:duration=longest:dropout_transition=3:weights=1 1[a]", audioChannels)
+          ffFilterN.setAudioChannels(audioChannels)
           ffFilterN.setSampleFormat(sampleFormat)
           ffFilterN.setAudioInputs(2)
           ffFilterN.start()
-          single(roomId,  host, clientInfo,layout, recorder4ts, ffFilterN, drawer, ts4Host, ts4Client, clientImage, out, tsDiffer, canvasSize)
+          single(roomId,  host, clientInfo,layout, recorder4ts, ffFilterN, drawer, ts4Host, ts4Client, hostImage, clientImage, out, tsDiffer, canvasSize)
 
         case UpdateRecorder(channel, sampleRate, f, width, height, liveId) =>
           if(liveId == host) {
@@ -136,7 +139,7 @@ object RecorderActor {
             ffFilter.setSampleRate(sampleRate)
             recorder4ts.setImageWidth(width)
             recorder4ts.setImageHeight(height)
-            single(roomId,  host, clientInfo, layout, recorder4ts, ffFilter, drawer, ts4Host, ts4Client, clientImage, out, tsDiffer,  (640,  480))
+            single(roomId,  host, clientInfo, layout, recorder4ts, ffFilter, drawer, ts4Host, ts4Client,hostImage, clientImage, out, tsDiffer,  (640,  480))
           }else{
             Behaviors.same
           }
@@ -147,7 +150,7 @@ object RecorderActor {
             Behaviors.same
           }else{
             val canvas = new BufferedImage(640, 480, BufferedImage.TYPE_3BYTE_BGR)
-            val drawer = ctx.spawn(draw(canvas, canvas.getGraphics, Ts4LastImage(), clientImage, clientInfo, recorder4ts,
+            val drawer = ctx.spawn(draw(canvas, canvas.getGraphics, Ts4LastImage(), hostImage, clientImage, clientInfo, recorder4ts,
               new Java2DFrameConverter(), new Java2DFrameConverter, layout, "defaultImg.jpg", roomId, (640, 480)), s"drawer_$roomId")
             ctx.self ! NewFrame(liveId, frame)
             work(roomId,host,clientInfo,layout,recorder4ts,ffFilter, drawer,ts4Host,ts4Client,out,tsDiffer,canvasSize)
@@ -259,7 +262,7 @@ object RecorderActor {
     }
   }
 
-  def draw(canvas: BufferedImage, graph: Graphics, lastTime: Ts4LastImage, clientFrame: mutable.Map[String, Image], clientInfo: List[String],
+  def draw(canvas: BufferedImage, graph: Graphics, lastTime: Ts4LastImage, hostFrame: BufferedImage, clientFrame: mutable.Map[String, BufferedImage], clientInfo: List[String],
            recorder4ts: FFmpegFrameRecorder, convert4Host: Java2DFrameConverter, convert:Java2DFrameConverter,
            layout: Int = 0, bgImg: String, roomId: Long, canvasSize: (Int, Int)): Behavior[VideoCommand] = {
     Behaviors.setup[VideoCommand] { ctx =>
@@ -267,66 +270,72 @@ object RecorderActor {
         case t: Image4Host =>
           val time = t.frame.timestamp
           val img = convert4Host.convert(t.frame)
-          val clientImgMap:mutable.Map[String, BufferedImage] = null
+          draw(canvas, graph, lastTime, img, clientFrame, clientInfo, recorder4ts, convert4Host, convert, layout, bgImg, roomId, canvasSize)
 
+        case t: Image4Client =>
           //得到各个参会人的frame信息
-          clientInfo.foreach{ client =>
-            val clientConvert = new Java2DFrameConverter()
-            if(clientFrame.get(client).nonEmpty){
-              val clientImg = clientConvert.convert(clientFrame.get(client).get.frame)
-              clientImgMap.put(client, clientImg)
-            } else {
-              clientImgMap.put(client, null)
+          clientInfo.foreach { client =>
+            if(client == t.liveId){
+              val clientConvert = new Java2DFrameConverter()
+              val clientImg = clientConvert.convert(t.frame)
+              ctx.self ! StartDrawing
+              clientFrame.put(client, clientImg)
             }
           }
+          draw(canvas, graph, lastTime, hostFrame, clientFrame, clientInfo, recorder4ts, convert4Host, convert, layout, bgImg, roomId, canvasSize)
+
+
+
+        case StartDrawing =>
+          log.info("record start drawing")
           //根据不同的参会人数设置不同的排列方式
           clientInfo.size match {
             case 1 =>
-              graph.drawImage(img, 0, canvasSize._2 / 4, canvasSize._1 / 2, canvasSize._2 / 2, null)
-              graph.drawString("主持人", 24, 24)
-              graph.drawImage(clientImgMap.values.toList.head, canvasSize._1 / 2, canvasSize._2 / 4, canvasSize._1 / 2, canvasSize._2 / 2, null)
-              graph.drawString("参会人1", 344, 24)
+              graph.drawImage(hostFrame, 0, canvasSize._2 / 4, canvasSize._1 / 2, canvasSize._2 / 2, null)
+              graph.drawString("主持人", 24, 25)
+              graph.drawImage(clientFrame.values.toList.head, canvasSize._1 / 2, canvasSize._2 / 4, canvasSize._1 / 2, canvasSize._2 / 2, null)
+              graph.drawString("参会人1", 344, 25)
             case 2 =>
-              graph.drawImage(img, canvasSize._1 / 4, 0, canvasSize._1 / 2, canvasSize._2 / 2, null)
+              graph.drawImage(hostFrame, canvasSize._1 / 4, 0, canvasSize._1 / 2, canvasSize._2 / 2, null)
               graph.drawString("主持人",310 , 0)
-              graph.drawImage(clientImgMap.values.head, 0, canvasSize._2 / 2, canvasSize._1 / 2, canvasSize._2 / 2, null)
-              graph.drawString("参会人1", 150, 240)
-              graph.drawImage(clientImgMap.values.toList(1), canvasSize._1 / 2, canvasSize._2 / 2, canvasSize._1 / 2, canvasSize._2 / 2, null)
-              graph.drawString("参会人2", 470, 240)
+              graph.drawImage(clientFrame.values.head, 0, canvasSize._2 / 2, canvasSize._1 / 2, canvasSize._2 / 2, null)
+              graph.drawString("参会人1", 150, 250)
+              graph.drawImage(clientFrame.values.toList(1), canvasSize._1 / 2, canvasSize._2 / 2, canvasSize._1 / 2, canvasSize._2 / 2, null)
+              graph.drawString("参会人2", 470, 250)
             case 3 =>
-              graph.drawImage(img, 0, 0, canvasSize._1 / 2, canvasSize._2 / 2, null)
+              graph.drawImage(hostFrame, 0, 0, canvasSize._1 / 2, canvasSize._2 / 2, null)
               graph.drawString("主持人", 150, 0)
-              graph.drawImage(clientImgMap.values.head, canvasSize._1 / 2, 0, canvasSize._1 / 2, canvasSize._2 / 2, null)
+              graph.drawImage(clientFrame.values.head, canvasSize._1 / 2, 0, canvasSize._1 / 2, canvasSize._2 / 2, null)
               graph.drawString("参会人1", 470, 0)
-              graph.drawImage(clientImgMap.values.toList(1), 0, canvasSize._2 / 2, canvasSize._1 / 2, canvasSize._2 / 2, null)
-              graph.drawString("参会人2", 150, 240)
-              graph.drawImage(clientImgMap.values.toList(2), canvasSize._1 / 2, canvasSize._2 / 2, canvasSize._1 / 2, canvasSize._2 / 2, null)
-              graph.drawString("参会人3", 470, 24)
+              graph.drawImage(clientFrame.values.toList(1), 0, canvasSize._2 / 2, canvasSize._1 / 2, canvasSize._2 / 2, null)
+              graph.drawString("参会人2", 150, 250)
+              graph.drawImage(clientFrame.values.toList(2), canvasSize._1 / 2, canvasSize._2 / 2, canvasSize._1 / 2, canvasSize._2 / 2, null)
+              graph.drawString("参会人3", 470, 25)
             case 4 =>
-              graph.drawImage(img, canvasSize._2 / 6, 0, canvasSize._1 / 3, canvasSize._2 / 2, null)
+              graph.drawImage(hostFrame, canvasSize._2 / 6, 0, canvasSize._1 / 3, canvasSize._2 / 2, null)
               graph.drawString("主持人", 200, 0)
-              graph.drawImage(clientImgMap.values.head, canvasSize._1 / 2, 0, canvasSize._1 / 3, canvasSize._2 / 2, null)
+              graph.drawImage(clientFrame.values.head, canvasSize._1 / 2, 0, canvasSize._1 / 3, canvasSize._2 / 2, null)
               graph.drawString("参会人1", 300, 0)
-              graph.drawImage(clientImgMap.values.toList(1), 0, canvasSize._2 / 2, canvasSize._1 / 3, canvasSize._2 / 2, null)
-              graph.drawString("参会人2", 100, 240)
-              graph.drawImage(clientImgMap.values.toList(2), canvasSize._1 / 3, canvasSize._2 / 2, canvasSize._1 / 3, canvasSize._2 / 2, null)
-              graph.drawString("参会人3",300 , 240)
-              graph.drawImage(clientImgMap.values.toList(3), canvasSize._1 * 2 / 3, canvasSize._2 / 2, canvasSize._1 / 3, canvasSize._2 / 2, null)
-              graph.drawString("参会人4", 500, 240)
+              graph.drawImage(clientFrame.values.toList(1), 0, canvasSize._2 / 2, canvasSize._1 / 3, canvasSize._2 / 2, null)
+              graph.drawString("参会人2", 100, 250)
+              graph.drawImage(clientFrame.values.toList(2), canvasSize._1 / 3, canvasSize._2 / 2, canvasSize._1 / 3, canvasSize._2 / 2, null)
+              graph.drawString("参会人3",300 , 250)
+              graph.drawImage(clientFrame.values.toList(3), canvasSize._1 * 2 / 3, canvasSize._2 / 2, canvasSize._1 / 3, canvasSize._2 / 2, null)
+              graph.drawString("参会人4", 500, 250)
 
             case 5 =>
-              graph.drawImage(img, 0, 0, canvasSize._1 / 3, canvasSize._2 / 2, null)
+              graph.drawImage(hostFrame, 0, 0, canvasSize._1 / 3, canvasSize._2 / 2, null)
               graph.drawString("主持人", 100, 0)
-              graph.drawImage(clientImgMap.values.head, canvasSize._1 / 3, 0, canvasSize._1 / 3, canvasSize._2 / 2, null)
+              graph.drawImage(clientFrame.values.head, canvasSize._1 / 3, 0, canvasSize._1 / 3, canvasSize._2 / 2, null)
               graph.drawString("参会人1", 300, 0)
-              graph.drawImage(clientImgMap.values.toList(1), canvasSize._1 * 2/ 3, 0, canvasSize._1 / 3, canvasSize._2 / 2, null)
+              graph.drawImage(clientFrame.values.toList(1), canvasSize._1 * 2/ 3, 0, canvasSize._1 / 3, canvasSize._2 / 2, null)
               graph.drawString("参会人2", 500, 0)
-              graph.drawImage(clientImgMap.values.toList(2), 0, canvasSize._2 / 2, canvasSize._1 / 3, canvasSize._2 / 2, null)
-              graph.drawString("参会人3", 100, 240)
-              graph.drawImage(clientImgMap.values.toList(3), canvasSize._1 / 3, canvasSize._2 / 2, canvasSize._1 / 3, canvasSize._2 / 2, null)
-              graph.drawString("参会人4", 300, 240)
-              graph.drawImage(clientImgMap.values.toList(4), canvasSize._1 * 2 / 3, canvasSize._2 / 2, canvasSize._1 / 3, canvasSize._2 / 2, null)
-              graph.drawString("参会人5", 500, 240)
+              graph.drawImage(clientFrame.values.toList(2), 0, canvasSize._2 / 2, canvasSize._1 / 3, canvasSize._2 / 2, null)
+              graph.drawString("参会人3", 100, 250)
+              graph.drawImage(clientFrame.values.toList(3), canvasSize._1 / 3, canvasSize._2 / 2, canvasSize._1 / 3, canvasSize._2 / 2, null)
+              graph.drawString("参会人4", 300, 250)
+              graph.drawImage(clientFrame.values.toList(4), canvasSize._1 * 2 / 3, canvasSize._2 / 2, canvasSize._1 / 3, canvasSize._2 / 2, null)
+              graph.drawString("参会人5", 500, 250)
 
           }
 
@@ -334,9 +343,6 @@ object RecorderActor {
           recorder4ts.record(frame.clone())
           Behaviors.same
 
-        case t: Image4Client =>
-          clientFrame.put(t.liveId, Image(t.frame))
-          Behaviors.same
 
         case Close =>
           log.info(s"drawer stopped")
