@@ -141,7 +141,7 @@ object RmManager {
 
   final case object AudienceWsEstablish extends RmCommand
 
-  final case class SendComment(comment: Comment) extends RmCommand
+//  final case class SendComment(comment: Comment) extends RmCommand
 
   final case class SendJudgeLike(judgeLike: JudgeLike) extends RmCommand
 
@@ -221,8 +221,10 @@ object RmManager {
         case GoToLive =>
           log.debug(s"########user-${userInfo.get.userName} start to live")
           val hostScene = new HostScene(stageCtx.getStage)
+          val albumInfo = new AlbumInfo(0l,"","","",0l,"","")
+          val audienceScene = new AudienceScene(albumInfo)
           val inviteController = new InviteController(stageCtx, ctx.self)
-          val hostController = new HostController(stageCtx, hostScene, inviteController, ctx.self)
+          val hostController = new HostController(stageCtx, hostScene, audienceScene, inviteController, ctx.self)
 
           def callBack(): Unit = Boot.addToPlatform(hostScene.changeToggleAction())
 
@@ -611,10 +613,10 @@ object RmManager {
           log.info(s"rmManager stopped in host.")
           Behaviors.stopped
 
-        case msg: SendComment =>
-//          log.debug(s"sending ${msg.comment}")
-          sender.foreach(_ ! msg.comment)
-          Behaviors.same
+//        case msg: SendComment =>
+////          log.debug(s"sending ${msg.comment}")
+//          sender.foreach(_ ! msg.comment)
+//          Behaviors.same
 
         case GetPackageLoss =>
           liveManager ! LiveManager.GetPackageLoss
@@ -761,9 +763,9 @@ object RmManager {
           liveManager ! LiveManager.PullStream(msg.newId,watchInfo = Some(info), audienceScene = Some(audienceScene))
           switchBehavior(ctx, "audienceBehavior", audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, audienceLiveInfo = None, audienceStatus = AudienceStatus.LIVE))
 
-        case msg: SendComment =>
-          sender.foreach(_ ! msg.comment)
-          Behaviors.same
+//        case msg: SendComment =>
+//          sender.foreach(_ ! msg.comment)
+//          Behaviors.same
 
         case msg: SendJudgeLike =>
           sender.foreach(_ ! msg.judgeLike)

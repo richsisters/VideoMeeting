@@ -6,7 +6,7 @@ import org.seekloud.VideoMeeting.pcClient.common.{Constants, StageContext}
 import org.seekloud.VideoMeeting.pcClient.component.WarningDialog
 import org.seekloud.VideoMeeting.pcClient.core.RmManager
 import org.seekloud.VideoMeeting.pcClient.core.RmManager.HeartBeat
-import org.seekloud.VideoMeeting.pcClient.scene.HostScene
+import org.seekloud.VideoMeeting.pcClient.scene.{HostScene, AudienceScene}
 import org.seekloud.VideoMeeting.pcClient.scene.HostScene.{HostSceneListener, AudienceListInfo}
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol._
 import org.slf4j.LoggerFactory
@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory
 class HostController(
   context: StageContext,
   hostScene: HostScene,
+  audienceScene: AudienceScene,
   inviteController: InviteController,
   rmManager: ActorRef[RmManager.RmCommand]
 ) {
@@ -225,6 +226,7 @@ class HostController(
               val userId = msg.joinInfo.get.userId
               val userName = msg.joinInfo.get.userName
               hostScene.updateAcceptList(userId, userName)
+              audienceScene.updateAcceptList(userId, userName)
 
 //            hostScene.connectionStateText.setText(s"与${msg.joinInfo.get.userName}连线中")
 //            hostScene.connectStateBox.getChildren.add(hostScene.shutConnectionBtn)

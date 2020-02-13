@@ -1,10 +1,12 @@
 package org.seekloud.VideoMeeting.pcClient.scene
 
 import javafx.animation.{Animation, KeyFrame, Timeline}
+import javafx.beans.property.{SimpleStringProperty, StringProperty}
 import javafx.collections.{FXCollections, ObservableList}
 import javafx.geometry.{Insets, Pos}
 import javafx.scene.canvas.{Canvas, GraphicsContext}
 import javafx.scene.control._
+import javafx.scene.control.cell.PropertyValueFactory
 import javafx.scene.effect.{DropShadow, Glow}
 import javafx.scene.image.{Image, ImageView}
 import javafx.scene.input.MouseEvent
@@ -37,6 +39,16 @@ import scala.collection.mutable
 
 
 object AudienceScene {
+
+  case class AcceptList(
+                         userInfo: StringProperty
+                       ){
+    def getUserInfo: String = userInfo.get()
+
+    def setUserInfo(info: String): Unit = userInfo.set(info)
+
+  }
+
 
   trait AudienceSceneListener {
 
@@ -71,6 +83,8 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
   private val group = new Group()
 
   private val timeline = new Timeline()
+
+  val audAcceptList: ObservableList[AcceptList] = FXCollections.observableArrayList()
 
   def startPackageLoss(): Unit = {
     log.info("start to get package loss.")
@@ -260,6 +274,15 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
     this.listener = listener
   }
 
+  def updateAcceptList(userId: Long, userName: String): Unit = {
+
+    val newRequest = AcceptList(
+      new SimpleStringProperty(s"$userName($userId)")
+    )
+    audAcceptList.add(newRequest)
+
+  }
+
   def createIDcard: HBox = {
 
     val header = Pictures.getPic(album.headImgUrl)
@@ -370,6 +393,21 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
 
     }
 
+    def createAcceptArea: TableView[AcceptList] = {
+      val AcceptTable = new TableView[AcceptList]()
+      AcceptTable.getStyleClass.add("table-view")
+
+      val userInfoCol = new TableColumn[AcceptList, String]("已加入成员")
+      userInfoCol.setPrefWidth(width * 0.15)
+      userInfoCol.setCellValueFactory(new PropertyValueFactory[AcceptList, String]("userInfo"))
+
+      AcceptTable.setItems(audAcceptList)
+      AcceptTable.getColumns.addAll(userInfoCol)
+      AcceptTable.setPrefHeight(height * 0.8)
+      AcceptTable
+    }
+
+
 //    def createAudLbArea: Label = {
     ////
     ////      val audienceIcon = Common.getImageView("img/watching.png",30,30)
@@ -381,7 +419,7 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
 
     val leftAreaBox = if (!isRecord) {
       //看直播
-      new VBox(createRoomInfoBox, createButtonBox)
+      new VBox(createRoomInfoBox, createButtonBox, createAcceptArea)
     } else {
       //看录像
       new VBox(createRoomInfoBox)

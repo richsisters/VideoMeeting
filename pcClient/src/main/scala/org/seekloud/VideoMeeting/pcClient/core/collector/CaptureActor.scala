@@ -220,11 +220,12 @@ object CaptureActor {
               Boot.addToPlatform {
                 gc.drawImage(msg.image, 0.0, 0.0, sWidth, sHeight)
               }
-            } else {
-              Boot.addToPlatform {
-                gc.drawImage(msg.image, 0.0, sHeight / 4, sWidth / 2, sHeight / 2)
-              }
             }
+//            else {
+//              Boot.addToPlatform {
+//                gc.drawImage(msg.image, 0.0, sHeight / 4, sWidth / 2, sHeight / 2)
+//              }
+//            }
           }
           Behaviors.same
 
