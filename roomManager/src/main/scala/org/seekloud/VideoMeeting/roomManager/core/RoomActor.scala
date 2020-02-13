@@ -514,7 +514,7 @@ object RoomActor {
         }
         Behaviors.same
 
-      case AudienceShutJoin(`roomId`, userId) =>
+      case AudienceShutJoin(`roomId`, `userId`) =>
         log.debug(s"${ctx.self.path} the audience connection has been shut")
         //TODO 目前是某个观众退出则关闭会议，应该修改为不关闭整个会议
         liveInfoMap.clear()
@@ -545,6 +545,19 @@ object RoomActor {
             ctx.self ! SwitchBehavior("idle", idle(wholeRoomInfo, liveInfoMap, subscribers, liker, startTime, totalView))
         }
         switchBehavior(ctx, "busy", busy(), InitTime, TimeOut("busy"))
+
+      case ForceExit(userId4Member) =>
+        liveInfoMap.remove(userId4Member)
+        //TODO 向processor发送强制某人退出消息
+        dispatch(RcvComment(-1L, "", s"host force user-$userId4Member to leave"))
+        dispatchTo(List(userId4Member, false), ForceExitRsp)
+        Behaviors.same
+
+      case BanOnMember(userId4Member, image, sound) =>
+        //TODO 向processor发送屏蔽
+        dispatch(RcvComment(-1L, "", s"user-$userId4Member can't ${if(image) "show up" else ""} ${if(sound) "and speak" else ""}"))
+        dispatchTo(List(userId4Member, false), BanOnMemberRsp(image, sound))
+        Behaviors.same
 
       case PingPackage =>
         Behaviors.same

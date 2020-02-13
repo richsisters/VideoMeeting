@@ -487,11 +487,13 @@ object RmManager {
           switchBehavior(ctx, "idle", idle(stageCtx, liveManager, mediaPlayer, homeController))
 
         case msg:PullFromProcessor =>
-          log.debug("pull from processor")
           hostStatus match {
-            case HostStatus.LIVE =>
+            case HostStatus.CONNECT =>
               log.debug("ready to send pull connect stream")
               timer.startSingleTimer(PullDelay, PullConnectStream(msg.newId), 10.seconds)
+
+            case _ =>
+              log.debug(s"========== current hostScene is ${hostScene}")
           }
           Behaviors.same
 
@@ -499,7 +501,7 @@ object RmManager {
           timer.cancel(PullDelay)
           val joinInfo = JoinInfo(roomInfo.get.roomId, 0L, hostScene.gc)
           liveManager ! LiveManager.PullStream(msg.newId, joinInfo = Some(joinInfo), hostScene = Some(hostScene))
-          switchBehavior(ctx, "hostBehavior", hostBehavior(stageCtx, homeController, hostScene, hostController, liveManager, mediaPlayer, sender, hostStatus = HostStatus.CONNECT, None))
+          Behaviors.same
 
         case HostLiveReq =>
           log.debug(s"Host req live.")
@@ -565,18 +567,14 @@ object RmManager {
           Behaviors.same
 
         case msg: JoinBegin =>
+          log.debug(s"======== ${msg.audienceInfo.userName} join begin")
+          //TODO 根据人数的增加更改画面
           /*背景改变*/
           hostScene.resetBack()
 
           /*媒体画面模式更改*/
           liveManager ! LiveManager.SwitchMediaMode(isJoin = true, reset = hostScene.resetBack)
-
-          /*拉取观众的rtp流并播放*/
-//          val joinInfo = JoinInfo(roomInfo.get.roomId, msg.audienceInfo.userId, hostScene.gc)
-//          liveManager ! LiveManager.PullStream(msg.audienceInfo.liveId, joinInfo = Some(joinInfo), hostScene = Some(hostScene))
-          Behaviors.same
-
-//          hostBehavior(stageCtx, homeController, hostScene, hostController, liveManager, mediaPlayer, sender, hostStatus = HostStatus.CONNECT, Some(msg.audienceInfo))
+          switchBehavior(ctx, "hostBehavior", hostBehavior(stageCtx, homeController, hostScene, hostController, liveManager, mediaPlayer, sender, hostStatus = HostStatus.CONNECT, None))
 
         case ShutJoin =>
           log.debug("disconnection with current audience.")
@@ -747,7 +745,7 @@ object RmManager {
 
         case msg:PullFromProcessor =>
           audienceStatus match {
-            case AudienceStatus.LIVE =>
+            case AudienceStatus.CONNECT =>
               timer.startSingleTimer(PullDelay, PullConnectStream(msg.newId), 10.seconds)
             case _ =>
               log.debug(s"==========current audience state is $audienceScene")

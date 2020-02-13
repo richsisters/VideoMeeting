@@ -48,7 +48,6 @@ object AuthProtocol {
   sealed trait WsMsgRm2Host extends WsMsgRm
 
   /*心跳包*/
-
   case object PingPackage extends WsMsgClient with WsMsgRm
 
   case class HeatBeat(ts: Long) extends WsMsgRm
@@ -93,7 +92,6 @@ object AuthProtocol {
 
 
   /*修改房间信息*/
-
   case class ModifyRoomInfo(
     roomName: Option[String] = None,
     roomDes: Option[String] = None
@@ -105,7 +103,6 @@ object AuthProtocol {
 
 
   /*设置直播内容*/
-
   case class ChangeLiveMode(
     isJoinOpen: Option[Boolean] = None, //是否开启连线
     aiMode: Option[Int] = None, //是否开启人脸识别
@@ -118,7 +115,6 @@ object AuthProtocol {
 
 
   /*会议控制*/
-
   case class AudienceJoin(userId: Long, userName: String, clientType: Int) extends WsMsgRm2Host //申请加入会议者信息
 
   case class JoinAccept(roomId: Long, userId: Long, clientType: Int, accept: Boolean) extends WsMsgHost //主持人审批某个用户加入请求
@@ -128,8 +124,6 @@ object AuthProtocol {
   case class StartMeetingRsp(roomId: Long, liveId: String, errCode:Int = 0, msg: String = "ok") extends WsMsgRm
 
   def StartMeetingError(msg: String) = StartMeetingRsp(-1L, "", 400040, msg)
-
-//  case class startMeeting(userId: List[Long], clientType: Int) extends WsMsgHost //开始会议，和所有同意的用户进行连线
 
   case class AudienceJoinRsp(
     joinInfo: Option[AudienceInfo] = None, //参会者者信息
@@ -147,7 +141,7 @@ object AuthProtocol {
 
   case class HostStopPushStream(roomId: Long) extends WsMsgHost //房主停止推流
 
-  //邀请好友
+  /*邀请好友*/
   case class Invite(
                      email: String,
                      meetingNum: String //会议号
@@ -155,6 +149,16 @@ object AuthProtocol {
 
 
   case object InviteRsp extends WsMsgRm2Host
+
+  case object BanOnAnchor extends WsMsgRm2Host//禁播消息
+
+  /*主持人权限*/
+  case class ForceExit(userId4Member: Long) extends WsMsgHost //强制某个用户退出
+
+  case class BanOnMember(userId4Member: Long, image: Boolean, sound: Boolean) extends WsMsgHost //屏蔽某人声音活着图像
+
+  case class SpeakerRight(userId4Member: Long) extends WsMsgHost //指定某人发言
+
 
   /**
     *
@@ -219,8 +223,10 @@ object AuthProtocol {
   case object HostCloseRoom extends WsMsgRm2Audience //房主关闭房间通知房间所有用户
   case class HostCloseRoom() extends WsMsgRm2Audience //房主关闭房间通知房间所有用户，class方便后台一些代码的处理
 
+  case object ForceExitRsp extends WsMsgRm2Audience //用户被主持人强制退出
 
-  case object BanOnAnchor extends WsMsgRm2Host//禁播消息
+  case class BanOnMemberRsp(image: Boolean, sound: Boolean)  //用户被主持人屏蔽声音或者图像
+
 
   /**
     * 所有用户
