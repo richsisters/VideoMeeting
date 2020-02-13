@@ -784,49 +784,21 @@ object RmManager {
           Behaviors.same
 
         case msg: ChangeOption4Audience =>
-          assert(userInfo.nonEmpty)
-          val rst = liveManager ? LiveManager.Ask4State
-          rst.onComplete {
-            case Success(isStart) =>
-              log.info(s"change option need image: ${msg.needImage}, need sound: ${msg.needSound}")
-              val userId = userInfo.get.userId
+          audienceStatus match{
+            case AudienceStatus.CONNECT =>
+              liveManager ! LiveManager.ChangeMediaOption(None, None, None, msg.needImage, msg.needSound, () => audienceScene.loadingBack())
+              Behaviors.same
 
-              val playId = audienceStatus match {
-                case AudienceStatus.LIVE => Ids.getPlayId(audienceStatus, roomId = Some(audienceScene.getRoomInfo.roomId))
-                case AudienceStatus.CONNECT => Ids.getPlayId(audienceStatus, roomId = Some(audienceScene.getRoomInfo.roomId), audienceId = Some(userId))
-                case AudienceStatus.RECORD => Ids.getPlayId(audienceStatus, roomId = Some(audienceScene.getRecordInfo.roomId), startTime = Some(audienceScene.getRecordInfo.startTime))
-              }
-              if(isStart) {
-                log.info(s"player has started, now stop it")
-                mediaPlayer.stop(playId, audienceScene.autoReset)
-              }
+            case AudienceStatus.LIVE =>
+              val playId = Ids.getPlayId(audienceStatus, roomId = Some(audienceScene.getRoomInfo.roomId))
+              mediaPlayer.stop(playId, audienceScene.autoReset)
               mediaPlayer.needImage(msg.needImage)
               mediaPlayer.needSound(msg.needSound)
+              liveManager ! LiveManager.StopPull
 
-              audienceStatus match {
-                case AudienceStatus.LIVE =>
-                  if (isStart) {
-                    liveManager ! LiveManager.StopPull
-                  }
-                  else {
-                    val info = WatchInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
-                    liveManager ! LiveManager.PullStream(audienceScene.liveId.get, watchInfo = Some(info))
-                  }
-
-                case AudienceStatus.CONNECT =>
-                  audienceLiveInfo.foreach { i =>
-                    liveManager ! LiveManager.StopPull
-
-                  }
-                case AudienceStatus.RECORD =>
-
-              }
-
-            case Failure(e) =>
-              log.info(s"get player isStart error: ${e.getMessage}")
-              timer.startSingleTimer(ASK4STATE_RETRY_TIMER_KEY, msg, 100 milliseconds)
+            case _ =>
+              log.info("audienceState is record!!!")
           }
-
 
           Behaviors.same
 

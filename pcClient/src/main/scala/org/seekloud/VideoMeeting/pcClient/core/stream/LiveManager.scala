@@ -115,8 +115,6 @@ object LiveManager {
           captureActor.foreach(_ ! CaptureActor.StopCapture)
           idle(parent, mediaPlayer, None, streamPusher, streamPuller, isStart = isStart, isRegular = isRegular)
 
-
-
         case msg: SwitchMediaMode =>
           captureActor.foreach(_ ! CaptureActor.SwitchMode(msg.isJoin, msg.reset))
           Behaviors.same

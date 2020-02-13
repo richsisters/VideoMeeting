@@ -206,7 +206,6 @@ class AudienceController(
 //            audienceScene.barrage.updateBarrage(msg)
           }
 
-
         case msg: JoinRsp =>
           if (msg.errCode == 0) {
             rmManager ! RmManager.StartJoin(msg.hostLiveId.get, msg.joinInfo.get)
@@ -218,6 +217,18 @@ class AudienceController(
             WarningDialog.initWarningDialog("房主拒绝连线申请!")
             audienceScene.hasReqJoin = false
           }
+
+        case ForceExitRsp =>
+          log.debug("got force exit rsp!")
+          rmManager ! RmManager.StopJoinAndWatch
+
+        case msg: BanOnMemberRsp =>
+          log.debug("got ban on member rsp!")
+          if(msg.image)
+            audienceScene.imageToggleBtn.setDisable(true)
+          if(msg.sound)
+            audienceScene.soundToggleBtn.setDisable(true)
+          rmManager ! RmManager.ChangeOption4Audience(msg.image, msg.sound)
 
         case msg:StartMeetingRsp =>
           if (msg.errCode == 0) {
@@ -245,8 +256,6 @@ class AudienceController(
 
         case x =>
           log.warn(s"audience recv unknown msg from rm: $x")
-
-
       }
     }
   }
