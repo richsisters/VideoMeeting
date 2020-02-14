@@ -221,10 +221,8 @@ object RmManager {
         case GoToLive =>
           log.debug(s"########user-${userInfo.get.userName} start to live")
           val hostScene = new HostScene(stageCtx.getStage)
-          val albumInfo = new AlbumInfo(0l,"","","",0l,"","")
-          val audienceScene = new AudienceScene(albumInfo)
           val inviteController = new InviteController(stageCtx, ctx.self)
-          val hostController = new HostController(stageCtx, hostScene, audienceScene, inviteController, ctx.self)
+          val hostController = new HostController(stageCtx, hostScene, inviteController, ctx.self)
 
           def callBack(): Unit = Boot.addToPlatform(hostScene.changeToggleAction())
 

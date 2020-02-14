@@ -254,6 +254,23 @@ class AudienceController(
             WarningDialog.initWarningDialog("主播已停止直播，请换个房间观看哦~")
           })
 
+        case msg: AudienceJoinRsp =>
+          if (msg.errCode == 0) {
+            //显示连线观众信息
+            Boot.addToPlatform {
+
+              val userId = msg.joinInfo.get.userId
+              val userName = msg.joinInfo.get.userName
+              audienceScene.updateAttendList(userId, userName)
+
+            }
+
+          } else {
+            Boot.addToPlatform {
+              WarningDialog.initWarningDialog(s"参会者加入出错:${msg.msg}")
+            }
+          }
+
         case x =>
           log.warn(s"audience recv unknown msg from rm: $x")
       }

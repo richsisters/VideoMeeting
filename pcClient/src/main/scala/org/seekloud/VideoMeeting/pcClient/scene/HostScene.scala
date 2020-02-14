@@ -401,7 +401,6 @@ class HostScene(stage: Stage) {
           new SimpleStringProperty(s"$userName($userId)")
       )
        audAcceptList.add(newRequest)
-
   }
 
   def getScene: Scene = this.scene

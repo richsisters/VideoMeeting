@@ -40,12 +40,12 @@ import scala.collection.mutable
 
 object AudienceScene {
 
-  case class AcceptList(
-                         userInfo: StringProperty
+  case class AttendList(
+                         attendInfo: StringProperty
                        ){
-    def getUserInfo: String = userInfo.get()
+    def getUserInfo: String = attendInfo.get()
 
-    def setUserInfo(info: String): Unit = userInfo.set(info)
+    def setUserInfo(info: String): Unit = attendInfo.set(info)
 
   }
 
@@ -84,7 +84,7 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
 
   private val timeline = new Timeline()
 
-  val audAcceptList: ObservableList[AcceptList] = FXCollections.observableArrayList()
+  val audAttendList: ObservableList[AttendList] = FXCollections.observableArrayList()
 
   def startPackageLoss(): Unit = {
     log.info("start to get package loss.")
@@ -274,13 +274,12 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
     this.listener = listener
   }
 
-  def updateAcceptList(userId: Long, userName: String): Unit = {
+  def updateAttendList(userId: Long, userName: String): Unit = {
 
-    val newRequest = AcceptList(
-      new SimpleStringProperty(s"$userName($userId)")
+    val newRequest = AttendList(
+      new SimpleStringProperty(s"$userName")
     )
-    audAcceptList.add(newRequest)
-    println("11111" + audAcceptList)
+    audAttendList.add(newRequest)
 
   }
 
@@ -333,6 +332,14 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
   }
 
   def addLeftArea(): VBox = {
+
+    val leftAreaBox = new VBox
+    leftAreaBox.getChildren.addAll(createRoomInfoBox, createButtonBox, createAcceptArea)
+    leftAreaBox.setSpacing(15)
+    leftAreaBox.setPadding(new Insets(25, 10, 10, 10))
+//    leftAreaBox.setPrefWidth(width*0.3)
+    leftAreaBox.setPrefHeight(height)
+    leftAreaBox.getStyleClass.add("hostScene-leftArea-wholeBox")
 
     def createRoomInfoBox: VBox = {
       //roomName
@@ -394,47 +401,20 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
 
     }
 
-    def createAcceptArea: TableView[AcceptList] = {
-      val AcceptTable = new TableView[AcceptList]()
-      AcceptTable.getStyleClass.add("table-view")
+    def createAcceptArea: TableView[AttendList] = {
+      val AttendTable = new TableView[AttendList]()
+      AttendTable.getStyleClass.add("table-view")
 
-      val userInfoCol = new TableColumn[AcceptList, String]("已加入成员")
+      val userInfoCol = new TableColumn[AttendList, String]("已加入成员")
       userInfoCol.setPrefWidth(width * 0.15)
-      userInfoCol.setCellValueFactory(new PropertyValueFactory[AcceptList, String]("userInfo"))
+      userInfoCol.setCellValueFactory(new PropertyValueFactory[AttendList, String]("userInfo"))
 
-      AcceptTable.setItems(audAcceptList)
-      AcceptTable.getColumns.addAll(userInfoCol)
-      AcceptTable.setPrefHeight(height * 0.3)
-      AcceptTable
+      AttendTable.setItems(audAttendList)
+      AttendTable.getColumns.addAll(userInfoCol)
+      AttendTable.setPrefHeight(height * 0.3)
+      AttendTable
     }
 
-
-//    def createAudLbArea: Label = {
-    ////
-    ////      val audienceIcon = Common.getImageView("img/watching.png",30,30)
-    ////      val audienceLabel = new Label("观众列表",audienceIcon)
-    ////      audienceLabel.getStyleClass.add("hostScene-leftArea-label")
-    ////      audienceLabel
-    ////
-    ////    }
-
-    val leftAreaBox = if (!isRecord) {
-      //看直播
-      new VBox(createRoomInfoBox, createButtonBox, createAcceptArea)
-    } else {
-      //看录像
-      new VBox(createRoomInfoBox)
-    }
-    if(!isRecord) {
-      leftAreaBox.setSpacing(5)
-      leftAreaBox.setPadding(new Insets(25, 10, 10, 10))
-    } else {
-      leftAreaBox.setSpacing(15)
-      leftAreaBox.setPadding(new Insets(25, 10, 10, 10))
-      leftAreaBox.setPrefWidth(width*0.3)
-    }
-    leftAreaBox.setPrefHeight(height)
-    leftAreaBox.getStyleClass.add("hostScene-leftArea-wholeBox")
     leftAreaBox
 
   }

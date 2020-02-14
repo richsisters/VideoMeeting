@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory
 class HostController(
   context: StageContext,
   hostScene: HostScene,
-  audienceScene: AudienceScene,
   inviteController: InviteController,
   rmManager: ActorRef[RmManager.RmCommand]
 ) {
@@ -226,7 +225,6 @@ class HostController(
               val userId = msg.joinInfo.get.userId
               val userName = msg.joinInfo.get.userName
               hostScene.updateAcceptList(userId, userName)
-              audienceScene.updateAcceptList(userId, userName)
 
 //            hostScene.connectionStateText.setText(s"与${msg.joinInfo.get.userName}连线中")
 //            hostScene.connectStateBox.getChildren.add(hostScene.shutConnectionBtn)
@@ -235,7 +233,7 @@ class HostController(
 
         } else {
           Boot.addToPlatform {
-            WarningDialog.initWarningDialog(s"观众加入出错:${msg.msg}")
+            WarningDialog.initWarningDialog(s"参会者加入出错:${msg.msg}")
           }
         }
 
