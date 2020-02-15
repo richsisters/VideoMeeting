@@ -80,7 +80,7 @@ object HostScene {
 
     def setBanOnImage(btn: ToggleButton): Unit = banOnImage.set(btn)
 
-    def getBanOnSound: ToggleButton = banOnImage.get()
+    def getBanOnSound: ToggleButton = banOnSound.get()
 
     def setBanOnSound(btn: ToggleButton): Unit = banOnSound.set(btn)
   }
@@ -949,7 +949,7 @@ class HostScene(stage: Stage) {
       AcceptTable.getStyleClass.add("table-view")
 
       val userInfoCol = new TableColumn[AcceptList, String]("已加入成员")
-      userInfoCol.setPrefWidth(width * 0.11)
+      userInfoCol.setPrefWidth(width * 0.1)
       userInfoCol.setCellValueFactory(new PropertyValueFactory[AcceptList, String]("userInfo"))
 
       val imageBtnCol = new TableColumn[AcceptList, Button]("图像")
