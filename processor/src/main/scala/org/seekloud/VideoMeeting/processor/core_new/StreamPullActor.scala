@@ -42,6 +42,8 @@ object StreamPullActor {
 
   case class NewSend(live: String) extends Command
 
+  case class StopPull4Client(liveId: String) extends Command
+
   case object TimerKey
 
   case object TimeKey4Clean

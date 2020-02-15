@@ -27,12 +27,17 @@ object RoomManager {
 
   sealed trait Command
 
-  //case class NewConnection(roomId: Long, host: String, client1: String, client2: String, client3: String, pushLiveId: String, pushLiveCode: String, layout: Int) extends Command
   case class NewConnection(roomId: Long, host: String, clientInfo: List[String], pushLiveId: String, pushLiveCode: String, layout: Int) extends Command
 
-  case class CloseRoom(roomId: Long) extends Command
+  case class ForceExit(roomId: Long, liveId: String) extends Command //主持人强制某人退出
 
-  case class UpdateRoomInfo(roomId: Long, layout:Int ) extends Command
+  case class BanOnClient(roomId: Long, liveId: String,isImg: Boolean, isSound: Boolean) extends Command
+
+  case class CancelBan(roomId: Long, liveId: String, isImg: Boolean, isSound: Boolean) extends Command
+
+  case class SpeakerRight(roomId: Long, liveId: String) extends Command
+
+  case class CloseRoom(roomId: Long) extends Command
 
   case class RecorderRef(roomId: Long, ref: ActorRef[RecorderActor.Command]) extends Command
 
@@ -63,14 +68,6 @@ object RoomManager {
           roomInfoMap.put(msg.roomId, roomActor)
           Behaviors.same
 
-        case msg:UpdateRoomInfo =>
-          log.info(s"${ctx.self} receive a msg${msg}")
-          val roomInfo = roomInfoMap.get(msg.roomId)
-          if(roomInfo.nonEmpty){
-            roomInfo.get ! RoomActor.UpdateRoomInfo(msg.roomId, msg.layout)
-          }
-          Behaviors.same
-
         case RecorderRef(roomId, ref) =>
           log.info(s"${ctx.self} receive a msg${msg}")
           val roomActor = roomInfoMap.get(roomId)
@@ -78,6 +75,42 @@ object RoomManager {
             roomActor.foreach(_ ! RoomActor.Recorder(roomId, ref) )
           }
           Behaviors.same
+
+        case msg: ForceExit =>
+          log.info(s"${ctx.self} receive a msg:${msg} ")
+          val roomInfo = roomInfoMap.get(msg.roomId)
+          if(roomInfo.nonEmpty){
+            roomInfo.get ! RoomActor.ForceExit4Client(msg.roomId, msg.liveId)
+          }
+          Behaviors.same
+
+        case msg: BanOnClient =>
+          log.info(s"${ctx.self} receive a msg $msg")
+          val roomInfo = roomInfoMap.get(msg.roomId)
+          if(roomInfo.nonEmpty){
+            roomInfo.get ! RoomActor.BanOnClient(msg.roomId, msg.liveId, msg.isImg, msg.isSound)
+          }
+          Behaviors.same
+
+        case msg: CancelBan =>
+          log.info(s"${ctx.self} receive a msg $msg")
+          val roomInfo = roomInfoMap.get(msg.roomId)
+          if(roomInfo.nonEmpty){
+            roomInfo.get ! RoomActor.CancelBan(msg.roomId, msg.liveId, msg.isImg, msg.isSound)
+          }
+          Behaviors.same
+
+
+
+        case msg: SpeakerRight =>
+          log.info(s"${ctx.self} receive a msg $msg")
+          val roomInfo = roomInfoMap.get(msg.roomId)
+          if(roomInfo.nonEmpty){
+            roomInfo.get ! RoomActor.SpeakerRight(msg.roomId, msg.liveId)
+          }
+          Behaviors.same
+
+
 
         case msg:CloseRoom =>
           log.info(s"${ctx.self} receive a msg:${msg} ")

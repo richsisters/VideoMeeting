@@ -34,9 +34,15 @@ object RoomActor {
   //case class NewRoom(roomId: Long, host: String, client1: String, client2: String, client3: String, pushLiveId: String, pushLiveCode: String, layout: Int) extends Command
   case class NewRoom(roomId: Long, host: String, clientInfo: List[String], pushLiveId: String, pushLiveCode: String, layout: Int) extends Command
 
-  case class UpdateRoomInfo(roomId: Long, layout: Int) extends Command
-
   case class Recorder(roomId: Long, recorderRef: ActorRef[RecorderActor.Command]) extends Command
+
+  case class ForceExit4Client(roomId: Long, liveId: String) extends  Command
+
+  case class BanOnClient(roomId: Long, liveId: String, isImg: Boolean, isSound: Boolean) extends Command
+
+  case class CancelBan(roomId: Long, liveId: String, isImg: Boolean, isSound: Boolean) extends Command
+
+  case class SpeakerRight(roomId: Long, liveId: String) extends  Command
 
   case class CloseRoom(roomId: Long) extends Command
 
@@ -139,14 +145,6 @@ object RoomActor {
           streamPushActor ! StreamPushActor.NewLive(msg.pushLiveId, msg.pushLiveCode)
           Behaviors.same
 
-        case UpdateRoomInfo(roomId, layout) =>
-          if(recorderMap.get(roomId).nonEmpty) {
-            recorderMap.get(roomId).foreach(_ ! RecorderActor.UpdateRoomInfo(roomId,layout ))
-          } else {
-            log.info(s"${roomId} recorder not exist")
-          }
-          Behaviors.same
-
         case msg:Recorder =>
           log.info(s"${ctx.self} receive a msg $msg")
           val grabberActorMap = grabberMap.get(msg.roomId)
@@ -156,6 +154,65 @@ object RoomActor {
             log.info(s"${msg.roomId} grabbers not exist")
           }
           Behaviors.same
+
+        case msg:ForceExit4Client =>
+          log.info(s"${ctx.self} receive a msg $msg")
+          val grabberActorMap = grabberMap.get(msg.roomId)
+          if(grabberActorMap.isDefined){
+            grabberActorMap.get.foreach( grabber =>
+              if(grabber._1 == msg.liveId){
+                grabber._2 ! GrabberActor.StopGrabber
+              }
+            )
+          } else {
+            log.info(s"${msg.roomId}  grabbers not exist when forceExit4Client")
+          }
+
+          if(recorderMap.get(msg.roomId).nonEmpty) {
+            recorderMap.get(msg.roomId).foreach(_ ! RecorderActor.ClientExit(msg.liveId))
+          } else {
+            log.info(s"${msg.roomId}  recorder not exist when forceExit4Client")
+          }
+
+          if(roomLiveMap.get(msg.roomId).nonEmpty){
+            streamPullActor ! StreamPullActor.StopPull4Client(msg.liveId)
+            roomLiveMap.get(msg.roomId).foreach{live =>
+              live.foreach{l =>
+                if(l == msg.liveId){
+                  pullPipeMap.get(l).foreach( a => a ! StreamPullPipe.ClosePipe)
+                  pullPipeMap.remove(msg.liveId)
+                }
+              }
+            }
+          } else {
+            log.info(s"${msg.roomId}  pipe not exist when forceExit4Client")
+          }
+
+          Behaviors.same
+
+        case msg: BanOnClient =>
+          log.info(s"${ctx.self} receive a msg $msg")
+          if(recorderMap.get(msg.roomId).nonEmpty) {
+            recorderMap.get(msg.roomId).foreach(_ ! RecorderActor.BanOnClient(msg.liveId, msg.isImg, msg.isSound))
+          } else {
+            log.info(s"${msg.roomId}  recorder not exist when forceExit4Client")
+          }
+          Behaviors.same
+
+        case msg: CancelBan =>
+          log.info(s"${ctx.self} receive a msg $msg")
+          if(recorderMap.get(msg.roomId).nonEmpty) {
+            recorderMap.get(msg.roomId).foreach(_ ! RecorderActor.CancelBan(msg.liveId, msg.isImg, msg.isSound))
+          } else {
+            log.info(s"${msg.roomId}  recorder not exist when forceExit4Client")
+          }
+          Behaviors.same
+
+        case msg: SpeakerRight =>
+          log.info(s"${ctx.self} receive a msg $msg") // todo 指定某人发言
+          Behaviors.same
+
+
 
         case CloseRoom(roomId) =>
           log.info(s"${ctx.self} receive a msg $msg")
