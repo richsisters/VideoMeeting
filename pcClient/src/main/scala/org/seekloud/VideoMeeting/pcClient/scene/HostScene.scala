@@ -60,16 +60,29 @@ object HostScene {
     def getRefuseBtn: Button = refuseBtn.get()
 
     def setRefuseBtn(btn: Button): Unit = refuseBtn.set(btn)
-
   }
 
   case class AcceptList(
-                         userInfo: StringProperty
+                         userInfo: StringProperty,
+                         banOnImage: ObjectProperty[ToggleButton],
+                         banOnSound: ObjectProperty[ToggleButton],
+                         exitBtn: ObjectProperty[Button]
                        ){
     def getUserInfo: String = userInfo.get()
 
     def setUserInfo(info: String): Unit = userInfo.set(info)
 
+    def getExitBtn: Button = exitBtn.get()
+
+    def setExitBtn(btn: Button): Unit = exitBtn.set(btn)
+
+    def getBanOnImage: ToggleButton = banOnImage.get()
+
+    def setBanOnImage(btn: ToggleButton): Unit = banOnImage.set(btn)
+
+    def getBanOnSound: ToggleButton = banOnImage.get()
+
+    def setBanOnSound(btn: ToggleButton): Unit = banOnSound.set(btn)
   }
 
   trait HostSceneListener {
@@ -111,6 +124,11 @@ object HostScene {
 
     def gotoInviteDialog()
 
+    def exitMember(userId: Long)
+
+    def banMember(userId: Long, image: Boolean, sound:Boolean)
+
+    def cancelBan(userId: Long, image: Boolean, sound:Boolean)
   }
 
 }
@@ -396,11 +414,64 @@ class HostScene(stage: Stage) {
     if (!tb3.isSelected) {
       tb3.setGraphic(connectionIcon1)
     }
+    val exitBtn = new Button("", new ImageView("img/exit.png"))
+    exitBtn.getStyleClass.add("hostScene-middleArea-tableBtn")
 
-      val newRequest = AcceptList(
-          new SimpleStringProperty(s"$userName($userId)")
-      )
-       audAcceptList.add(newRequest)
+    val banOnImage = new ToggleButton("")
+    banOnImage.getStyleClass.add("hostScene-bottomArea-tableBtn")
+
+    val banOnSound = new ToggleButton("")
+    banOnSound.getStyleClass.add("hostScene-bottomArea-tableBtn")
+
+    val btnList = List(exitBtn, banOnImage, banOnSound)
+    val glow = new Glow()
+    btnList.foreach{btn =>
+      btn.addEventHandler(MouseEvent.MOUSE_ENTERED, (_: MouseEvent) => {
+        exitBtn.setEffect(glow)
+      })
+      btn.addEventHandler(MouseEvent.MOUSE_EXITED, (_: MouseEvent) => {
+        btn.setEffect(null)
+      })
+    }
+
+    val newRequest = AcceptList(
+      new SimpleStringProperty(s"$userName($userId)"),
+      new SimpleObjectProperty[ToggleButton](banOnImage),
+      new SimpleObjectProperty[ToggleButton](banOnSound),
+      new SimpleObjectProperty[Button](exitBtn)
+    )
+
+    exitBtn.setOnAction{event =>
+      log.debug(s"强制用户$userId 退出...")
+      listener.exitMember(userId)
+      audAcceptList.remove(newRequest)
+    }
+
+    banOnImage.setOnAction{_ =>
+      if(banOnImage.isSelected){
+        log.debug(s"屏蔽用户$userId 图像...")
+        listener.banMember(userId, true, false)
+        Tooltip.install(banOnImage, new Tooltip("点击开启该用户图像"))
+      } else{
+        log.debug(s"开启用户$userId 图像...")
+        listener.cancelBan(userId, true, false)
+        Tooltip.install(banOnImage, new Tooltip("点击屏蔽该用户图像"))
+      }
+    }
+
+    banOnSound.setOnAction{_ =>
+      if(banOnSound.isSelected){
+        log.debug(s"屏蔽用户$userId 声音...")
+        listener.banMember(userId, false, true)
+        Tooltip.install(banOnImage, new Tooltip("点击开启该用户声音"))
+      } else{
+        log.debug(s"开启用户$userId 声音...")
+        listener.cancelBan(userId, false, true)
+        Tooltip.install(banOnImage, new Tooltip("点击屏蔽该用户声音"))
+      }
+    }
+
+    audAcceptList.add(newRequest)
   }
 
   def getScene: Scene = this.scene
@@ -855,7 +926,7 @@ class HostScene(stage: Stage) {
       val AudienceTable = new TableView[AudienceListInfo]()
       AudienceTable.getStyleClass.add("table-view")
 
-      val userInfoCol = new TableColumn[AudienceListInfo, String]("会议成员")
+      val userInfoCol = new TableColumn[AudienceListInfo, String]("申请加入成员")
       userInfoCol.setPrefWidth(width * 0.15)
       userInfoCol.setCellValueFactory(new PropertyValueFactory[AudienceListInfo, String]("userInfo"))
 
@@ -878,11 +949,23 @@ class HostScene(stage: Stage) {
       AcceptTable.getStyleClass.add("table-view")
 
       val userInfoCol = new TableColumn[AcceptList, String]("已加入成员")
-      userInfoCol.setPrefWidth(width * 0.15)
+      userInfoCol.setPrefWidth(width * 0.11)
       userInfoCol.setCellValueFactory(new PropertyValueFactory[AcceptList, String]("userInfo"))
 
+      val imageBtnCol = new TableColumn[AcceptList, Button]("图像")
+      imageBtnCol.setCellValueFactory(new PropertyValueFactory[AcceptList, Button]("banOnImage"))
+      imageBtnCol.setPrefWidth(width * 0.05)
+
+      val soundBtnCol = new TableColumn[AcceptList, Button]("声音")
+      soundBtnCol.setCellValueFactory(new PropertyValueFactory[AcceptList, Button]("banOnSound"))
+      soundBtnCol.setPrefWidth(width * 0.05)
+
+      val exitBtnCol = new TableColumn[AcceptList, Button]("退出")
+      exitBtnCol.setCellValueFactory(new PropertyValueFactory[AcceptList, Button]("exitBtn"))
+      exitBtnCol.setPrefWidth(width * 0.05)
+
       AcceptTable.setItems(audAcceptList)
-      AcceptTable.getColumns.addAll(userInfoCol)
+      AcceptTable.getColumns.addAll(userInfoCol, imageBtnCol, soundBtnCol, exitBtnCol)
       AcceptTable.setPrefHeight(height * 0.3)
       AcceptTable
     }
@@ -976,7 +1059,6 @@ class HostScene(stage: Stage) {
   }
 
   def changeToggleAction(): Unit = {
-    log.debug("########init mediaCapture successfullly change toggle action")
     liveBar.liveToggleButton.setDisable(false)
     liveBar.startTimer()
 

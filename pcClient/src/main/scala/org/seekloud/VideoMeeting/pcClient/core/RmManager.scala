@@ -30,6 +30,7 @@ import org.seekloud.VideoMeeting.pcClient.utils.RMClient
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo._
 import org.slf4j.LoggerFactory
 import org.seekloud.VideoMeeting.player.sdk.MediaPlayer
+import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -130,6 +131,12 @@ object RmManager {
   final case object ShutJoin extends RmCommand //主动关闭和某观众的连线
 
   final case class InviteReq(email: String, meeting: String) extends RmCommand
+
+  final case class ForceExit(userId4Member: Long) extends RmCommand
+
+  final case class BanOnMember(userId4Member: Long, image: Boolean, sound: Boolean) extends RmCommand
+
+  final case class SpeakerRight(userId4Member: Long) extends RmCommand
 
 
   /*观众*/
@@ -618,6 +625,16 @@ object RmManager {
 
         case GetPackageLoss =>
           liveManager ! LiveManager.GetPackageLoss
+          Behaviors.same
+
+        case ForceExit(userId4Member) =>
+          log.debug("send forceexit to roomManager...")
+          sender.foreach(_ ! AuthProtocol.ForceExit(userId4Member))
+          Behaviors.same
+
+        case BanOnMember(userId4Member, image, sound) =>
+          log.debug(s"send banOnMember-${image}-${sound} to roomManager...")
+          sender.foreach(_ ! AuthProtocol.BanOnMember(userId4Member, image, sound))
           Behaviors.same
 
         case x =>

@@ -127,6 +127,20 @@
     -fx-border-color: #00000000;
     -fx-cursor: hand;
 }
+.hostScene-bottomArea-tableBtn{
+    -fx-graphic: url("../img/ban.png");
+    -fx-background-color: #00000000;
+    -fx-border-color: #00000000;
+    -fx-cursor: hand;
+}
+
+.hostScene-bottomArea-tableBtn:selected{
+    -fx-graphic: url("../img/allow.png");
+    -fx-background-color: #00000000;
+    -fx-border-color: #00000000;
+    -fx-cursor: hand;
+}
+
 .hostScene-middleArea-textArea{
     -fx-border-width: 1px;
     -fx-border-color: #CACACA;

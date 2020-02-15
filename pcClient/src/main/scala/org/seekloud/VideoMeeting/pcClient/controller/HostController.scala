@@ -143,6 +143,19 @@ class HostController(
         rmManager ! RmManager.InviteReq(inviteInfo.get._1.toString, inviteInfo.get._2.toString)
       }
     }
+
+    override def exitMember(userId: Long): Unit = {
+      rmManager ! RmManager.ForceExit(userId)
+    }
+
+    override def banMember(userId: Long, image: Boolean, sound: Boolean): Unit = {
+      rmManager ! RmManager.BanOnMember(userId, image, sound)
+    }
+
+    override def cancelBan(userId: Long, image: Boolean, sound: Boolean): Unit = {
+      //TODO 取消屏蔽
+      println("cancel")
+    }
   })
 
 
