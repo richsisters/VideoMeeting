@@ -19,7 +19,8 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
 import ch.megard.akka.http.cors.scaladsl.model.HttpOriginMatcher
 import org.seekloud.VideoMeeting.processor.models.MpdInfoDao
-import org.seekloud.VideoMeeting.protocol.ptcl.processer2Manager.Processor.{NewConnect, NewConnectRsp, CloseRoom, CloseRoomRsp, UpdateRoomInfo, UpdateRsp}
+import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol.ForceExitRsp
+import org.seekloud.VideoMeeting.protocol.ptcl.processer2Manager.Processor.{CloseRoom => _, _}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
@@ -40,15 +41,56 @@ trait ProcessorService extends ServiceUtils {
   }
 
   //强制某个用户退出接口
-  //  private def forceQuit = (path("forceQuit") & post){
-  //
-  //  }
+  private def forceExit = (path("forceExit") & post){
+    entity(as[Either[Error, ForceExit]]){
+      case Right(req) =>
+        log.info(s"post method $ForceExit")
+        roomManager ! RoomManager.ForceExit(req.roomId, req.liveId)
+        complete(ExitRsp())
+      case Left(e) =>
+        complete(parseJsonError)
+    }
+
+  }
 
 
- //主持人屏蔽用户接口
-//  private def shutUp = (path("shutUp") & post){
-//
-//  }
+  //主持人屏蔽用户接口
+  private def banOnClient = (path("banOnClient") & post){
+    entity(as[Either[Error, BanOnClient]]){
+      case Right(req) =>
+        log.info(s"post method $BanOnClient")
+        roomManager ! RoomManager.BanOnClient(req.roomId, req.liveId, req.isImg, req.isSound)
+        complete(BanRsp())
+      case Left(e) =>
+        complete(parseJsonError)
+    }
+  }
+
+  private def cancelBan = (path("cancelBan") & post){
+    entity(as[Either[Error, CancelBan]]){
+      case Right(req) =>
+        log.info(s"post method $CancelBan")
+        roomManager ! RoomManager.CancelBan(req.roomId, req.liveId, req.isImg, req.isSound)
+        complete(CancelBanRsp())
+      case Left(e) =>
+        complete(parseJsonError)
+    }
+  }
+
+
+
+  //主持人指定某人发言接口
+  private def speakerRight = (path("speakerRight") & post){
+    entity(as[Either[Error, SpeakerRight]]){
+      case Right(req) =>
+        log.info(s"post method $SpeakerRight")
+        roomManager ! RoomManager.SpeakerRight(req.roomId, req.liveId)
+        complete(SpeakerRightRsp())
+      case Left(e) =>
+        complete(parseJsonError)
+    }
+
+  }
 
   private def closeRoom = (path("closeRoom") & post) {
     entity(as[Either[Error, CloseRoom]]) {
@@ -56,18 +98,6 @@ trait ProcessorService extends ServiceUtils {
         log.info(s"post method closeRoom ${req.roomId}.")
         roomManager ! RoomManager.CloseRoom(req.roomId)
         complete(CloseRoomRsp())
-
-      case Left(e) =>
-        complete(parseJsonError)
-    }
-  }
-
-  private def updateRoomInfo = (path("updateRoomInfo") & post) {
-    entity(as[Either[Error, UpdateRoomInfo]]) {
-      case Right(req) =>
-        log.info(s"post method updateRoomInfo.")
-        roomManager ! RoomManager.UpdateRoomInfo(req.roomId, req.layout)
-        complete(UpdateRsp())
 
       case Left(e) =>
         complete(parseJsonError)
@@ -113,6 +143,6 @@ trait ProcessorService extends ServiceUtils {
 //  }
 
   val processorRoute:Route = pathPrefix("processor") {
-   newConnect  ~ closeRoom ~ updateRoomInfo  ~ upLoadImg ~ streamLog
+   newConnect  ~ closeRoom  ~ forceExit ~ banOnClient ~ cancelBan ~ speakerRight ~ upLoadImg ~ streamLog
   }
 }

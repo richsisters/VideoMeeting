@@ -8,6 +8,8 @@ import java.nio.{ByteBuffer, ShortBuffer}
 import scala.collection.mutable
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{Behaviors, StashBuffer, TimerScheduler}
+import akka.http.scaladsl.model.Uri.Empty
+import javax.imageio.ImageIO
 import org.bytedeco.ffmpeg.global.{avcodec, avutil}
 import org.bytedeco.javacv.{FFmpegFrameFilter, FFmpegFrameRecorder, Frame, Java2DFrameConverter}
 import org.seekloud.VideoMeeting.processor.Boot.roomManager
@@ -29,21 +31,27 @@ import scala.concurrent.duration._
   */
 object RecorderActor {
 
-  var audioChannels = 2 //todo 待议
-  val sampleFormat = 1 //todo 待议
+  var audioChannels = 2
+  val sampleFormat = 1
   var frameRate = 30
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
   sealed trait Command
 
-  case class UpdateRoomInfo(roomId: Long, layout: Int) extends Command // todo
-
   case object Init extends Command
 
   case object RestartRecord extends Command
 
   case object StopRecorder extends Command
+
+  case class ClientExit(liveId: String) extends Command
+
+  case class BanOnClient(liveId: String, isImg: Boolean, isSound: Boolean) extends Command
+
+  case class BanClientSound(liveId: String) extends Command
+
+  case class CancelBan(liveId: String, isImg: Boolean, isSound: Boolean) extends Command // todo 取消屏蔽
 
   case object CloseRecorder extends Command
 
@@ -62,6 +70,10 @@ object RecorderActor {
   case class Image4Client(frame: Frame, liveId: String) extends VideoCommand
 
   case object StartDrawing extends  VideoCommand
+
+  case class ReStartDrawing(clientInfo: List[String]) extends VideoCommand
+
+  case class BanClientImg(liveId: String) extends VideoCommand
 
   case object Close extends VideoCommand
 
@@ -208,7 +220,7 @@ object RecorderActor {
               if (liveId == host) {
                 ffFilter.pushSamples(0, frame.audioChannels, frame.sampleRate, ffFilter.getSampleFormat, frame.samples: _*)
               } else if (clientInfo.contains(liveId)) {
-                ffFilter.pushSamples(1, frame.audioChannels, frame.sampleRate, ffFilter.getSampleFormat, frame.samples: _*) // fixme pushsamples 的参数值
+                ffFilter.pushSamples(1, frame.audioChannels, frame.sampleRate, ffFilter.getSampleFormat, frame.samples: _*) //fixme 声音合并
               } else {
                 log.info(s"wrong liveId, couple got wrong audio")
               }
@@ -223,13 +235,28 @@ object RecorderActor {
           }
           Behaviors.same
 
-        case msg: UpdateRoomInfo =>
-          log.info(s"$roomId got msg: $msg in work.")
-          if (msg.layout != layout) {
-//            drawer ! SetLayout(msg.layout) //todo 更新房间内容
+        case msg: ClientExit =>
+          log.info(s"${ctx.self} receive a msg $msg")
+          val newClientInfo = clientInfo.filter(c => c != msg.liveId)
+          drawer ! ReStartDrawing(newClientInfo)
+          work(roomId,  host, newClientInfo, layout, recorder4ts, ffFilter, drawer, ts4Host, ts4Client, out, tsDiffer, canvasSize)
+
+        case msg: BanOnClient =>
+          log.info(s"${ctx.self} receive a msg $msg")
+          if(msg.isImg){
+            drawer ! BanClientImg(msg.liveId)
+          } else if(msg.isSound){
+            ctx.self ! BanClientSound(msg.liveId)
           }
-          ctx.self ! RestartRecord
-          work(roomId,  host, clientInfo, msg.layout, recorder4ts, ffFilter, drawer, ts4Host, ts4Client, out, tsDiffer, canvasSize)
+          Behaviors.same
+
+        case msg: BanClientSound =>
+          log.info(s"${ctx.self} receive a msg ${msg}") // todo 屏蔽声音
+          Behaviors.same
+
+        case msg: CancelBan =>
+          log.info(s"${ctx.self} receive a msg ${msg}") // todo 取消屏蔽
+          Behaviors.same
 
         case m@RestartRecord =>
           log.info(s"couple state get $m")
@@ -285,6 +312,15 @@ object RecorderActor {
           draw(canvas, graph, lastTime, hostFrame, clientFrame, clientInfo, recorder4ts, convert4Host, convert, layout, bgImg, roomId, canvasSize)
 
 
+        case t: ReStartDrawing =>
+          draw(canvas, graph, lastTime, hostFrame, clientFrame, t.clientInfo, recorder4ts, convert4Host, convert, layout, bgImg, roomId, canvasSize)
+          Behaviors.same
+
+        case t: BanClientImg =>
+          val img =  new File("挂断.png")
+          val banImg = ImageIO.read(img)
+          clientFrame.put(t.liveId, banImg) // fixme 屏蔽时显示的图片
+          draw(canvas, graph, lastTime, hostFrame, clientFrame, clientInfo, recorder4ts, convert4Host, convert, layout, bgImg, roomId, canvasSize)
 
         case StartDrawing =>
           log.info("record start drawing")
