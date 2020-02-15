@@ -225,7 +225,7 @@ object AuthProtocol {
 
   case object ForceExitRsp extends WsMsgRm2Audience //用户被主持人强制退出
 
-  case class BanOnMemberRsp(image: Boolean, sound: Boolean)  //用户被主持人屏蔽声音或者图像
+  case class BanOnMemberRsp(image: Boolean, sound: Boolean) extends WsMsgRm2Audience//用户被主持人屏蔽声音或者图像
 
 
   /**

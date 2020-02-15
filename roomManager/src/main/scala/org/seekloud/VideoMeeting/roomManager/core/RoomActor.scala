@@ -550,13 +550,13 @@ object RoomActor {
         liveInfoMap.remove(userId4Member)
         //TODO 向processor发送强制某人退出消息
         dispatch(RcvComment(-1L, "", s"host force user-$userId4Member to leave"))
-        dispatchTo(List(userId4Member, false), ForceExitRsp)
+        dispatchTo(List((userId4Member, false)), ForceExitRsp)
         Behaviors.same
 
       case BanOnMember(userId4Member, image, sound) =>
         //TODO 向processor发送屏蔽
         dispatch(RcvComment(-1L, "", s"user-$userId4Member can't ${if(image) "show up" else ""} ${if(sound) "and speak" else ""}"))
-        dispatchTo(List(userId4Member, false), BanOnMemberRsp(image, sound))
+        dispatchTo(List((userId4Member, false)), BanOnMemberRsp(image, sound))
         Behaviors.same
 
       case PingPackage =>
