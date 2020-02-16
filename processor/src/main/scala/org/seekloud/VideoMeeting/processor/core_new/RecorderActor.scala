@@ -325,7 +325,7 @@ object RecorderActor {
         case StartDrawing =>
           log.info("record start drawing")
           //根据不同的参会人数设置不同的排列方式
-          clientInfo.size match {
+          clientFrame.values.toList.size match {
             case 1 =>
               graph.drawImage(hostFrame, 0, canvasSize._2 / 4, canvasSize._1 / 2, canvasSize._2 / 2, null)
               graph.drawString("主持人", 24, 25)
