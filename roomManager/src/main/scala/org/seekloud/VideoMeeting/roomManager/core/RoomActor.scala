@@ -547,16 +547,34 @@ object RoomActor {
         switchBehavior(ctx, "busy", busy(), InitTime, TimeOut("busy"))
 
       case ForceExit(userId4Member) =>
-        liveInfoMap.remove(userId4Member)
-        //TODO 向processor发送强制某人退出消息
-        dispatch(RcvComment(-1L, "", s"host force user-$userId4Member to leave"))
-        dispatchTo(List((userId4Member, false)), ForceExitRsp)
+        if(liveInfoMap.contains(userId4Member)){
+          log.debug(s"host force user-$userId4Member to leave")
+          ProcessorClient.forceExit(roomId, liveInfoMap(userId4Member).liveId, System.currentTimeMillis())
+          liveInfoMap.remove(userId4Member)
+          dispatchTo(List((userId4Member, false)), ForceExitRsp)
+        } else{
+          log.debug(s"host force user-$userId4Member to leave, but there is no user!")
+        }
         Behaviors.same
 
       case BanOnMember(userId4Member, image, sound) =>
-        //TODO 向processor发送屏蔽
-        dispatch(RcvComment(-1L, "", s"user-$userId4Member can't ${if(image) "show up" else ""} ${if(sound) "and speak" else ""}"))
-        dispatchTo(List((userId4Member, false)), BanOnMemberRsp(image, sound))
+        if(liveInfoMap.contains(userId4Member)){
+          log.debug(s"user-$userId4Member can't ${if(image) "show up" else ""} ${if(sound) "and speak" else ""}")
+          ProcessorClient.banOnClient(roomId, liveInfoMap(userId4Member).liveId, image, sound)
+          dispatchTo(List((userId4Member, false)), BanOnMemberRsp(image, sound))
+        } else{
+          log.debug(s"host ban user-$userId4Member, but there is no user!")
+        }
+        Behaviors.same
+
+      case CancelBan(userId4Member, image, sound) =>
+        if(liveInfoMap.contains(userId4Member)){
+          log.debug(s"user-$userId4Member begin to ${if(image) "show up" else ""} ${if(sound) "and speak" else ""}")
+          ProcessorClient.cancelBan(roomId, liveInfoMap(userId4Member).liveId, image, sound)
+          dispatchTo(List((userId4Member, false)), CancelBanOnMemberRsp(image, sound))
+        } else{
+          log.debug(s"host cancel banning user-$userId4Member, but there is no user!")
+        }
         Behaviors.same
 
       case PingPackage =>
@@ -569,14 +587,14 @@ object RoomActor {
   }
 
   private def changeMode(ctx: ActorContext[RoomActor.Command], anchorUid: Long, dispatchTo: (List[(Long, Boolean)], WsMsgRm) => Unit)(roomId: Long, liveIdList: List[String], screenLayout: Int, aiMode: Int, startTime: Long) = {
-    ProcessorClient.updateRoomInfo(roomId, screenLayout).map {
-      case Right(rsp) =>
-        log.debug(s"${ctx.self.path} modify the mode success")
-        dispatchTo(List((anchorUid, false)), ChangeModeRsp())
-      case Left(error) =>
-        log.debug(s"${ctx.self.path} there is some error:$error")
-        dispatchTo(List((anchorUid, false)), ChangeModeError)
-    }
+//    ProcessorClient.updateRoomInfo(roomId, screenLayout).map {
+//      case Right(rsp) =>
+//        log.debug(s"${ctx.self.path} modify the mode success")
+//        dispatchTo(List((anchorUid, false)), ChangeModeRsp())
+//      case Left(error) =>
+//        log.debug(s"${ctx.self.path} there is some error:$error")
+//        dispatchTo(List((anchorUid, false)), ChangeModeError)
+//    }
   }
 
   private def dispatch(subscribers: mutable.HashMap[(Long, Boolean), ActorRef[UserActor.Command]])(msg: WsMsgRm)(implicit sendBuffer: MiddleBufferInJvm): Unit = {

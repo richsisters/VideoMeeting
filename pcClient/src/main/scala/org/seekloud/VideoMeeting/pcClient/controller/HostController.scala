@@ -153,8 +153,7 @@ class HostController(
     }
 
     override def cancelBan(userId: Long, image: Boolean, sound: Boolean): Unit = {
-      //TODO 取消屏蔽
-      println("cancel")
+      rmManager ! RmManager.CancelBan(userId, image, sound)
     }
   })
 
@@ -190,7 +189,6 @@ class HostController(
         Boot.addToPlatform {
           WarningDialog.initWarningDialog("邀请邮件已发送")
         }
-
 
       case msg: ModifyRoomRsp =>
         //若失败，信息改成之前的信息

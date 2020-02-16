@@ -21,23 +21,23 @@ trait TestService extends ServiceUtils{
   import io.circe.syntax._
   import io.circe.generic.auto._
 
-  private val testUpdateRoomInfo = (path("testUpdateRoomInfo") & post){
-    entity(as[Either[Error,UpdateRoomInfo]]){
-      case Right(req) =>
-        dealFutureResult{
-          ProcessorClient.updateRoomInfo(req.roomId,req.layout).map{
-            case Right(v) =>
-              complete(v)
-            case Left(e) =>
-              complete(s"$e")
-          }
-        }
-
-      case Left(error) =>
-        println(s"$error")
-        complete("error")
-    }
-  }
+//  private val testUpdateRoomInfo = (path("testUpdateRoomInfo") & post){
+//    entity(as[Either[Error,UpdateRoomInfo]]){
+//      case Right(req) =>
+//        dealFutureResult{
+//          ProcessorClient.updateRoomInfo(req.roomId,req.layout).map{
+//            case Right(v) =>
+//              complete(v)
+//            case Left(e) =>
+//              complete(s"$e")
+//          }
+//        }
+//
+//      case Left(error) =>
+//        println(s"$error")
+//        complete("error")
+//    }
+//  }
 
   private val testSeekRecord = (path("testSeekRecord") & post){
     entity(as[Either[Error,SeekRecord]]){
@@ -75,7 +75,7 @@ trait TestService extends ServiceUtils{
 
 
   val test = pathPrefix("test"){
-    testUpdateRoomInfo ~ testCloseRoom ~ testSeekRecord
+    testCloseRoom ~ testSeekRecord
   }
 
 

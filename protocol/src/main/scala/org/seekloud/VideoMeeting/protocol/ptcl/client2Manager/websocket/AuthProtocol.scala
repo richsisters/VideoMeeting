@@ -157,6 +157,8 @@ object AuthProtocol {
 
   case class BanOnMember(userId4Member: Long, image: Boolean, sound: Boolean) extends WsMsgHost //屏蔽某人声音活着图像
 
+  case class CancelBan(userId4Member: Long, image: Boolean, sound: Boolean) extends WsMsgHost //取消屏蔽某人声音活着图像
+
   case class SpeakerRight(userId4Member: Long) extends WsMsgHost //指定某人发言
 
 
@@ -226,6 +228,8 @@ object AuthProtocol {
   case object ForceExitRsp extends WsMsgRm2Audience //用户被主持人强制退出
 
   case class BanOnMemberRsp(image: Boolean, sound: Boolean) extends WsMsgRm2Audience//用户被主持人屏蔽声音或者图像
+
+  case class CancelBanOnMemberRsp(image: Boolean, sound: Boolean) extends WsMsgRm2Audience//用户被主持人取消屏蔽声音或者图像
 
 
   /**

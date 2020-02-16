@@ -136,6 +136,8 @@ object RmManager {
 
   final case class BanOnMember(userId4Member: Long, image: Boolean, sound: Boolean) extends RmCommand
 
+  final case class CancelBan(userId4Member: Long, image: Boolean, sound: Boolean) extends RmCommand
+
   final case class SpeakerRight(userId4Member: Long) extends RmCommand
 
 
@@ -637,6 +639,11 @@ object RmManager {
           sender.foreach(_ ! AuthProtocol.BanOnMember(userId4Member, image, sound))
           Behaviors.same
 
+        case CancelBan(userId4Member, image, sound) =>
+          log.debug(s"send cancelBan-${image}-${sound} to roomManager...")
+          sender.foreach(_ ! AuthProtocol.CancelBan(userId4Member, image, sound))
+          Behaviors.same
+
         case x =>
           log.warn(s"unknown msg in host: $x")
           Behaviors.unhandled
@@ -801,6 +808,7 @@ object RmManager {
         case msg: ChangeOption4Audience =>
           audienceStatus match{
             case AudienceStatus.CONNECT =>
+              log.debug(s"change option in connect image=${msg.needImage}, sound=${msg.needSound}")
               liveManager ! LiveManager.ChangeMediaOption(None, None, None, msg.needImage, msg.needSound, () => audienceScene.loadingBack())
               Behaviors.same
 

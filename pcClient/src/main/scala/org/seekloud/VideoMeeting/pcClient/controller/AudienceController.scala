@@ -228,6 +228,14 @@ class AudienceController(
             audienceScene.imageToggleBtn.setDisable(true)
           if(msg.sound)
             audienceScene.soundToggleBtn.setDisable(true)
+          rmManager ! RmManager.ChangeOption4Audience(!msg.image, !msg.sound)
+
+        case msg: CancelBanOnMemberRsp =>
+          log.debug("got  cancel ban on member rsp!")
+          if(msg.image)
+            audienceScene.imageToggleBtn.setDisable(false)
+          if(msg.sound)
+            audienceScene.soundToggleBtn.setDisable(false)
           rmManager ! RmManager.ChangeOption4Audience(msg.image, msg.sound)
 
         case msg:StartMeetingRsp =>
