@@ -37,18 +37,75 @@ object Processor {
                           ) extends CommonRsp
 
 
-  /**  url:processor/update
+//  /**  url:processor/update
+//    *  post
+//    */
+//  case class UpdateRoomInfo(
+//                             roomId: Long,
+//                             layout: Int
+//                           )
+//
+//  case class UpdateRsp(
+//                        errCode: Int = 0,
+//                        msg:String = "ok"
+//                      ) extends CommonRsp
+
+  /**  url:processor/forceExit
     *  post
     */
-  case class UpdateRoomInfo(
-                             roomId: Long,
-                             layout: Int
-                           )
+  case class ForceExit(
+                      roomId: Long,
+                      liveId: String,
+                      startTime: Long
+                      )
 
-  case class UpdateRsp(
-                        errCode: Int = 0,
-                        msg:String = "ok"
-                      ) extends CommonRsp
+  case class ExitRsp(
+                    errCode: Int = 0,
+                    msg: String = "ok"
+                    ) extends CommonRsp
 
+  /**  url:processor/banOnClient
+    *  post
+    */
+  case class BanOnClient(
+                        roomId: Long,
+                        liveId: String,
+                        isImg: Boolean,
+                        isSound: Boolean
+                        )
+
+  case class BanRsp(
+                   errCode: Int = 0,
+                   msg: String ="ok"
+                   ) extends CommonRsp
+
+
+  /**  url:processor/cancelBan
+    *  post
+    */
+  case class CancelBan(
+                      roomId: Long,
+                      liveId: String,
+                      isImg: Boolean,
+                      isSound: Boolean
+                      )
+  case class CancelBanRsp(
+                         errCode: Int = 0,
+                         msg: String = "ok"
+                         ) extends CommonRsp
+
+  /**  url:processor/speakerRight
+    *  post
+    */
+  case class SpeakerRight(
+                         roomId: Long,
+                         liveId: String,
+                         startTime: Long
+                         )
+
+  case class SpeakerRightRsp(
+                              errCode: Int = 0,
+                              msg: String ="ok"
+                            )extends  CommonRsp
 
 }
