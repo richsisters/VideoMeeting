@@ -93,9 +93,9 @@ class MediaCapture(
 
 
   /*声音配置*/
-  private var sampleRate = 48000.0F
+  private var sampleRate = 44100.0F
   private var sampleSizeInBits = 16
-  private var channels = 1
+  private var channels = 2
   private var needSound = true
   private var audioCodec = avcodec.AV_CODEC_ID_AAC
 

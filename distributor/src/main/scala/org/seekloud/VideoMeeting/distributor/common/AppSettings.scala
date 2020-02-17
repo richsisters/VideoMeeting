@@ -47,7 +47,7 @@ object AppSettings {
 
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
-  val config: Config = ConfigFactory.parseResources("application.conf").withFallback(ConfigFactory.load())
+  val config: Config = ConfigFactory.parseResources("product.conf").withFallback(ConfigFactory.load())
 
   val appConfig: Config = config.getConfig("app")
 
@@ -68,6 +68,7 @@ object AppSettings {
   val testFile: Boolean = appConfig.getBoolean("testFile")
 
   val rtpToHost: String = appConfig.getString("rtpToHost")
+  val rtpToHostPort: Int = appConfig.getInt("rtpToHostPort")
   val rtpServerDst: String = appConfig.getString("rtpServerDst")
 
   val slickConfig: Config = config.getConfig("slick.db")

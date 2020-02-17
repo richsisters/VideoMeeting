@@ -8,11 +8,10 @@ import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
 import org.slf4j.{Logger, LoggerFactory}
 import org.seekloud.VideoMeeting.distributor.common.AppSettings._
-import org.seekloud.VideoMeeting.rtpClient.Protocol._
-import org.seekloud.VideoMeeting.rtpClient.PullStreamClient
 import org.seekloud.VideoMeeting.distributor.Boot.{liveManager, pullActor}
 import org.seekloud.VideoMeeting.distributor.core.SendActor.{SendData, StopSend}
-
+import org.seekloud.VideoMeeting.rtpClient.Protocol._
+import org.seekloud.VideoMeeting.rtpClient.PullStreamClient
 import scala.collection.mutable
 /**
   * Author: tldq
@@ -102,7 +101,8 @@ object PullActor {
             pullChannel.socket().bind(new InetSocketAddress("0.0.0.0", 41660))
             work()
           }else {
-            val pullStreamDst = new InetSocketAddress(rtpToHost, 61041)
+            log.debug(s"rtp server ${rtpToHost}:${rtpToHostPort}")
+            val pullStreamDst = new InetSocketAddress(rtpToHost, rtpToHostPort)
             val host = "0.0.0.0"
             val port = getRandomPort
             val client = new PullStreamClient(host, port, pullStreamDst, ctx.self, rtpServerDst)
@@ -121,7 +121,7 @@ object PullActor {
   }
 
   def wait()(implicit timer: TimerScheduler[Command],
-    stashBuffer: StashBuffer[Command]): Behavior[Command] = {
+             stashBuffer: StashBuffer[Command]): Behavior[Command] = {
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
         case m@Ready(client) =>
@@ -136,7 +136,7 @@ object PullActor {
   }
 
   def work(client:PullStreamClient)(implicit timer: TimerScheduler[Command],
-    stashBuffer: StashBuffer[Command]): Behavior[Command] = {
+                                    stashBuffer: StashBuffer[Command]): Behavior[Command] = {
     client.pullStreamStart()
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
@@ -198,6 +198,7 @@ object PullActor {
           Behaviors.same
 
         case PullStreamData(liveId, seq, data) =>
+          log.debug("pull stream data...")
           if(liveSenderMap.get(liveId).isDefined){
             val sender = liveSenderMap(liveId)
             if(liveCountMap.getOrElse(liveId,0) < 5){
@@ -230,7 +231,7 @@ object PullActor {
   }
 
   def work()(implicit timer: TimerScheduler[Command],
-    stashBuffer: StashBuffer[Command]):Behavior[Command] = {
+             stashBuffer: StashBuffer[Command]):Behavior[Command] = {
     log.info("-----------------------测试中，自己收流")
     recvThread.start()
     Behaviors.receive[Command] { (ctx, msg) =>
@@ -284,3 +285,4 @@ object PullActor {
   }
 
 }
+

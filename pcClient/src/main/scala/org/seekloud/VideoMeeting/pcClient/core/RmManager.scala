@@ -571,6 +571,8 @@ object RmManager {
 
         case msg: HostStartMeeting =>
           log.debug(s"videoMeeting ${msg.roomId} begin.")
+          hostScene.resetBack()
+          liveManager ! LiveManager.SwitchMediaMode(isJoin = true, reset = hostScene.resetBack)
           assert(roomInfo.nonEmpty)
           sender.foreach(_ ! StartMeeting( msg.roomId))
           Behaviors.same
@@ -579,10 +581,10 @@ object RmManager {
           log.debug(s"======== ${msg.audienceInfo.userName} join begin")
           //TODO 根据人数的增加更改画面
           /*背景改变*/
-          hostScene.resetBack()
-
-          /*媒体画面模式更改*/
-          liveManager ! LiveManager.SwitchMediaMode(isJoin = true, reset = hostScene.resetBack)
+//          hostScene.resetBack()
+//
+//          /*媒体画面模式更改*/
+//          liveManager ! LiveManager.SwitchMediaMode(isJoin = true, reset = hostScene.resetBack)
           switchBehavior(ctx, "hostBehavior", hostBehavior(stageCtx, homeController, hostScene, hostController, liveManager, mediaPlayer, sender, hostStatus = HostStatus.CONNECT, None))
 
         case ShutJoin =>
