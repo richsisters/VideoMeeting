@@ -11,7 +11,7 @@ import org.seekloud.VideoMeeting.capture.protocol.Messages.LatestFrame
 import org.slf4j.LoggerFactory
 import org.bytedeco.opencv.global.{opencv_imgproc => OpenCVProc}
 import org.bytedeco.opencv.global.{opencv_core => OpenCVCore}
-import org.seekloud.VideoMeeting.capture.core.CaptureManager.MediaSettings
+import org.seekloud.VideoMeeting.capture.core.CaptureManager.{Command, MediaSettings}
 
 import scala.collection.mutable
 import scala.util.{Failure, Success, Try}
@@ -45,6 +45,8 @@ object MontageActor {
 
   final case object Stop extends Command
 
+  final case class CameraPosition(position: Int) extends Command
+
   val converter = new OpenCVFrameConverter.ToIplImage()
 
 
@@ -58,15 +60,21 @@ object MontageActor {
       val toMat = new ToMat()
       val cameraOutMat = new Mat()
       val desktopOutMat = new Mat()
+      val canvas = new Mat(dSize, OpenCVCore.CV_8UC3, new Scalar(0, 0, 0, 0))
+      val cameraRoi = canvas(new Rect(0, 0, pSize.width(), pSize.height()))
+      val desktopRoi = canvas(new Rect(0, 0, dSize.width(), dSize.height()))
       working(imageQueue,
         new LinkedBlockingDeque[Frame](),
         new LinkedBlockingDeque[Frame](),
         dSize,
         pSize,
         cameraMask,
+        cameraRoi,
         desktopMask,
+        desktopRoi,
         cameraOutMat,
         desktopOutMat,
+        canvas,
         toMat,
         0,
         0)
@@ -79,9 +87,12 @@ object MontageActor {
     dSize: Size,
     pSize: Size,
     cameraMask: Mat,
+    cameraRoi: Mat,
     desktopMask: Mat,
+    desktopRoi: Mat,
     cameraOutMat: Mat,
     desktopOutMat: Mat,
+    canvas: Mat,
     toMat: ToMat,
     state: Int,  //0：摄像头；1：桌面；2：拼接
     frameNumber: Int
@@ -90,14 +101,14 @@ object MontageActor {
       msg match {
         case ShowDesktop =>
           cameraQueue.clear()
-          working(imageQueue, cameraQueue, desktopQueue, dSize, pSize, cameraMask, desktopMask, cameraOutMat, desktopOutMat, toMat, 1, frameNumber)
+          working(imageQueue, cameraQueue, desktopQueue, dSize, pSize, cameraMask, cameraRoi, desktopMask, desktopRoi, cameraOutMat, desktopOutMat, canvas, toMat, 1, frameNumber)
 
         case ShowCamera =>
           desktopQueue.clear()
-          working(imageQueue, cameraQueue, desktopQueue, dSize, pSize, cameraMask, desktopMask, cameraOutMat, desktopOutMat, toMat, 0, frameNumber)
+          working(imageQueue, cameraQueue, desktopQueue, dSize, pSize, cameraMask, cameraRoi, desktopMask, desktopRoi, cameraOutMat, desktopOutMat, canvas, toMat, 0, frameNumber)
 
         case ShowBoth =>
-          working(imageQueue, cameraQueue, desktopQueue, dSize, pSize, cameraMask, desktopMask, cameraOutMat, desktopOutMat, toMat, 2, frameNumber)
+          working(imageQueue, cameraQueue, desktopQueue, dSize, pSize, cameraMask, cameraRoi, desktopMask, desktopRoi, cameraOutMat, desktopOutMat, canvas, toMat, 2, frameNumber)
 
         case CameraImage(frame: Frame) =>
           if(state != 1){
@@ -108,23 +119,36 @@ object MontageActor {
               imageQueue.offer(LatestFrame(frame, System.currentTimeMillis()))
             }else if(state == 2){
               if(!desktopQueue.isEmpty){
-                val desktopImage = desktopQueue.peek().clone()
-                val canvas = new Mat(dSize, OpenCVCore.CV_8UC3, new Scalar(0, 0, 0, 0))
-                val cameraRoi = canvas(new Rect(0, 0, pSize.width(), pSize.height()))
-                val desktopRoi = canvas(new Rect(0, 0, dSize.width(), dSize.height()))
+                val desktopImage = desktopQueue.peek()
+                //                val canvas = new Mat(dSize, OpenCVCore.CV_8UC3, new Scalar(0, 0, 0, 0))
                 val desktopMat = toMat.convert(desktopImage)
                 desktopMat.copyTo(desktopRoi, desktopMask)
                 val cameraMat = toMat.convert(frame)
                 OpenCVProc.resize(cameraMat, cameraOutMat, pSize)
                 cameraOutMat.copyTo(cameraRoi, cameraMask)
                 val convertFrame = converter.convert(canvas)
-                imageQueue.offer(LatestFrame(convertFrame, System.currentTimeMillis()))
+                imageQueue.offer(LatestFrame(convertFrame.clone(), System.currentTimeMillis()))
               }
             }
-            working(imageQueue, cameraQueue, desktopQueue, dSize, pSize, cameraMask, desktopMask, cameraOutMat, desktopOutMat, toMat, state, frameNumber + 1)
+            working(imageQueue, cameraQueue, desktopQueue, dSize, pSize, cameraMask, cameraRoi, desktopMask, desktopRoi, cameraOutMat, desktopOutMat, canvas, toMat, state, frameNumber + 1)
           }
 
           Behaviors.same
+
+        case CameraPosition(position) =>
+          val (left, top) ={
+            if(position == 1){
+              (dSize.width() - pSize.width() - 1, 0)
+            }else if(position == 2){
+              (dSize.width()-pSize.width()-1, dSize.height() - pSize.height()-1)
+            }else if(position == 3){
+              (0, dSize.height()-pSize.height())
+            }else{
+              (0, 0)
+            }
+          }
+          val cameraRoi1 = canvas(new Rect(left, top, pSize.width(), pSize.height()))
+          working(imageQueue, cameraQueue, desktopQueue, dSize, pSize, cameraMask, cameraRoi1, desktopMask, desktopRoi, cameraOutMat, desktopOutMat, canvas, toMat, state, frameNumber)
 
         case DesktopImage(frame: Frame) =>
           if(state != 0){
@@ -138,19 +162,17 @@ object MontageActor {
               imageQueue.offer(LatestFrame(convertFrame1, System.currentTimeMillis()))
             }else if(state == 2){
               if(!cameraQueue.isEmpty){
-                val cameraImage = cameraQueue.peek().clone()
-                val canvas = new Mat(dSize, OpenCVCore.CV_8UC3, new Scalar(0, 0, 0, 0))
-                val cameraRoi = canvas(new Rect(0, 0, pSize.width(), pSize.height()))
-                val desktopRoi = canvas(new Rect(0, 0, dSize.width(), dSize.height()))
+                // val canvas = new Mat(dSize, OpenCVCore.CV_8UC3, new Scalar(0, 0, 0, 0))
                 desktopOutMat.copyTo(desktopRoi, desktopMask)
+                val cameraImage = cameraQueue.peek()
                 val cameraMat =toMat.convert(cameraImage)
                 OpenCVProc.resize(cameraMat, cameraOutMat, pSize)
                 cameraOutMat.copyTo(cameraRoi, cameraMask)
                 val convertFrame = converter.convert(canvas)
-                imageQueue.offer(LatestFrame(convertFrame, System.currentTimeMillis()))
+                imageQueue.offer(LatestFrame(convertFrame.clone(), System.currentTimeMillis()))
               }
             }
-            working(imageQueue, cameraQueue, desktopQueue, dSize, pSize, cameraMask, desktopMask, cameraOutMat, desktopOutMat, toMat, state, frameNumber + 1)
+            working(imageQueue, cameraQueue, desktopQueue, dSize, pSize, cameraMask,cameraRoi, desktopMask, desktopRoi, cameraOutMat, desktopOutMat, canvas, toMat, state, frameNumber + 1)
           }
           Behaviors.same
 

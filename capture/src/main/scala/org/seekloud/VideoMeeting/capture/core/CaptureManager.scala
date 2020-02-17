@@ -8,7 +8,7 @@ import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerSch
 import javax.sound.sampled._
 import org.bytedeco.ffmpeg.global.avcodec
 import org.bytedeco.ffmpeg.global.avcodec._
-import org.bytedeco.javacv.{FFmpegFrameGrabber, FFmpegFrameRecorder, JavaFXFrameConverter1, OpenCVFrameGrabber}
+import org.bytedeco.javacv._
 import org.seekloud.VideoMeeting.capture.processor.ImageConverter
 import org.seekloud.VideoMeeting.capture.protocol.Messages
 import org.seekloud.VideoMeeting.capture.protocol.Messages._
@@ -58,17 +58,19 @@ object CaptureManager {
     sampleSizeInBits: Int,
     channels: Int,
     needSound: Boolean,
+    audioCodec: Int,
+    videoCodec: Int,
     camDeviceIndex: Int,
     audioDeviceIndex: Int
   )
 
   private case class ChildDead[U](name: String, childRef: ActorRef[U]) extends Command
 
-  final case class CameraGrabberStarted(grabber: OpenCVFrameGrabber) extends Command
+  final case class CameraGrabberStarted(grabber: OpenCVFrameGrabber, only: Boolean) extends Command
 
   final case class StartCameraFailed(ex: Throwable) extends Command
 
-  final case class DesktopGrabberStarted(grabber: FFmpegFrameGrabber) extends Command
+  final case class DesktopGrabberStarted(grabber: FFmpegFrameGrabber1, only: Boolean) extends Command
 
   final case class StartedDesktopFailed(ex: Throwable) extends Command
 
@@ -77,6 +79,8 @@ object CaptureManager {
   final case class StartTargetDataLineFailed(ex: Throwable) extends Command
 
   final case class SetTimerGetter(func: () => Long) extends Command
+
+  final case class CameraPosition(position: Int) extends Command
 
   final case object StartCapture extends Command
 
@@ -120,22 +124,8 @@ object CaptureManager {
           debug(s"cameraGrabber-${mediaSettings.camDeviceIndex} started.")
           cameraGrabber
         }.onComplete {
-          case Success(grabber) => ctx.self ! CameraGrabberStarted(grabber)
+          case Success(grabber) => ctx.self ! CameraGrabberStarted(grabber, true)
           case Failure(ex) => ctx.self ! StartCameraFailed(ex)
-        }
-
-        val desktopGrabber = new FFmpegFrameGrabber("desktop")
-        desktopGrabber.setFormat("gdigrab")
-//        desktopGrabber.setImageWidth(mediaSettings.imageWidth)
-//        desktopGrabber.setImageHeight(mediaSettings.imageHeight)
-        Future{
-          debug(s"desktopGrabber is starting...")
-          desktopGrabber.start()
-          debug(s"desktopGrabber started.")
-          desktopGrabber
-        }.onComplete{
-          case Success(grabber) => ctx.self ! DesktopGrabberStarted(grabber)
-          case Failure(ex) => ctx.self ! StartedDesktopFailed(ex)
         }
       }
 
@@ -146,11 +136,9 @@ object CaptureManager {
         val dataLineInfo = new DataLine.Info(classOf[TargetDataLine], audioFormat)
 
         Future {
-          debug(s"audioSystem is starting...")
           val line = AudioSystem.getLine(dataLineInfo).asInstanceOf[TargetDataLine]
           line.open(audioFormat)
           line.start()
-          debug(s"audioSystem started")
           line
         }.onComplete {
           case Success(line) => ctx.self ! TargetDataLineStarted(line)
@@ -170,7 +158,6 @@ object CaptureManager {
     outputStream: Option[OutputStream],
     outputFile: Option[File],
     grabber: Option[OpenCVFrameGrabber] = None,
-    desktopGrabber: Option[FFmpegFrameGrabber] = None,
     line: Option[TargetDataLine] = None,
     imageFail: Boolean = false,
     soundFail: Boolean = false
@@ -185,7 +172,7 @@ object CaptureManager {
           imageConverter.setTimeGetter(msg.func)
           Behaviors.same
 
-        case CameraGrabberStarted(g) =>
+        case CameraGrabberStarted(g, only) =>
           log.info(s"Start camera success.")
           if (line.nonEmpty || soundFail || !mediaSettings.needSound) {
             ctx.self ! StartCapture
@@ -194,7 +181,7 @@ object CaptureManager {
             else
               replyTo ! Messages.CaptureStartSuccess(ctx.self)
           }
-          init(replyTo, mediaSettings, outputStream, outputFile, Some(g), desktopGrabber, line, imageFail, soundFail)
+          init(replyTo, mediaSettings, outputStream, outputFile, Some(g), line, imageFail, soundFail)
 
         case TargetDataLineStarted(l) =>
           log.info(s"Start targetDataLine success.")
@@ -205,7 +192,7 @@ object CaptureManager {
             else
               replyTo ! Messages.CaptureStartSuccess(ctx.self)
           }
-          init(replyTo, mediaSettings, outputStream, outputFile, grabber, desktopGrabber, Some(l), imageFail, soundFail)
+          init(replyTo, mediaSettings, outputStream, outputFile, grabber, Some(l), imageFail, soundFail)
 
         case StartCameraFailed(ex) =>
           log.info(s"Start Camera failed: $ex")
@@ -216,7 +203,7 @@ object CaptureManager {
           else if (soundFail || !mediaSettings.needSound) {
             ctx.self ! StopCapture
           }
-          init(replyTo, mediaSettings, outputStream, outputFile, grabber, desktopGrabber, line, imageFail = true, soundFail)
+          init(replyTo, mediaSettings, outputStream, outputFile, grabber, line, imageFail = true, soundFail)
 
         case StartTargetDataLineFailed(ex) =>
           log.info(s"Start targetDataLine failed: $ex")
@@ -227,23 +214,8 @@ object CaptureManager {
           else if (imageFail || !mediaSettings.needImage) {
             ctx.self ! StopCapture
           }
-          init(replyTo, mediaSettings, outputStream, outputFile, grabber, desktopGrabber, line, imageFail, soundFail = true)
+          init(replyTo, mediaSettings, outputStream, outputFile, grabber, line, imageFail, soundFail = true)
 
-        case DesktopGrabberStarted(g) =>
-          log.info(s"Start desktop grab success.")
-          if ((line.nonEmpty || soundFail || !mediaSettings.needSound) && grabber.nonEmpty) {
-            ctx.self ! StartCapture
-            if (soundFail)
-              replyTo ! Messages.CannotAccessSound(ctx.self)
-            else
-              replyTo ! Messages.CaptureStartSuccess(ctx.self)
-          }
-          init(replyTo, mediaSettings, outputStream, outputFile, grabber, Some(g), line, imageFail, soundFail)
-
-        case StartedDesktopFailed(ex) =>
-          log.info(s"Start desktop failed: $ex")
-          replyTo ! Messages.CannotAccessDesktop(ctx.self)
-          Behaviors.same
 
         case StartCapture =>
           val encodeActorMap = mutable.HashMap[EncoderType.Value, ActorRef[EncodeActor.Command]]()
@@ -252,10 +224,6 @@ object CaptureManager {
           val imageCaptureOpt = if (grabber.nonEmpty) {
             Some(getImageCapture(ctx, grabber.get, montageActor, mediaSettings.frameRate, debug))
           } else None
-
-          val desktopCaptureOpt = if(desktopGrabber.nonEmpty){
-            Some(getDesktopCapture(ctx, desktopGrabber.get, montageActor, mediaSettings.frameRate, debug))
-          }else None
 
           val soundCaptureOpt = if (line.nonEmpty) {
             Some(getSoundCapture(ctx, replyTo, line.get, encodeActorMap, mediaSettings.frameRate, mediaSettings.sampleRate, mediaSettings.channels, mediaSettings.sampleSizeInBits, debug))
@@ -283,7 +251,7 @@ object CaptureManager {
             setEncoder(ctx, mediaSettings, fileEncoder, EncoderType.FILE, imageCaptureOpt, soundCaptureOpt, encodeActorMap, replyTo)
           }
 
-          stashBuffer.unstashAll(ctx, idle(replyTo, mediaSettings, grabber, line, imageCaptureOpt, desktopCaptureOpt, montageActor, soundCaptureOpt, None, encodeActorMap))
+          stashBuffer.unstashAll(ctx, idle(replyTo, mediaSettings, grabber, line, imageCaptureOpt, None, montageActor, soundCaptureOpt, encodeActorMap))
 
         case StopCapture =>
           log.info(s"CaptureManager stopped in init.")
@@ -322,7 +290,6 @@ object CaptureManager {
     desktopCaptureOpt: Option[ActorRef[DesktopCapture.Command]] = None,
     montageActor: ActorRef[MontageActor.Command],
     soundCaptureOpt: Option[ActorRef[SoundCapture.Command]] = None,
-    desktopGrabber: Option[FFmpegFrameGrabber] = None,
     encodeActorMap: mutable.HashMap[EncoderType.Value, ActorRef[EncodeActor.Command]])(
     implicit stashBuffer: StashBuffer[Command],
     timer: TimerScheduler[Command]
@@ -346,6 +313,10 @@ object CaptureManager {
 
           Behaviors.same
 
+        case CameraPosition(position) =>
+          montageActor ! MontageActor.CameraPosition(position)
+          Behaviors.same
+
         case AskSamples =>
           soundCaptureOpt.foreach(_ ! SoundCapture.AskSamples)
           Behaviors.same
@@ -367,22 +338,179 @@ object CaptureManager {
           encodeActorMap.remove(EncoderType.STREAM)
           Behaviors.same
 
-        case ShowPerson =>
-          montageActor ! MontageActor.ShowCamera
-          if(desktopCaptureOpt.nonEmpty) desktopCaptureOpt.get ! DesktopCapture.SuspendGrab
-          if(imageCaptureOpt.nonEmpty) imageCaptureOpt.get ! ImageCapture.StartCamera
+        case msg: RecordToBiliBili =>
+          log.info(s"Start record to bilibili")
+          val streamEncoder = if (grabber.nonEmpty && line.isEmpty) { // image only
+            new FFmpegFrameRecorder(msg.url, grabber.get.getImageWidth, grabber.get.getImageHeight)
+          } else if (grabber.isEmpty && line.nonEmpty) { //sound only
+            new FFmpegFrameRecorder(msg.url, mediaSettings.channels)
+          } else {
+            new FFmpegFrameRecorder(msg.url, grabber.get.getImageWidth, grabber.get.getImageHeight, mediaSettings.channels)
+          }
+          setEncoder(ctx, mediaSettings, streamEncoder, EncoderType.BILIBILI, imageCaptureOpt, soundCaptureOpt, encodeActorMap, replyTo, format = "flv")
           Behaviors.same
+
+        case StopRecordToBiliBili =>
+          encodeActorMap.get(EncoderType.BILIBILI).foreach(_ ! EncodeActor.StopEncode)
+          encodeActorMap.remove(EncoderType.BILIBILI)
+          Behaviors.same
+
+
+        case CameraGrabberStarted(grabber1, only) =>
+          if(only){
+            if(desktopCaptureOpt.nonEmpty){
+              desktopCaptureOpt.foreach(_ ! DesktopCapture.StopGrab)
+            }
+            montageActor ! MontageActor.ShowCamera
+          }else{
+            if(desktopCaptureOpt.nonEmpty) montageActor ! MontageActor.ShowBoth
+          }
+          val desktop = if(only) None else desktopCaptureOpt
+          val imageCaptureOpt1 =
+            Some(getImageCapture(ctx, grabber1, montageActor, mediaSettings.frameRate, debug))
+          idle(
+            replyTo,
+            mediaSettings,
+            grabber,
+            line,
+            imageCaptureOpt1,
+            desktop,
+            montageActor,
+            soundCaptureOpt,
+            encodeActorMap)
+
+        case DesktopGrabberStarted(grabber1, only) =>
+          if(only){
+            if(imageCaptureOpt.nonEmpty){
+              imageCaptureOpt.foreach(_ ! ImageCapture.StopCamera)
+            }
+            montageActor ! MontageActor.ShowDesktop
+          }else{
+            if(imageCaptureOpt.nonEmpty) montageActor ! MontageActor.ShowBoth
+          }
+          val camera = if(only) None else imageCaptureOpt
+          val desktopCaptureOpt1 =
+            Some(getDesktopCapture(ctx, grabber1, montageActor, mediaSettings.frameRate, debug))
+          idle(
+            replyTo,
+            mediaSettings,
+            grabber,
+            line,
+            camera,
+            desktopCaptureOpt1,
+            montageActor,
+            soundCaptureOpt,
+            encodeActorMap)
+
+
+        case StartCameraFailed(ex) =>
+          replyTo ! Messages.CannotAccessImage(ctx.self)
+          Behaviors.same
+
+        case StartedDesktopFailed(ex) =>
+          replyTo ! Messages.CannotAccessDesktop(ctx.self)
+          Behaviors.same
+
+        case ShowPerson =>
+          if(imageCaptureOpt.nonEmpty){
+            if(desktopCaptureOpt.nonEmpty){
+              desktopCaptureOpt.foreach(_ ! DesktopCapture.StopGrab)
+            }
+            montageActor ! MontageActor.ShowCamera
+            idle(
+              replyTo,
+              mediaSettings,
+              grabber,
+              line,
+              imageCaptureOpt,
+              None,
+              montageActor,
+              soundCaptureOpt,
+              encodeActorMap)
+          }else{
+            if (mediaSettings.needImage){
+              Future {
+                val cameraGrabber = new OpenCVFrameGrabber(mediaSettings.camDeviceIndex)
+                cameraGrabber.setImageWidth(mediaSettings.imageWidth)
+                cameraGrabber.setImageHeight(mediaSettings.imageHeight)
+                debug(s"cameraGrabber-${mediaSettings.camDeviceIndex} is starting...")
+                cameraGrabber.start()
+                debug(s"cameraGrabber-${mediaSettings.camDeviceIndex} started.")
+                cameraGrabber
+              }.onComplete {
+                case Success(grabber) => ctx.self ! CameraGrabberStarted(grabber, true)
+                case Failure(ex) => ctx.self ! StartCameraFailed(ex)
+              }
+            }
+            Behaviors.same
+          }
 
         case ShowDesktop =>
-          montageActor ! MontageActor.ShowDesktop
-          if(imageCaptureOpt.nonEmpty) imageCaptureOpt.get ! ImageCapture.SuspendCamera
-          if(desktopCaptureOpt.nonEmpty) desktopCaptureOpt.get ! DesktopCapture.StartGrab
-          Behaviors.same
+          if(desktopCaptureOpt.nonEmpty) {
+            if (imageCaptureOpt.nonEmpty) {
+              imageCaptureOpt.foreach(_ ! ImageCapture.StopCamera)
+            }
+            montageActor ! MontageActor.ShowDesktop
+            idle(
+              replyTo,
+              mediaSettings,
+              grabber,
+              line,
+              None,
+              desktopCaptureOpt,
+              montageActor,
+              soundCaptureOpt,
+              encodeActorMap)
+          }else{
+            if (mediaSettings.needImage){
+              Future{
+                val desktopGrabber = new FFmpegFrameGrabber1("desktop")
+                desktopGrabber.setFormat("gdigrab")
+                debug(s"desktopGrabber is starting...")
+                desktopGrabber.start()
+                debug(s"desktopGrabber started.")
+                desktopGrabber
+              }.onComplete{
+                case Success(grabber) => ctx.self ! DesktopGrabberStarted(grabber, true)
+                case Failure(ex) => ctx.self ! StartedDesktopFailed(ex)
+              }
+            }
+            Behaviors.same
+          }
+
 
         case ShowBoth =>
-          montageActor ! MontageActor.ShowBoth
-          if(desktopCaptureOpt.nonEmpty) desktopCaptureOpt.get ! DesktopCapture.StartGrab
-          if(imageCaptureOpt.nonEmpty) imageCaptureOpt.get ! ImageCapture.StartCamera
+          if(desktopCaptureOpt.isDefined && imageCaptureOpt.isDefined){
+            montageActor ! MontageActor.ShowBoth
+          }else{
+            if(desktopCaptureOpt.isEmpty){
+              Future{
+                val desktopGrabber = new FFmpegFrameGrabber1("desktop")
+                desktopGrabber.setFormat("gdigrab")
+                debug(s"desktopGrabber is starting...")
+                desktopGrabber.start()
+                debug(s"desktopGrabber started.")
+                desktopGrabber
+              }.onComplete{
+                case Success(grabber) => ctx.self ! DesktopGrabberStarted(grabber, false)
+                case Failure(ex) => ctx.self ! StartedDesktopFailed(ex)
+              }
+            }
+            if(imageCaptureOpt.isEmpty){
+              Future {
+                val cameraGrabber = new OpenCVFrameGrabber(mediaSettings.camDeviceIndex)
+                cameraGrabber.setImageWidth(mediaSettings.imageWidth)
+                cameraGrabber.setImageHeight(mediaSettings.imageHeight)
+                debug(s"cameraGrabber-${mediaSettings.camDeviceIndex} is starting...")
+                cameraGrabber.start()
+                debug(s"cameraGrabber-${mediaSettings.camDeviceIndex} started.")
+                cameraGrabber
+              }.onComplete {
+                case Success(grabber) => ctx.self ! CameraGrabberStarted(grabber, false)
+                case Failure(ex) => ctx.self ! StartCameraFailed(ex)
+              }
+            }
+          }
           Behaviors.same
 
         case msg: StartEncodeFile =>
@@ -406,6 +534,8 @@ object CaptureManager {
           imageCaptureOpt.foreach(_ ! ImageCapture.StopCamera)
           soundCaptureOpt.foreach(_ ! SoundCapture.StopSample)
           encodeActorMap.foreach(_._2 ! EncodeActor.StopEncode)
+          desktopCaptureOpt.foreach(_ ! DesktopCapture.StopGrab)
+          montageActor ! MontageActor.Stop
           timer.startSingleTimer(STOP_DELAY_TIMER_KEY, StopDelay, 1.second)
           Behaviors.same
 
@@ -414,6 +544,8 @@ object CaptureManager {
           imageCaptureOpt.foreach(_ ! ImageCapture.StopCamera)
           soundCaptureOpt.foreach(_ ! SoundCapture.StopSample)
           encodeActorMap.foreach(_._2 ! EncodeActor.StopEncode)
+          desktopCaptureOpt.foreach(_ ! DesktopCapture.StopGrab)
+          montageActor ! MontageActor.Stop
           timer.startSingleTimer(STOP_DELAY_TIMER_KEY, StopDelay, 1.second)
           Behaviors.same
 
@@ -443,18 +575,19 @@ object CaptureManager {
     imageCaptureOpt: Option[ActorRef[ImageCapture.Command]] = None,
     soundCaptureOpt: Option[ActorRef[SoundCapture.Command]] = None,
     encodeActorMap: mutable.HashMap[EncoderType.Value, ActorRef[EncodeActor.Command]],
-    replyTo: ActorRef[Messages.ReplyToCommand]
+    replyTo: ActorRef[Messages.ReplyToCommand],
+    format: String = "mpegts"
   ): Unit = {
 
-    encoder.setFormat("mpegts")
+    encoder.setFormat(format)
 
     /*video*/
     encoder.setVideoOption("tune", "zerolatency")
     encoder.setVideoOption("preset", "ultrafast")
     encoder.setVideoOption("crf", "25")
-//    encoder.setVideoOption("keyint", "1")
+    //    encoder.setVideoOption("keyint", "1")
     encoder.setVideoBitrate(mediaSettings.outputBitrate)
-    //                    encoder.setVideoCodec(avcodec.AV_CODEC_ID_H264)
+    encoder.setVideoCodec(mediaSettings.videoCodec)
     encoder.setFrameRate(mediaSettings.frameRate)
 
     /*audio*/
@@ -463,7 +596,7 @@ object CaptureManager {
     encoder.setAudioBitrate(192000)
     encoder.setSampleRate(mediaSettings.sampleRate.toInt)
     encoder.setAudioChannels(mediaSettings.channels)
-    //          encoder.setAudioCodec(avcodec.AV_CODEC_ID_AAC)
+    encoder.setAudioCodec(mediaSettings.audioCodec)
     encoderType match {
       case EncoderType.STREAM =>
         log.info(s"streamEncoder start success.")
@@ -473,6 +606,11 @@ object CaptureManager {
         log.info(s"fileEncoder start success.")
         val encodeActor = getEncodeActor(ctx, replyTo, EncoderType.FILE, encoder, latestFrame, mediaSettings.needImage, mediaSettings.needSound, debug)
         encodeActorMap.put(EncoderType.FILE, encodeActor)
+
+      case EncoderType.BILIBILI =>
+        log.info(s"bilibiliEncoder start success.")
+        val encodeActor = getEncodeActor(ctx, replyTo, EncoderType.BILIBILI, encoder, latestFrame, mediaSettings.needImage, mediaSettings.needSound, debug)
+        encodeActorMap.put(EncoderType.BILIBILI, encodeActor)
     }
   }
 
@@ -494,7 +632,7 @@ object CaptureManager {
 
   private def getDesktopCapture(
     ctx: ActorContext[Command],
-    grabber: FFmpegFrameGrabber,
+    grabber: FFmpegFrameGrabber1,
     montageActor: ActorRef[MontageActor.Command],
     frameRate: Int,
     debug: Boolean

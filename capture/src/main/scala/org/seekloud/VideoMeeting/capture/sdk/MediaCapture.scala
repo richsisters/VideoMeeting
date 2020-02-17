@@ -9,6 +9,7 @@ import akka.actor.typed.scaladsl.adapter._
 import akka.dispatch.MessageDispatcher
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
+import org.bytedeco.ffmpeg.global.avcodec
 import org.seekloud.VideoMeeting.capture.common.AppSettings
 import org.seekloud.VideoMeeting.capture.core.CaptureManager
 import org.seekloud.VideoMeeting.capture.core.CaptureManager.MediaSettings
@@ -81,21 +82,26 @@ class MediaCapture(
 
   private val captureNum : AtomicInteger = new AtomicInteger(0)
 
+  /*提供设置的默认值*/
   /*画面配置*/
   private var imageWidth = 640
-  private var imageHeight = 360
+  private var imageHeight = 480
   private var frameRate = AppSettings.frameRate
   private var outputBitrate = AppSettings.bit
   private var needImage = true
+  private var videoCodec = avcodec.AV_CODEC_ID_H264
+
 
   /*声音配置*/
-  private var sampleRate = 44100.0F
+  private var sampleRate = 48000.0F
   private var sampleSizeInBits = 16
-  private var channels = 2
+  private var channels = 1
   private var needSound = true
+  private var audioCodec = avcodec.AV_CODEC_ID_AAC
 
   /*录制选项*/
   private var outputFile: Option[File] = None
+  private var startOutputFile = false
 
 
   def setImageWidth(imageWidth: Int): Unit = {
@@ -158,6 +164,17 @@ class MediaCapture(
 
   def getOutputFileName: Option[String] = this.outputFile.map(_.getName)
 
+  def setAudioCodec(codec: Int) = {
+    this.audioCodec = codec
+  }
+
+  def setVideoCodec(codec: Int) = {
+    this.videoCodec = codec
+  }
+
+  def getAudioCodec: Int = this.audioCodec
+
+  def getVideoCode: Int = this.videoCodec
 
   def setOptions(imageWidth: Option[Int] = None,
     imageHeight: Option[Int] = None,
@@ -167,7 +184,9 @@ class MediaCapture(
     sampleRate: Option[Float] = None,
     sampleSizeInBits: Option[Int] = None,
     channels: Option[Int] = None,
-    needSound: Option[Boolean] = None): Unit = {
+    needSound: Option[Boolean] = None,
+    audioCodec: Option[Int] = None,
+    videoCodec: Option[Int] = None): Unit = {
 
     this.imageWidth = imageWidth.getOrElse(this.imageWidth)
     this.imageHeight = imageHeight.getOrElse(this.imageHeight)
@@ -178,6 +197,8 @@ class MediaCapture(
     this.sampleSizeInBits = sampleSizeInBits.getOrElse(this.sampleSizeInBits)
     this.channels = channels.getOrElse(this.channels)
     this.needSound = needSound.getOrElse(this.needSound)
+    this.audioCodec = audioCodec.getOrElse(this.audioCodec)
+    this.videoCodec = videoCodec.getOrElse(this.videoCodec)
     mediaSettings = Some(MediaSettings(
       this.imageWidth,
       this.imageHeight,
@@ -188,6 +209,8 @@ class MediaCapture(
       this.sampleSizeInBits,
       this.channels,
       this.needSound,
+      this.audioCodec,
+      this.videoCodec,
       this.camDeviceIndex,
       this.audioDeviceIndex
     ))
@@ -210,15 +233,22 @@ class MediaCapture(
   }
 
 
+
+  def changeCameraPosition(position: Int): Unit ={
+    captureManager.foreach(_ ! CaptureManager.CameraPosition(position))
+  }
+
+
   /**
     * 初始化并开始工作
     *
     * */
   def start(): Unit = {
 
-    val number = captureNum.incrementAndGet()
+//    val number = captureNum.incrementAndGet()
 
-    log.info(s"MediaCapture-$number is starting...")
+    val mediaNo = s"captureManager-${System.currentTimeMillis()}"
+    log.info(s"$mediaNo is starting...")
 
     val mediaSettings =
       if (this.mediaSettings.isEmpty) {MediaSettings(
@@ -231,16 +261,20 @@ class MediaCapture(
         sampleSizeInBits,
         channels,
         needSound,
+        audioCodec,
+        videoCodec,
         camDeviceIndex,
         audioDeviceIndex
       )}
       else this.mediaSettings.get
 
-    captureManager = Some(system.spawn(CaptureManager.create(replyTo, mediaSettings, outputStream, outputFile, debug, needTimestamp), s"captureManager-$number"))
+    val file = if(startOutputFile) outputFile else None
+    captureManager = Some(system.spawn(CaptureManager.create(replyTo, mediaSettings, outputStream, file, debug, needTimestamp), mediaNo))
 
   }
 
-  def stop(): Unit = {
+  def stop(startOutputFile: Boolean = false): Unit = {
+    this.startOutputFile = startOutputFile
     log.info(s"MediaCapture-${captureNum.get()} is stopping...")
     captureManager.foreach { c =>
       c ! CaptureManager.StopCapture

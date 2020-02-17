@@ -22,7 +22,7 @@ object Messages {
   case class LatestSound(samples: ShortBuffer, ts: Long) //采集到声音样本的时间
 
   object EncoderType extends Enumeration {
-    val STREAM, FILE = Value
+    val STREAM, FILE, BILIBILI = Value
   }
 
 
@@ -43,6 +43,8 @@ object Messages {
 
   final case object CannotSaveToFile extends ReplyToCommand
 
+  final case object CannotRecordToBiliBili extends ReplyToCommand
+
   final case class ImageRsp(latestImage: LatestImage) extends ReplyToCommand
 
   final case class SoundRsp(latestSound: LatestSound) extends ReplyToCommand
@@ -52,6 +54,8 @@ object Messages {
   final case object NoSamples extends ReplyToCommand
 
   final case object ManagerStopped extends ReplyToCommand
+
+  final case class EncodeException(ex: Exception) extends ReplyToCommand
 
 
   /*to manager*/
@@ -70,6 +74,10 @@ object Messages {
   final case object StopEncodeFile extends ReqCommand
 
   final case object StopMediaCapture extends ReqCommand
+
+  final case class RecordToBiliBili(url: String) extends ReqCommand
+
+  final case object StopRecordToBiliBili extends ReqCommand
 
 
 }

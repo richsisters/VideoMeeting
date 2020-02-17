@@ -4,7 +4,7 @@ import java.util.concurrent.LinkedBlockingDeque
 
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
-import org.bytedeco.javacv.{FFmpegFrameGrabber, OpenCVFrameGrabber}
+import org.bytedeco.javacv.{FFmpegFrameGrabber, FFmpegFrameGrabber1, OpenCVFrameGrabber}
 import org.seekloud.VideoMeeting.capture.core.MontageActor.DesktopImage
 import org.seekloud.VideoMeeting.capture.protocol.Messages.LatestFrame
 import org.slf4j.LoggerFactory
@@ -35,16 +35,17 @@ object DesktopCapture {
 
   final case object StopGrab extends Command
 
-  def create(grabber: FFmpegFrameGrabber,  frameRate: Int, isDebug: Boolean, montageActor: ActorRef[MontageActor.Command]): Behavior[Command] =
+  def create(grabber: FFmpegFrameGrabber1,  frameRate: Int, isDebug: Boolean, montageActor: ActorRef[MontageActor.Command]): Behavior[Command] =
     Behaviors.setup[Command] { ctx =>
       log.info(s"ImageCapture is staring...")
       debug = isDebug
+      ctx.self ! StartGrab
       working(grabber, montageActor, frameRate)
     }
 
 
   private def working(
-    grabber: FFmpegFrameGrabber,
+    grabber: FFmpegFrameGrabber1,
     montageActor: ActorRef[MontageActor.Command],
     frameRate: Int,
     state: Boolean = false

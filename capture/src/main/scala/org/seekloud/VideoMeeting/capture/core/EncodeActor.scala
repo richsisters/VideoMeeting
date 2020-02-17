@@ -11,7 +11,7 @@ import akka.actor.typed.scaladsl.Behaviors
 import org.bytedeco.javacv.{FFmpegFrameRecorder, Java2DFrameConverter}
 import org.seekloud.VideoMeeting.capture.sdk.MediaCapture.executor
 import org.seekloud.VideoMeeting.capture.protocol.Messages
-import org.seekloud.VideoMeeting.capture.protocol.Messages.EncoderType
+import org.seekloud.VideoMeeting.capture.protocol.Messages.{EncodeException, EncoderType}
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
@@ -21,6 +21,7 @@ import scala.util.{Failure, Success}
   * User: TangYaruo
   * Date: 2019/8/28
   * Time: 17:54
+  * Description: 用来存储视频对视频的编码
   */
 object EncodeActor {
 
@@ -73,14 +74,18 @@ object EncodeActor {
               log.info(s"fileEncoder start failed: $e")
               replyTo ! Messages.CannotSaveToFile
               ctx.self ! StopEncode
+            case EncoderType.BILIBILI =>
+              log.info(s"fileEncoder start failed: $e")
+              replyTo ! Messages.CannotRecordToBiliBili
           }
 
       }
-      working(encodeType, encoder, imageCache, new Java2DFrameConverter(), needImage, needSound)
+      working(replyTo, encodeType, encoder, imageCache, new Java2DFrameConverter(), needImage, needSound)
     }
 
 
   private def working(
+    replyTo: ActorRef[Messages.ReplyToCommand],
     encodeType: EncoderType.Value,
     encoder: FFmpegFrameRecorder,
     imageCache: LinkedBlockingDeque[Messages.LatestFrame],
@@ -106,7 +111,7 @@ object EncodeActor {
             TimeUnit.MICROSECONDS
           )
 
-          working(encodeType, encoder, imageCache, imageConverter, needImage, needSound, Some(loop), Some(encodeLoopExecutor), frameNumber)
+          working(replyTo, encodeType, encoder, imageCache, imageConverter, needImage, needSound, Some(loop), Some(encodeLoopExecutor), frameNumber)
 
         case EncodeLoop =>
           if (needImage) {
@@ -129,9 +134,13 @@ object EncodeActor {
             } catch {
               case ex: Exception =>
                 log.error(s"[$encodeType] encode image frame error: $ex")
+                if(ex.getMessage.startsWith("av_interleaved_write_frame() error")){
+                  replyTo ! EncodeException(ex)
+                  ctx.self ! StopEncode
+                }
             }
           }
-          working(encodeType, encoder, imageCache, imageConverter, needImage, needSound, encodeLoop, encodeExecutor, frameNumber + 1)
+          working(replyTo, encodeType, encoder, imageCache, imageConverter, needImage, needSound, encodeLoop, encodeExecutor, frameNumber + 1)
 
         case msg: EncodeSamples =>
           if (encodeLoop.nonEmpty) {

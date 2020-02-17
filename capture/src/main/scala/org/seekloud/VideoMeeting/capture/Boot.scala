@@ -43,10 +43,10 @@ class Boot extends javafx.application.Application {
     val testActor = system.spawn(TestCaptureActor.create(gc), "testActor")
     val mediaCapture = MediaCapture(testActor)
 
-    val outFile = new File("D:\\test_video\\testCapture1.ts")
-//    mediaCapture.setOutputFile(outFile)
-//    mediaCapture.needImage(true)
-//    mediaCapture.needSound(true)
+    val outFile = new File("/Users/hewro/Desktop/testCapture2.ts")
+    mediaCapture.setOutputFile(outFile)
+    mediaCapture.needImage(true)
+    mediaCapture.needSound(true)
     mediaCapture.start()
 
     val group = new Group()

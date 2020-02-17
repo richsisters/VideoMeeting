@@ -34,6 +34,7 @@ object TestCaptureActor {
       idle(gc)
     }
 
+  //replyTo对接收到的信息进行处理
   private def idle(gc: GraphicsContext): Behavior[TestCommand] =
     Behaviors.receive[TestCommand] { (ctx, msg) =>
       msg match {
@@ -41,6 +42,7 @@ object TestCaptureActor {
         case msg: CaptureStartSuccess =>
           log.info(s"media capture start success!")
           val testAskLoop = new ScheduledThreadPoolExecutor(1)
+          //循环请求图像
           val loop = testAskLoop.scheduleAtFixedRate(
             () => {
               msg.manager ! Messages.AskImage
@@ -80,6 +82,7 @@ object TestCaptureActor {
 
         case msg: ImageRsp =>
           Boot.addToPlatform {
+            //在画布上绘制获得图像，显示成视频
             gc.drawImage(msg.latestImage.image, 0, 0, gc.getCanvas.getWidth, gc.getCanvas.getHeight)
           }
           Behaviors.same
