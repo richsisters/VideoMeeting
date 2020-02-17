@@ -146,6 +146,15 @@ object StreamPullActor {
           ctx.self ! CleanStream(liveId)
           Behaviors.same
 
+        case msg: StopPull4Client =>
+          log.info(s"${ctx.self} receive a msg $msg")
+          if(liveInfoMap.get(msg.liveId).isDefined){
+            liveInfoMap.remove(msg.liveId)
+            livePipeMap.remove(msg.liveId)
+            liveCountMap.remove(msg.liveId)
+          }
+          Behaviors.same
+
         case CleanStream(liveId) =>
           log.info(s"$liveId does not have stream for 30 secs and kill it")
           val infoOpt = liveInfoMap.get(liveId)
@@ -178,8 +187,6 @@ object StreamPullActor {
           if(livePipeMap.get(liveId).isDefined) {
             val pullPipe = livePipeMap(liveId)
             pullPipe ! NewBuffer(data)
-          }else{
-            log.error(s"cant't find liveInfo for liveId=$liveId")
           }
           Behaviors.same
 

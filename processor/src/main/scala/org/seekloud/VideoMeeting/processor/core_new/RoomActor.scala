@@ -157,6 +157,21 @@ object RoomActor {
 
         case msg:ForceExit4Client =>
           log.info(s"${ctx.self} receive a msg $msg")
+
+          if(roomLiveMap.get(msg.roomId).nonEmpty){
+            streamPullActor ! StreamPullActor.StopPull4Client(msg.liveId)
+            roomLiveMap.get(msg.roomId).foreach{live =>
+              live.foreach{l =>
+                if(l == msg.liveId){
+                  pullPipeMap.get(l).foreach( a => a ! StreamPullPipe.ClosePipe)
+                  pullPipeMap.remove(msg.liveId)
+                }
+              }
+            }
+          } else {
+            log.info(s"${msg.roomId}  pipe not exist when forceExit4Client")
+          }
+
           val grabberActorMap = grabberMap.get(msg.roomId)
           if(grabberActorMap.isDefined){
             grabberActorMap.get.foreach( grabber =>
@@ -174,19 +189,6 @@ object RoomActor {
             log.info(s"${msg.roomId}  recorder not exist when forceExit4Client")
           }
 
-          if(roomLiveMap.get(msg.roomId).nonEmpty){
-            streamPullActor ! StreamPullActor.StopPull4Client(msg.liveId)
-            roomLiveMap.get(msg.roomId).foreach{live =>
-              live.foreach{l =>
-                if(l == msg.liveId){
-                  pullPipeMap.get(l).foreach( a => a ! StreamPullPipe.ClosePipe)
-                  pullPipeMap.remove(msg.liveId)
-                }
-              }
-            }
-          } else {
-            log.info(s"${msg.roomId}  pipe not exist when forceExit4Client")
-          }
 
           Behaviors.same
 
