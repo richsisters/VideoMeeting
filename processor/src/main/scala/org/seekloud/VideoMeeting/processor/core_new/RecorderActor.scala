@@ -242,8 +242,7 @@ object RecorderActor {
         case msg: BanOnClient =>
           log.info(s"${ctx.self} receive a msg $msg")
           if(msg.isImg){
-            val newClientInfo = clientInfo.filter(c => c != msg.liveId)
-            drawer ! ReStartDrawing(newClientInfo, msg.liveId)
+            drawer ! BanClientImg(msg.liveId)
           } else if(msg.isSound){
             ctx.self ! BanClientSound(msg.liveId)
           }
