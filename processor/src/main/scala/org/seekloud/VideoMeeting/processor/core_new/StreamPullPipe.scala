@@ -43,10 +43,15 @@ object StreamPullPipe {
       Behaviors.withTimers[Command] {
         implicit timer =>
           streamPullActor ! NewLive(liveId, roomId, ctx.self)
-          val output = if (isDebug) {
-            val file = new File(s"$debugPath$roomId/${liveId}_in.ts")
-            Some(new FileOutputStream(file))
-          } else None
+          val output =
+              try{
+                val file = new File(s"$debugPath$roomId/${liveId}_in.ts")
+                Some(new FileOutputStream(file))
+              } catch {
+                case e: Exception =>
+                  log.error(s"create record file error, $e")
+                  None
+              }
           work(roomId, liveId, out, output)
       }
     }

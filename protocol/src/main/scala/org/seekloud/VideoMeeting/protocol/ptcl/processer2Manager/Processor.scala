@@ -108,4 +108,32 @@ object Processor {
                               msg: String ="ok"
                             )extends  CommonRsp
 
+
+
+  /**  url:processor/record
+    *  post
+    */
+  case class SeekRecord(
+                         roomId:Long,
+                         startTime:Long
+                       )
+
+  case class RecordInfoRsp(
+                            errCode:Int = 0,
+                            msg:String = "ok",
+                            duration:String
+                          ) extends CommonRsp
+
+  case class RecordList(
+                         records:List[RecordData]
+                       )
+
+  case class RecordData(
+                         roomId:Long,
+                         startTime:Long
+                       )
+
+  case class RecordInfo(fileExist:Boolean,
+                        duration:String)
+
 }

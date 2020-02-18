@@ -4,7 +4,7 @@ import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerSch
 import akka.actor.typed.{ActorRef, Behavior}
 import org.seekloud.byteobject.MiddleBufferInJvm
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo._
-import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.http.CommonProtocol.{GetLiveInfoRsp, GetLiveInfoRsp4RM}
+import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.http.CommonProtocol.GetLiveInfoRsp4RM
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol.{HostCloseRoom, _}
 import org.seekloud.VideoMeeting.roomManager.Boot.{executor, roomManager}
@@ -14,7 +14,7 @@ import org.seekloud.VideoMeeting.roomManager.models.dao.{RecordDao, StatisticDao
 import org.seekloud.VideoMeeting.roomManager.protocol.ActorProtocol
 import org.seekloud.VideoMeeting.roomManager.protocol.ActorProtocol.BanOnAnchor
 import org.seekloud.VideoMeeting.roomManager.protocol.CommonInfoProtocol.WholeRoomInfo
-import org.seekloud.VideoMeeting.roomManager.utils.{DistributorClient, ProcessorClient, RtpClient}
+import org.seekloud.VideoMeeting.roomManager.utils.{ProcessorClient, RtpClient}
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable
@@ -97,25 +97,11 @@ object RoomActor {
             data match {
               case Right(rsp) =>
                 if (userTableOpt.nonEmpty) {
-
                   val roomInfo = RoomInfo(roomId, s"${userTableOpt.get.userName}的会议室", "", Common.DefaultImg.coverImg,
                     userTableOpt.get.uid, userTableOpt.get.userName, UserInfoDao.getHeadImg(userTableOpt.get.headImg)
-                    , None, Some(rsp.liveInfo.liveId))
-
-                  DistributorClient.startPull(roomId, rsp.liveInfo.liveId).map {
-                    case Right(r) =>
-                      log.info(s"distributor startPull succeed, get live address: ${r.liveAdd}")
-                      dispatchTo(subscribers)(List((userId, false)), StartLiveRsp(Some(rsp.liveInfo)))
-                      roomInfo.mpd = Some(r.liveAdd)
-                      val startTime = r.startTime
-                        ctx.self ! SwitchBehavior("idle", idle(WholeRoomInfo(roomInfo, rsp.liveInfo), mutable.HashMap[Long, LiveInfo](), subscribers, mutable.Set[Long](), startTime, 0))
-
-                    case Left(e) =>
-                      log.error(s"distributor startPull error: $e")
-                      dispatchTo(subscribers)(List((userId, false)), StartLiveRefused4LiveInfoError)
-                      ctx.self ! SwitchBehavior("init", init(roomId, subscribers))
-                  }
-
+                    , Some(rsp.liveInfo.liveId))
+                  dispatchTo(subscribers)(List((userId, false)), StartLiveRsp(Some(rsp.liveInfo)))
+                  ctx.self ! SwitchBehavior("idle", idle(WholeRoomInfo(roomInfo, rsp.liveInfo), mutable.HashMap[Long, LiveInfo](), subscribers, System.currentTimeMillis()))
                 } else {
                   log.debug(s"${ctx.self.path} 开始直播被拒绝，数据库中没有该用户的数据，userId=$userId")
                   dispatchTo(subscribers)(List((userId, false)), StartLiveRefused)
@@ -140,9 +126,9 @@ object RoomActor {
 
         case TestRoom(roomInfo) =>
           //仅用户测试使用空房间
-          idle(WholeRoomInfo(roomInfo, LiveInfo("", "")),  mutable.HashMap[Long, LiveInfo](), subscribers, mutable.Set[Long](), System.currentTimeMillis(), 0)
+          idle(WholeRoomInfo(roomInfo, LiveInfo("", "")),  mutable.HashMap[Long, LiveInfo](), subscribers, System.currentTimeMillis())
 
-        case ActorProtocol.AddUserActor4Test(userId, roomId, userActor) =>
+        case ActorProtocol.AddUserActor4Test(userId, `roomId`, userActor) =>
           subscribers.put((userId, false), userActor)
           Behaviors.same
 
@@ -157,10 +143,7 @@ object RoomActor {
     wholeRoomInfo: WholeRoomInfo, //包含该房间主持人的LiveInfo
     liveInfoMap: mutable.HashMap[Long, LiveInfo], //除主持人外的所有参会者的liveInfo
     subscribe: mutable.HashMap[(Long, Boolean), ActorRef[UserActor.Command]], //需要区分订阅的用户的身份，注册用户还是临时用户(uid,是否是临时用户true:是)
-    liker: mutable.Set[Long],
-    startTime: Long,
-    totalView: Int
-  )
+    startTime: Long)
     (implicit stashBuffer: StashBuffer[Command],
       timer: TimerScheduler[Command],
       sendBuffer: MiddleBufferInJvm
@@ -178,10 +161,10 @@ object RoomActor {
         case UpdateRTMP(rtmp) =>
           val newRoomInfo = wholeRoomInfo.copy(roomInfo = wholeRoomInfo.roomInfo.copy(rtmp = Some(rtmp)))
           log.debug(s"${ctx.self.path} 更新liveId=$rtmp,更新后的liveId=${newRoomInfo.roomInfo.rtmp}")
-          idle(newRoomInfo, liveInfoMap, subscribe, liker, startTime, totalView)
+          idle(newRoomInfo, liveInfoMap, subscribe, startTime)
 
         case ActorProtocol.WebSocketMsgWithActor(userId, roomId, wsMsg) =>
-          handleWebSocketMsg(wholeRoomInfo, subscribe, liveInfoMap, liker, startTime, totalView, dispatch(subscribe), dispatchTo(subscribe))(ctx, userId, roomId, wsMsg)
+          handleWebSocketMsg(wholeRoomInfo, subscribe, liveInfoMap, startTime, dispatch(subscribe), dispatchTo(subscribe))(ctx, userId, roomId, wsMsg)
 
         case GetRtmpLiveInfo(_, replyTo) =>
           log.debug(s"room${wholeRoomInfo.roomInfo.roomId}获取liveId成功")
@@ -189,7 +172,6 @@ object RoomActor {
           Behaviors.same
 
         case ActorProtocol.UpdateSubscriber(join, roomId, userId, temporary, userActorOpt) =>
-          var viewNum = totalView
           //虽然房间存在，但其实主播已经关闭房间，这时的startTime=-1
           //向所有人发送主播已经关闭房间的消息
           log.info(s"-----roomActor get UpdateSubscriber id: $roomId")
@@ -198,7 +180,6 @@ object RoomActor {
           }
           else {
             if (join == Common.Subscriber.join) {
-              viewNum += 1
               log.debug(s"${ctx.self.path}新用户加入房间roomId=$roomId,userId=$userId")
               subscribe.put((userId, temporary), userActorOpt.get)
             } else if (join == Common.Subscriber.left) {
@@ -233,7 +214,7 @@ object RoomActor {
             case Failure(_) =>
 
           }
-          idle(wholeRoomInfo, liveInfoMap, subscribe, liker, startTime, viewNum)
+          idle(wholeRoomInfo, liveInfoMap, subscribe, startTime)
 
         case ActorProtocol.HostCloseRoom(roomId) =>
           log.debug(s"${ctx.self.path} host close the room")
@@ -246,8 +227,7 @@ object RoomActor {
           }
           if (startTime != -1l) {
             log.debug(s"${ctx.self.path} 主播向distributor发送finishPull请求")
-            DistributorClient.finishPull(wholeRoomInfo.liveInfo.liveId)
-            roomManager ! RoomManager.DelaySeekRecord(wholeRoomInfo, totalView, roomId, startTime, wholeRoomInfo.liveInfo.liveId)
+            roomManager ! RoomManager.DelaySeekRecord(wholeRoomInfo, roomId, startTime, wholeRoomInfo.liveInfo.liveId)
           }
           dispatchTo(subscribe)(subscribe.filter(r => r._1 != (wholeRoomInfo.roomInfo.userId, false)).keys.toList, HostCloseRoom())
           Behaviors.stopped
@@ -259,26 +239,15 @@ object RoomActor {
           } yield {
             data match {
               case Right(rsp) =>
-                DistributorClient.startPull(roomId, rsp.liveInfo.liveId).map {
-                  case Right(r) =>
-                    log.info("distributor startPull succeed")
-                    val startTime = r.startTime
-                    val newWholeRoomInfo = wholeRoomInfo.copy(roomInfo = wholeRoomInfo.roomInfo.copy(mpd = Some(r.liveAdd), rtmp = Some(rsp.liveInfo.liveId)), liveInfo = rsp.liveInfo)
-                    dispatchTo(subscribe)(List((wholeRoomInfo.roomInfo.userId, false)), StartLiveRsp(Some(rsp.liveInfo)))
-                    ctx.self ! SwitchBehavior("idle", idle(newWholeRoomInfo, liveInfoMap, subscribe, liker, startTime, 0))
-                  case Left(e) =>
-                    log.error(s"distributor startPull error: $e")
-                    val newWholeRoomInfo = wholeRoomInfo.copy(liveInfo = rsp.liveInfo)
-                    dispatchTo(subscribe)(List((wholeRoomInfo.roomInfo.userId, false)), StartLiveRsp(Some(rsp.liveInfo)))
-                    ctx.self ! SwitchBehavior("idle", idle(newWholeRoomInfo, liveInfoMap, subscribe, liker, startTime, 0))
-                }
-
+                val newWholeRoomInfo = wholeRoomInfo.copy(roomInfo = wholeRoomInfo.roomInfo.copy(rtmp = Some(rsp.liveInfo.liveId)), liveInfo = rsp.liveInfo)
+                dispatchTo(subscribe)(List((wholeRoomInfo.roomInfo.userId, false)), StartLiveRsp(Some(rsp.liveInfo)))
+                ctx.self ! SwitchBehavior("idle", idle(newWholeRoomInfo, liveInfoMap, subscribe, System.currentTimeMillis()))
 
               case Left(str) =>
                 log.debug(s"${ctx.self.path} 重新开始直播失败=$str")
                 dispatchTo(subscribe)(List((wholeRoomInfo.roomInfo.userId, false)), StartLiveRefused4LiveInfoError)
                 ctx.self ! ActorProtocol.HostCloseRoom(wholeRoomInfo.roomInfo.roomId)
-                ctx.self ! SwitchBehavior("idle", idle(wholeRoomInfo, liveInfoMap, subscribe, liker, startTime, 0))
+                ctx.self ! SwitchBehavior("idle", idle(wholeRoomInfo, liveInfoMap, subscribe, startTime))
             }
           }
           switchBehavior(ctx, "busy", busy(), InitTime, TimeOut("busy"))
@@ -331,9 +300,7 @@ object RoomActor {
     wholeRoomInfo: WholeRoomInfo,
     subscribers: mutable.HashMap[(Long, Boolean), ActorRef[UserActor.Command]], //包括主持人在内的所有用户
     liveInfoMap: mutable.HashMap[Long, LiveInfo], //除主持人外所有用户在内的liveinfo
-    liker: mutable.Set[Long],
     startTime: Long,
-    totalView: Int,
     dispatch: WsMsgRm => Unit,
     dispatchTo: (List[(Long, Boolean)], WsMsgRm) => Unit
   )
@@ -363,7 +330,7 @@ object RoomActor {
         } else {
           dispatchTo(List((wholeRoomInfo.roomInfo.userId, false)), ChangeModeRsp())
         }
-        idle(wholeRoomInfo.copy(isJoinOpen = connect), liveInfoMap, subscribers, liker, startTime, totalView)
+        idle(wholeRoomInfo.copy(isJoinOpen = connect), liveInfoMap, subscribers, startTime)
 
       case JoinAccept(`roomId`, userId4Audience, clientType, accept) =>
         log.info(s"${ctx.self.path} 接受加入会议请求，roomId=$roomId")
@@ -415,7 +382,6 @@ object RoomActor {
               val liveIdHost = wholeRoomInfo.liveInfo.liveId
               val liveIdAudience = liveInfoMap.values.map(_.liveId).toList
               val liveIdMix = rsp.liveInfo
-              DistributorClient.startPull(roomId, liveIdMix.liveId)
               ProcessorClient.newConnect(roomId, liveIdHost, liveIdAudience, liveIdMix.liveId, liveIdMix.liveCode, wholeRoomInfo.layout)
               ctx.self ! UpdateRTMP(liveIdMix.liveId)
               dispatch(RcvComment(-1l, "", s"roomId$roomId start the meeting!"))
@@ -458,16 +424,10 @@ object RoomActor {
         log.debug(s"${ctx.self.path} modify the room info$info")
         dispatch(UpdateRoomInfo2Client(roomInfo.roomName, roomInfo.roomDes))
         dispatchTo(List((wholeRoomInfo.roomInfo.userId, false)), ModifyRoomRsp())
-        idle(info, liveInfoMap, subscribers, liker, startTime, totalView)
+        idle(info, liveInfoMap, subscribers, startTime)
 
 
       case HostStopPushStream(`roomId`) =>
-        //val liveId = wholeRoomInfo.roomInfo.rtmp.get
-       /* wholeRoomInfo.roomInfo.rtmp match {
-          case Some(v) =>
-          case None =>
-        }*/
-
         log.debug(s"${ctx.self.path} host stop stream in room${wholeRoomInfo.roomInfo.roomId},name=${wholeRoomInfo.roomInfo.roomName}")
         //前端需要自行处理主播主动断流的情况，后台默认连线者也会断开
         dispatch(HostStopPushStream2Client)
@@ -475,24 +435,20 @@ object RoomActor {
           case Some(v) =>
             if(v != wholeRoomInfo.liveInfo.liveId)
               ProcessorClient.closeRoom(roomId)
-            log.debug(s"roomId:$roomId 主播停止推流，向distributor发送finishpull消息")
-            DistributorClient.finishPull(v)
             if (startTime != -1l) {
-              roomManager ! RoomManager.DelaySeekRecord(wholeRoomInfo, totalView, roomId, startTime, v)
+              roomManager ! RoomManager.DelaySeekRecord(wholeRoomInfo, roomId, startTime, v)
             }
           case None =>
         }
-//        if (wholeRoomInfo.roomInfo.rtmp.get != liveInfoMap(Role.host)(wholeRoomInfo.roomInfo.userId).liveId)
-//          ProcessorClient.closeRoom(roomId)
         liveInfoMap.clear()
 
-        val newroomInfo = wholeRoomInfo.copy(roomInfo = wholeRoomInfo.roomInfo.copy(rtmp = None, mpd = None))
+        val newroomInfo = wholeRoomInfo.copy(roomInfo = wholeRoomInfo.roomInfo.copy(rtmp = None))
         log.debug(s"${ctx.self.path} 主播userId=${userId}已经停止推流，更新房间信息，liveId=${newroomInfo.roomInfo.rtmp}")
         subscribers.get((wholeRoomInfo.roomInfo.userId, false)) match {
           case Some(hostActor) =>
-            idle(newroomInfo, liveInfoMap, mutable.HashMap((wholeRoomInfo.roomInfo.userId, false) -> hostActor), mutable.Set[Long](), -1l, totalView)
+            idle(newroomInfo, liveInfoMap, mutable.HashMap((wholeRoomInfo.roomInfo.userId, false) -> hostActor), -1l)
           case None =>
-            idle(newroomInfo, liveInfoMap, mutable.HashMap.empty[(Long, Boolean), ActorRef[UserActor.Command]], mutable.Set[Long](), -1l, totalView)
+            idle(newroomInfo, liveInfoMap, mutable.HashMap.empty[(Long, Boolean), ActorRef[UserActor.Command]], -1l)
         }
 
       case JoinReq(userId4Audience, `roomId`, clientType) =>
@@ -527,7 +483,7 @@ object RoomActor {
         Behaviors.same
 
       case JudgeLike(`userId`, `roomId`) =>
-        dispatchTo(List((userId, false)), JudgeLikeRsp(liker.contains(userId)))
+        log.info(s"$userId like this room")
         Behaviors.same
 
       case Comment(`userId`, `roomId`, comment, color, extension) =>
@@ -539,10 +495,10 @@ object RoomActor {
               case None =>
                 log.debug(s"${ctx.self.path.name} the database doesn't have the user")
             }
-            ctx.self ! SwitchBehavior("idle", idle(wholeRoomInfo, liveInfoMap, subscribers, liker, startTime, totalView))
+            ctx.self ! SwitchBehavior("idle", idle(wholeRoomInfo, liveInfoMap, subscribers, startTime))
           case Failure(e) =>
             log.debug(s"s${ctx.self.path.name} the search by userId error:$e")
-            ctx.self ! SwitchBehavior("idle", idle(wholeRoomInfo, liveInfoMap, subscribers, liker, startTime, totalView))
+            ctx.self ! SwitchBehavior("idle", idle(wholeRoomInfo, liveInfoMap, subscribers, startTime))
         }
         switchBehavior(ctx, "busy", busy(), InitTime, TimeOut("busy"))
 
@@ -586,7 +542,7 @@ object RoomActor {
     }
   }
 
-  private def changeMode(ctx: ActorContext[RoomActor.Command], anchorUid: Long, dispatchTo: (List[(Long, Boolean)], WsMsgRm) => Unit)(roomId: Long, liveIdList: List[String], screenLayout: Int, aiMode: Int, startTime: Long) = {
+  private def changeMode(ctx: ActorContext[RoomActor.Command], anchorUid: Long, dispatchTo: (List[(Long, Boolean)], WsMsgRm) => Unit)(roomId: Long, liveIdList: List[String], screenLayout: Int, aiMode: Int, startTime: Long): Unit = {
 //    ProcessorClient.updateRoomInfo(roomId, screenLayout).map {
 //      case Right(rsp) =>
 //        log.debug(s"${ctx.self.path} modify the mode success")

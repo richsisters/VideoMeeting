@@ -8,7 +8,6 @@ import org.seekloud.VideoMeeting.roomManager.common.AppSettings
 import org.seekloud.VideoMeeting.roomManager.core.UserManager
 import org.seekloud.VideoMeeting.roomManager.http.SessionBase.{AdminInfo, AdminSession}
 import org.seekloud.VideoMeeting.roomManager.models.dao.{AdminDAO, RecordDao, UserInfoDao}
-import org.seekloud.VideoMeeting.roomManager.utils.DistributorClient
 import akka.actor.typed.scaladsl.AskPattern._
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo.UserInfo
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonRsp

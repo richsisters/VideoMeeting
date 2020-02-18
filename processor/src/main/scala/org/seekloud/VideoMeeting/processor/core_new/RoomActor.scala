@@ -11,8 +11,8 @@ import org.seekloud.VideoMeeting.processor.stream.PipeStream
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
-
 import org.seekloud.VideoMeeting.processor.Boot.{streamPullActor, streamPushActor}
+import org.seekloud.VideoMeeting.protocol.ptcl.processer2Manager.Processor.{RecordData, RecordInfo}
 
 import scala.collection.mutable
 
@@ -213,8 +213,6 @@ object RoomActor {
         case msg: SpeakerRight =>
           log.info(s"${ctx.self} receive a msg $msg") // todo 指定某人发言
           Behaviors.same
-
-
 
         case CloseRoom(roomId) =>
           log.info(s"${ctx.self} receive a msg $msg")

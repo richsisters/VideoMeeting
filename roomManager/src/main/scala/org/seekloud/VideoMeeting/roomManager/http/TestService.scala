@@ -8,7 +8,7 @@ import akka.actor.typed.scaladsl.AskPattern._
 import org.seekloud.VideoMeeting.roomManager.http.SessionBase._
 import io.circe.Error
 import org.seekloud.VideoMeeting.protocol.ptcl.processer2Manager.ProcessorProtocol.{CloseRoom, GetMpd, SeekRecord, UpdateRoomInfo}
-import org.seekloud.VideoMeeting.roomManager.utils.{DistributorClient, ProcessorClient}
+import org.seekloud.VideoMeeting.roomManager.utils.ProcessorClient
 
 import scala.concurrent.Future
 
