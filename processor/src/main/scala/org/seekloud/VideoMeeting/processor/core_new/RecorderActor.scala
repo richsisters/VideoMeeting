@@ -75,6 +75,8 @@ object RecorderActor {
 
   case class BanClientImg(liveId: String) extends VideoCommand
 
+  case class CancelBanImg(liveId: String) extends VideoCommand
+
   case object Close extends VideoCommand
 
   case class Ts4Host(var time: Long = 0)
@@ -211,8 +213,6 @@ object RecorderActor {
               drawer ! Image4Host(frame)
             } else if(clientInfo.contains(liveId)){
               drawer ! Image4Client(frame, liveId)
-            } else {
-              log.info(s"wrong, liveId, work got wrong img")
             }
           }
           if (frame.samples != null) {
@@ -221,8 +221,6 @@ object RecorderActor {
                 ffFilter.pushSamples(0, frame.audioChannels, frame.sampleRate, ffFilter.getSampleFormat, frame.samples: _*)
               } else if (clientInfo.contains(liveId)) {
                 ffFilter.pushSamples(1, frame.audioChannels, frame.sampleRate, ffFilter.getSampleFormat, frame.samples: _*) //fixme 声音合并
-              } else {
-                log.info(s"wrong liveId, couple got wrong audio")
               }
               val f = ffFilter.pullSamples().clone()
               if (f != null) {
@@ -244,19 +242,26 @@ object RecorderActor {
         case msg: BanOnClient =>
           log.info(s"${ctx.self} receive a msg $msg")
           if(msg.isImg){
-            drawer ! BanClientImg(msg.liveId)
+            val newClientInfo = clientInfo.filter(c => c != msg.liveId)
+            drawer ! ReStartDrawing(newClientInfo, msg.liveId)
           } else if(msg.isSound){
             ctx.self ! BanClientSound(msg.liveId)
           }
-          Behaviors.same
+          val newClientInfo = clientInfo.filter(c => c != msg.liveId)
+          work(roomId,  host, newClientInfo, layout, recorder4ts, ffFilter, drawer, ts4Host, ts4Client, out, tsDiffer, canvasSize)
 
         case msg: BanClientSound =>
-          log.info(s"${ctx.self} receive a msg ${msg}") // todo 屏蔽声音
-          Behaviors.same
+          log.info(s"${ctx.self} receive a msg ${msg}")
+          val newClientInfo = clientInfo.filter(c => c != msg.liveId)
+          work(roomId,  host, newClientInfo, layout, recorder4ts, ffFilter, drawer, ts4Host, ts4Client, out, tsDiffer, canvasSize)
 
         case msg: CancelBan =>
-          log.info(s"${ctx.self} receive a msg ${msg}") // todo 取消屏蔽
-          Behaviors.same
+          log.info(s"${ctx.self} receive a msg ${msg}")
+          val newClientInfo = if(clientInfo.contains(msg.liveId))  clientInfo else clientInfo :+ msg.liveId
+          if(msg.isImg){
+            drawer ! CancelBanImg(msg.liveId)
+          }
+          work(roomId,  host, newClientInfo, layout, recorder4ts, ffFilter, drawer, ts4Host, ts4Client, out, tsDiffer, canvasSize)
 
         case m@RestartRecord =>
           log.info(s"couple state get $m")
@@ -295,8 +300,8 @@ object RecorderActor {
     Behaviors.setup[VideoCommand] { ctx =>
       Behaviors.receiveMessage[VideoCommand] {
         case t: Image4Host =>
-          val time = t.frame.timestamp
           val img = convert4Host.convert(t.frame)
+          ctx.self ! StartDrawing
           draw(canvas, graph, lastTime, img, clientFrame, clientInfo, recorder4ts, convert4Host, convert, layout, bgImg, roomId, canvasSize)
 
         case t: Image4Client =>
@@ -319,10 +324,14 @@ object RecorderActor {
           draw(canvas, graph, lastTime, hostFrame, clientFrame, t.clientInfo, recorder4ts, convert4Host, convert, layout, bgImg, roomId, canvasSize)
 
         case t: BanClientImg =>
-          val img =  new File("挂断.png")
-          val banImg = ImageIO.read(img)
-          clientFrame.put(t.liveId, banImg) // fixme 屏蔽时显示的图片
+          log.info(s"${ctx.self} receive a msg $t")
+          val img = ImageIO.read(this.getClass.getResource("/img/禁止.jpg"))
+          val banImg = new BufferedImage(640, 480, img.getType)
+          ctx.self ! StartDrawing
+          clientFrame.put(t.liveId, banImg)
+          graph.clearRect(0,0,canvasSize._1, canvasSize._2)
           draw(canvas, graph, lastTime, hostFrame, clientFrame, clientInfo, recorder4ts, convert4Host, convert, layout, bgImg, roomId, canvasSize)
+
 
         case StartDrawing =>
           //根据不同的参会人数设置不同的排列方式

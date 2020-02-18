@@ -519,7 +519,6 @@ object RoomActor {
         //TODO 目前是某个观众退出则关闭会议，应该修改为不关闭整个会议
         liveInfoMap.clear()
         ctx.self ! UpdateRTMP(wholeRoomInfo.liveInfo.liveId)
-        ProcessorClient.closeRoom(roomId)
         //            val liveList = liveInfoMap.toList.sortBy(_._1).flatMap(r => r._2).map(_._2.liveId)
         //            ProcessorClient.updateRoomInfo(wholeRoomInfo.roomInfo.roomId, liveList, wholeRoomInfo.layout, wholeRoomInfo.aiMode, 0l)
         dispatch(AuthProtocol.AudienceDisconnect(wholeRoomInfo.liveInfo.liveId))
