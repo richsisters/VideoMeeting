@@ -77,7 +77,6 @@ object AppSettings {
   val slickConnectTimeout = slickConfig.getInt("connectTimeout")
   val slickIdleTimeout = slickConfig.getInt("idleTimeout")
   val slickMaxLifetime = slickConfig.getInt("maxLifetime")
-  val isDebug = appConfig.getBoolean("isDebug")
 
   
   val sessionConfig = {

@@ -6,7 +6,7 @@ import java.nio.channels.Pipe.{SinkChannel, SourceChannel}
 
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
-import org.seekloud.VideoMeeting.processor.common.AppSettings.{debugPath, isDebug}
+import org.seekloud.VideoMeeting.processor.common.AppSettings.recordPath
 import org.seekloud.VideoMeeting.processor.stream.PipeStream
 import org.slf4j.LoggerFactory
 
@@ -32,7 +32,7 @@ object RoomActor {
   sealed trait Command
 
   //case class NewRoom(roomId: Long, host: String, client1: String, client2: String, client3: String, pushLiveId: String, pushLiveCode: String, layout: Int) extends Command
-  case class NewRoom(roomId: Long, host: String, clientInfo: List[String], pushLiveId: String, pushLiveCode: String, layout: Int) extends Command
+  case class NewRoom(roomId: Long, host: String, clientInfo: List[String], pushLiveId: String, pushLiveCode: String, startTime:Long) extends Command
 
   case class Recorder(roomId: Long, recorderRef: ActorRef[RecorderActor.Command]) extends Command
 
@@ -67,7 +67,7 @@ object RoomActor {
   val pullPipeMap = mutable.Map[String, ActorRef[StreamPullPipe.Command]]()
   val pushPipeMap = mutable.Map[String, ActorRef[StreamPushPipe.Command]]()
 
-  def create(roomId: Long, host: String, clientInfo: List[String], pushLiveId: String, pushLiveCode: String,  layout: Int): Behavior[Command]= {
+  def create(roomId: Long, host: String, clientInfo: List[String], pushLiveId: String, pushLiveCode: String,  startTime: Long): Behavior[Command]= {
     Behaviors.setup[Command]{ ctx =>
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       Behaviors.withTimers[Command] {
@@ -89,15 +89,14 @@ object RoomActor {
 
         case msg:NewRoom =>
           log.info(s"${ctx.self} receive a msg $msg")
-          if (isDebug) {
-            val file = new File(debugPath + msg.roomId)
-            if (!file.exists()) {
-              file.mkdir()
-            }
+          val file = new File(s"$recordPath${msg.roomId}/${msg.startTime}/")
+          if (!file.exists()) {
+            log.debug(s"mkdirs $recordPath${msg.roomId}/${msg.startTime}/")
+            file.mkdirs()
           }
           val pushPipe = new PipeStream
           val pushSink = pushPipe.getSink
-          val pushSource= pushPipe.getSource
+          val pushSource = pushPipe.getSource
           val pushOut = Channels.newOutputStream(pushSink)
 
           val pullPipe4Host = new PipeStream
@@ -106,7 +105,7 @@ object RoomActor {
           val pullInput4Host = Channels.newInputStream(pullSource4Host)
           val pullOut4Host = Channels.newOutputStream(pullSink4Host)
 
-          val recorderActor = getRecorderActor(ctx, msg.roomId, msg.host, msg.clientInfo, msg.pushLiveId, msg.pushLiveCode, msg.layout, pushOut)
+          val recorderActor = getRecorderActor(ctx, msg.roomId, msg.host, msg.clientInfo, msg.pushLiveId, msg.pushLiveCode, pushOut)
           val grabber4host = getGrabberActor(ctx, msg.roomId, msg.host, pullInput4Host, recorderActor)
 
           grabberMap.put(msg.roomId, mutable.Map(msg.host -> grabber4host)) //fixme
@@ -136,7 +135,7 @@ object RoomActor {
           pipeMap.put(msg.pushLiveId, pushPipe)
 
           val pullPipe4host = getPullPipe(ctx, msg.roomId, msg.host, pullOut4Host)
-          val pushPipe4recorder = getPushPipe(ctx, msg.roomId, msg.pushLiveId, msg.pushLiveCode, pushSource)
+          val pushPipe4recorder = getPushPipe(ctx, msg.roomId, msg.pushLiveId, msg.pushLiveCode, pushSource, msg.startTime)
 
           pullPipeMap.put(msg.host, pullPipe4host)
           pushPipeMap.put(msg.pushLiveId, pushPipe4recorder)
@@ -288,10 +287,10 @@ object RoomActor {
     }.unsafeUpcast[GrabberActor.Command]
   }
 
-  def getRecorderActor(ctx: ActorContext[Command], roomId: Long, host: String, clientInfo: List[String], pushLiveId: String,  pushLiveCode: String,layout: Int,  out: OutputStream) = {
+  def getRecorderActor(ctx: ActorContext[Command], roomId: Long, host: String, clientInfo: List[String], pushLiveId: String,  pushLiveCode: String, out: OutputStream) = {
     val childName = s"recorderActor_$pushLiveId"
     ctx.child(childName).getOrElse{
-      val actor = ctx.spawn(RecorderActor.create(roomId, host, clientInfo: List[String], layout, out), childName)
+      val actor = ctx.spawn(RecorderActor.create(roomId, host, clientInfo: List[String], 0, out), childName)
       ctx.watchWith(actor,ChildDead4Recorder(roomId, childName, actor))
       actor
     }.unsafeUpcast[RecorderActor.Command]
@@ -306,10 +305,10 @@ object RoomActor {
     }.unsafeUpcast[StreamPullPipe.Command]
   }
 
-  def getPushPipe(ctx: ActorContext[Command], roomId: Long, pushLiveId: String, pushLiveCode: String, source: SourceChannel) = {
+  def getPushPipe(ctx: ActorContext[Command], roomId: Long, pushLiveId: String, pushLiveCode: String, source: SourceChannel, startTime: Long) = {
     val childName = s"pushPipeActor_$pushLiveId"
     ctx.child(childName).getOrElse{
-      val actor = ctx.spawn(StreamPushPipe.create(roomId, pushLiveId, pushLiveCode, source,0l), childName)
+      val actor = ctx.spawn(StreamPushPipe.create(roomId, pushLiveId, pushLiveCode, source, startTime), childName)
       ctx.watchWith(actor, ChildDead4PushPipe(pushLiveId, childName, actor) )
       actor
     }.unsafeUpcast[StreamPushPipe.Command]

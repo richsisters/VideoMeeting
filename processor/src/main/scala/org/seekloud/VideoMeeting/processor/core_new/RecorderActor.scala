@@ -13,7 +13,7 @@ import javax.imageio.ImageIO
 import org.bytedeco.ffmpeg.global.{avcodec, avutil}
 import org.bytedeco.javacv.{FFmpegFrameFilter, FFmpegFrameRecorder, Frame, Java2DFrameConverter}
 import org.seekloud.VideoMeeting.processor.Boot.roomManager
-import org.seekloud.VideoMeeting.processor.common.AppSettings.{addTs, bitRate, debugPath, isDebug}
+import org.seekloud.VideoMeeting.processor.common.AppSettings.{addTs, bitRate}
 import org.slf4j.LoggerFactory
 import org.seekloud.VideoMeeting.processor.utils.TimeUtil
 

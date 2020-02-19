@@ -12,6 +12,7 @@ import akka.actor.typed.scaladsl.AskPattern._
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo.UserInfo
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonRsp
 import org.seekloud.VideoMeeting.roomManager.protocol.ActorProtocol
+import org.seekloud.VideoMeeting.roomManager.utils.ProcessorClient
 
 import scala.concurrent.Future
 /**
@@ -49,7 +50,7 @@ trait AdminService extends ServiceUtils with SessionBase{
         case Right(req) =>
           dealFutureResult {
             RecordDao.searchRecordById(req.recordIdList).flatMap { r =>
-              DistributorClient.deleteRecord(r).map {
+              ProcessorClient.deleteRecord(r).map {
                 case Right(data) =>
                   dealFutureResult {
                     RecordDao.deleteRecordById(req.recordIdList).map { t =>

@@ -53,6 +53,8 @@ trait RecordService extends ServiceUtils {
     }
   }
 
-  val recordRoutes:Route = seekRecord ~ removeRecords
+  val recordRoutes:Route = pathPrefix("processor"){
+    seekRecord ~ removeRecords
+  }
 
 }

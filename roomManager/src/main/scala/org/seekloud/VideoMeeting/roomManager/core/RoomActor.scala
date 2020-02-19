@@ -217,16 +217,15 @@ object RoomActor {
           idle(wholeRoomInfo, liveInfoMap, subscribe, startTime)
 
         case ActorProtocol.HostCloseRoom(roomId) =>
-          log.debug(s"${ctx.self.path} host close the room")
           wholeRoomInfo.roomInfo.rtmp match {
             case Some(v) =>
               if(v != wholeRoomInfo.liveInfo.liveId){
+                log.debug(s"${ctx.self.path} host close the room")
                 ProcessorClient.closeRoom(wholeRoomInfo.roomInfo.roomId)
               }
             case None =>
           }
           if (startTime != -1l) {
-            log.debug(s"${ctx.self.path} 主播向distributor发送finishPull请求")
             roomManager ! RoomManager.DelaySeekRecord(wholeRoomInfo, roomId, startTime, wholeRoomInfo.liveInfo.liveId)
           }
           dispatchTo(subscribe)(subscribe.filter(r => r._1 != (wholeRoomInfo.roomInfo.userId, false)).keys.toList, HostCloseRoom())
@@ -382,7 +381,7 @@ object RoomActor {
               val liveIdHost = wholeRoomInfo.liveInfo.liveId
               val liveIdAudience = liveInfoMap.values.map(_.liveId).toList
               val liveIdMix = rsp.liveInfo
-              ProcessorClient.newConnect(roomId, liveIdHost, liveIdAudience, liveIdMix.liveId, liveIdMix.liveCode, wholeRoomInfo.layout)
+              ProcessorClient.newConnect(roomId, liveIdHost, liveIdAudience, liveIdMix.liveId, liveIdMix.liveCode, startTime)
               ctx.self ! UpdateRTMP(liveIdMix.liveId)
               dispatch(RcvComment(-1l, "", s"roomId$roomId start the meeting!"))
               log.debug("send start meeting rsp...")

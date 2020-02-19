@@ -16,7 +16,7 @@ object Processor {
                          clientInfo: List[String], //存放多个参会人的liveId
                          pushLiveId:String,
                          pushLiveCode:String,
-                         layout: Int = 1
+                         startTime: Long
                        )
 
   case class NewConnectRsp(

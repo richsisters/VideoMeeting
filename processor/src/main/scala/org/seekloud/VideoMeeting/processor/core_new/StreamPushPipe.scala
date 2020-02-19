@@ -1,21 +1,18 @@
 package org.seekloud.VideoMeeting.processor.core_new
 
 import java.io.{File, FileInputStream, FileOutputStream, PipedInputStream, PipedOutputStream}
-
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
 import org.slf4j.LoggerFactory
-
 import scala.language.implicitConversions
 import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousCloseException
 import java.nio.channels.Pipe.SourceChannel
-
 import org.seekloud.VideoMeeting.processor.Boot.streamPushActor
 import org.seekloud.VideoMeeting.processor.common.AppSettings._
-
 import scala.concurrent.duration._
 import scala.collection.mutable
+import org.bytedeco.javacpp.Loader
 
 /**
   * Created by sky
@@ -35,7 +32,7 @@ object StreamPushPipe {
 
   case object ClosePipe extends Command
 
-  case class NewLive(startTime: Long) extends Command
+  case object NewLive extends Command
 
   case class NewHostLive(startTime: Long, source: SourceChannel) extends Command
 
@@ -53,24 +50,31 @@ object StreamPushPipe {
       Behaviors.withTimers[Command] {
         implicit timer =>
           log.info(s"${ctx.self} init ----")
-          ctx.self ! NewLive(startTime)
-          val out = if(isDebug){
-            val file = new File(s"$debugPath$roomId/${liveId}_out.ts")
-            Some(new FileOutputStream(file))
-          }else{
-            None
+          ctx.self ! NewLive
+          val file = new File(s"$recordPath$roomId/$startTime/out.ts")
+          if(file.exists()){
+            file.delete()
+            file.createNewFile()
+          } else{
+            file.createNewFile()
           }
-          work(roomId, liveId, liveCode, source,ByteBuffer.allocate(1316), out)
+          work(roomId, liveId, liveCode, source,ByteBuffer.allocate(1316), new FileOutputStream(file), startTime)
       }
     }
   }
 
-  def work(roomId: Long,liveId:String, liveCode: String, source:SourceChannel, dataBuf:ByteBuffer, out:Option[FileOutputStream])
+  def work(roomId: Long,
+           liveId:String,
+           liveCode: String,
+           source:SourceChannel,
+           dataBuf:ByteBuffer,
+           out:FileOutputStream,
+           startTime: Long)
     (implicit timer: TimerScheduler[Command],
       stashBuffer: StashBuffer[Command]): Behavior[Command] = {
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
-        case NewLive(startTime) =>
+        case NewLive =>
           liveCountMap.put(liveId, 0)
           ctx.self ! SendData
           dataBuf.clear()
@@ -81,7 +85,7 @@ object StreamPushPipe {
           dataBuf.flip()
           if (r > 0) {
             val data = dataBuf.array().clone()
-            out.foreach(_.write(data))
+            out.write(data)
             streamPushActor ! StreamPushActor.PushData(liveId,  data.take(r))
             if (liveCountMap.getOrElse(liveId, 0) < 5) {
               log.info(s"$liveId send data --")
@@ -102,7 +106,8 @@ object StreamPushPipe {
           log.info(s"$roomId pushPipe stopped ----")
           source.close()
           dataBuf.clear()
-          out.foreach(_.close())
+          out.close()
+          saveRecord(roomId, startTime)
           Behaviors.stopped
 
         case x =>
@@ -111,4 +116,13 @@ object StreamPushPipe {
       }
     }
   }
+
+  def saveRecord(roomId: Long, startTime: Long):Unit = {
+    log.debug("begin to save record...")
+    val ffmpeg = Loader.load(classOf[org.bytedeco.ffmpeg.ffmpeg])
+    val pb = new ProcessBuilder(ffmpeg, "-i", s"$recordPath$roomId/$startTime/out.ts", "-b:v", "1M", "-movflags", "faststart", s"$recordPath$roomId/$startTime/record.mp4")
+    pb.start()
+    log.debug("save record end...")
+  }
 }
+

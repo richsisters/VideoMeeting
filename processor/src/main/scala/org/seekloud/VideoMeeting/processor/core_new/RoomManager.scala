@@ -26,7 +26,7 @@ object RoomManager {
 
   sealed trait Command
 
-  case class NewConnection(roomId: Long, host: String, clientInfo: List[String], pushLiveId: String, pushLiveCode: String, layout: Int) extends Command
+  case class NewConnection(roomId: Long, host: String, clientInfo: List[String], pushLiveId: String, pushLiveCode: String, startTime: Long) extends Command
 
   case class ForceExit(roomId: Long, liveId: String) extends Command //主持人强制某人退出
 
@@ -66,8 +66,8 @@ object RoomManager {
 
         case msg:NewConnection =>
           log.info(s"${ctx.self} receive a msg${msg}")
-          val roomActor = getRoomActor(ctx, msg.roomId, msg.host, msg.clientInfo, msg.pushLiveId, msg.pushLiveCode, msg.layout) //fixme 参数更改
-          roomActor ! RoomActor.NewRoom(msg.roomId, msg.host, msg.clientInfo,msg.pushLiveId, msg.pushLiveCode, msg.layout)
+          val roomActor = getRoomActor(ctx, msg.roomId, msg.host, msg.clientInfo, msg.pushLiveId, msg.pushLiveCode, msg.startTime) //fixme 参数更改
+          roomActor ! RoomActor.NewRoom(msg.roomId, msg.host, msg.clientInfo,msg.pushLiveId, msg.pushLiveCode, msg.startTime)
           roomInfoMap.put(msg.roomId, roomActor)
           Behaviors.same
 
@@ -152,10 +152,10 @@ object RoomManager {
     }
   }
 
-  def getRoomActor(ctx: ActorContext[Command], roomId:Long, host: String, clientInfo: List[String], pushLiveId: String,pushLiveCode: String,  layout: Int) = {
+  def getRoomActor(ctx: ActorContext[Command], roomId:Long, host: String, clientInfo: List[String], pushLiveId: String,pushLiveCode: String,  startTime: Long) = {
     val childName = s"roomActor_${roomId}_${host}"
     ctx.child(childName).getOrElse{
-      val actor = ctx.spawn(RoomActor.create(roomId, host, clientInfo, pushLiveId, pushLiveCode, layout), childName)
+      val actor = ctx.spawn(RoomActor.create(roomId, host, clientInfo, pushLiveId, pushLiveCode, startTime), childName)
       ctx.watchWith(actor, ChildDead(roomId, childName, actor))
       actor
     }.unsafeUpcast[RoomActor.Command]
@@ -172,7 +172,7 @@ object RoomManager {
     }
   }
 
-  private def getVideoDuration(roomId:Long,startTime:Long) ={
+  private def getVideoDuration(roomId:Long, startTime:Long) ={
     val ffprobe = Loader.load(classOf[org.bytedeco.ffmpeg.ffprobe])
     val pb = new ProcessBuilder(ffprobe,"-v","error","-show_entries","format=duration", "-of","csv=\"p=0\"","-i", s"$recordPath$roomId/$startTime/record.mp4")
     val processor = pb.start()
