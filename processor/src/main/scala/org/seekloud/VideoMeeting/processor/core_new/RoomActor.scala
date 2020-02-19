@@ -244,6 +244,7 @@ object RoomActor {
           Behaviors.same
 
         case ClosePipe(liveId) =>
+          log.debug(s"close pipe 4 push ${pushPipeMap.get(liveId)}")
           pushPipeMap.get(liveId).foreach( a => a ! StreamPushPipe.ClosePipe)
           pullPipeMap.remove(liveId)
           pushPipeMap.remove(liveId)
