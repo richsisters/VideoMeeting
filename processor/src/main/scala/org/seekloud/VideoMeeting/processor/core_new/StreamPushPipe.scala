@@ -118,11 +118,11 @@ object StreamPushPipe {
   }
 
   def saveRecord(roomId: Long, startTime: Long):Unit = {
-    log.debug("begin to save record...")
+    log.info("begin to save record...")
     val ffmpeg = Loader.load(classOf[org.bytedeco.ffmpeg.ffmpeg])
     val pb = new ProcessBuilder(ffmpeg, "-i", s"$recordPath$roomId/$startTime/out.ts", "-b:v", "1M", "-movflags", "faststart", s"$recordPath$roomId/$startTime/record.mp4")
     pb.start()
-    log.debug("save record end...")
+    log.info("save record end...")
   }
 }
 

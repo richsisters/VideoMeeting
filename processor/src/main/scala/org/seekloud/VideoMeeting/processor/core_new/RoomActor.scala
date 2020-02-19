@@ -27,7 +27,7 @@ import scala.collection.mutable
   */
 object RoomActor {
 
-  private  val log = LoggerFactory.getLogger(this.getClass)
+  private val log = LoggerFactory.getLogger(this.getClass)
 
   sealed trait Command
 
@@ -273,6 +273,10 @@ object RoomActor {
         case ChildDead4PushPipe(liveId, childName, value) =>
           log.info(s"${childName} is dead ")
           pushPipeMap.remove(liveId)
+          Behaviors.same
+
+        case _ =>
+          log.info(s"unknown msg:$msg")
           Behaviors.same
       }
 

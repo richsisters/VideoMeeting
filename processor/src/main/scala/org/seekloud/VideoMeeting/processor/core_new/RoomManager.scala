@@ -172,17 +172,23 @@ object RoomManager {
     }
   }
 
-  private def getVideoDuration(roomId:Long, startTime:Long) ={
+  private def getVideoDuration(roomId:Long,startTime:Long) ={
     val ffprobe = Loader.load(classOf[org.bytedeco.ffmpeg.ffprobe])
-    val pb = new ProcessBuilder(ffprobe,"-v","error","-show_entries","format=duration", "-of","csv=\"p=0\"","-i", s"$recordPath$roomId/$startTime/record.mp4")
+    //容器时长（container duration）
+    val pb = new ProcessBuilder(ffprobe,"-v","error","-show_entries","format=duration", "-of","csv=p=0","-i", s"$recordPath$roomId/$startTime/record.mp4")
     val processor = pb.start()
     val br = new BufferedReader(new InputStreamReader(processor.getInputStream))
-    val s = br.readLine()
-    var duration = 0
-    if(s!= null){
-      duration = (s.toDouble * 1000).toInt
+    val sb = new StringBuilder()
+    var line:String = ""
+    while ({
+      line = br.readLine()
+      line != null
+    }){
+      sb.append(line)
     }
     br.close()
+    val duration = (sb.toString().toDouble * 1000).toInt
+    processor.destroy()
     millis2HHMMSS(duration)
   }
 
@@ -197,5 +203,6 @@ object RoomManager {
     val d = if (dec >= 10) dec.toString else "0" + dec
     s"$h:$m:$s.$d"
   }
+
 
 }
