@@ -76,6 +76,11 @@ object EmailActor {
     p.put("mail.smtp.port", AppSettings.emailPort)
     p.put("mail.transport.protocol", "smtp")
     p.put("mail.smtp.auth", "true")
+    // 以下配置用在aliyun服务器上,aliyun服务器上25端口被禁用
+    p.put("mail.smtp.socketFactory.port", "465")
+    p.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory")
+    p.put("mail.smtp.socketFactory.fallback", "false")
+    p.put("mail.smtp.ssl.enable", "true")
     p
   }
 
