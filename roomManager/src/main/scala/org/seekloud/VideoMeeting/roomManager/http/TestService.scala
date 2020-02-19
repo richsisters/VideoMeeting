@@ -2,13 +2,9 @@ package org.seekloud.VideoMeeting.roomManager.http
 
 import scala.language.postfixOps
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
 import org.seekloud.VideoMeeting.roomManager.Boot.{executor, scheduler}
-import akka.actor.typed.scaladsl.AskPattern._
-import org.seekloud.VideoMeeting.roomManager.http.SessionBase._
-import io.circe.Error
 import org.seekloud.VideoMeeting.protocol.ptcl.processer2Manager.ProcessorProtocol.{CloseRoom, GetMpd, SeekRecord, UpdateRoomInfo}
-import org.seekloud.VideoMeeting.roomManager.utils.{DistributorClient, ProcessorClient}
+import org.seekloud.VideoMeeting.roomManager.utils.ProcessorClient
 
 import scala.concurrent.Future
 
@@ -43,7 +39,7 @@ trait TestService extends ServiceUtils{
     entity(as[Either[Error,SeekRecord]]){
       case Right(req) =>
         dealFutureResult{
-          DistributorClient.seekRecord(req.roomId,req.startTime).map{
+          ProcessorClient.seekRecord(req.roomId,req.startTime).map{
             case Right(v) =>
               complete(v)
             case Left(e) =>

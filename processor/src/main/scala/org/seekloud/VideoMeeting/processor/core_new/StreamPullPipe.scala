@@ -6,7 +6,7 @@ import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{Behaviors, StashBuffer, TimerScheduler}
 import org.seekloud.VideoMeeting.processor.Boot
 import org.seekloud.VideoMeeting.processor.Boot.streamPullActor
-import org.seekloud.VideoMeeting.processor.common.AppSettings.{debugPath, isDebug}
+import org.seekloud.VideoMeeting.processor.common.AppSettings.recordPath
 import org.seekloud.VideoMeeting.processor.core_new.StreamPullActor.NewLive
 import org.slf4j.LoggerFactory
 import scala.concurrent.duration._
@@ -43,16 +43,19 @@ object StreamPullPipe {
       Behaviors.withTimers[Command] {
         implicit timer =>
           streamPullActor ! NewLive(liveId, roomId, ctx.self)
-          val output = if (isDebug) {
-            val file = new File(s"$debugPath$roomId/${liveId}_in.ts")
-            Some(new FileOutputStream(file))
-          } else None
-          work(roomId, liveId, out, output)
+          val file = new File(s"$recordPath${liveId}_in.ts")
+          if(file.exists()){
+            file.delete()
+            file.createNewFile()
+          } else{
+            file.createNewFile()
+          }
+          work(roomId, liveId, out, new FileOutputStream(file))
       }
     }
   }
 
-  def work(roomId: Long, liveId: String, out: OutputStream, fileOut:Option[FileOutputStream])(implicit timer: TimerScheduler[Command],
+  def work(roomId: Long, liveId: String, out: OutputStream, fileOut:FileOutputStream)(implicit timer: TimerScheduler[Command],
                                                                                    stashBuffer: StashBuffer[Command]): Behavior[Command] = {
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
@@ -60,7 +63,7 @@ object StreamPullPipe {
           if (Boot.showStreamLog) {
             log.info(s"NewBuffer $liveId ${data.length}")
           }
-          fileOut.foreach(_.write(data))
+          fileOut.write(data)
           out.write(data)
           Behaviors.same
 
@@ -70,7 +73,7 @@ object StreamPullPipe {
 
         case Stop =>
           log.info(s"$liveId pullPipe stopped ----")
-          fileOut.foreach(_.close())
+          fileOut.close()
           out.close()
           Behaviors.stopped
 

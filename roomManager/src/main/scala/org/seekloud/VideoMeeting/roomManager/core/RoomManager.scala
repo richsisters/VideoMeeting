@@ -5,19 +5,14 @@ import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerSch
 import akka.actor.typed.{ActorRef, Behavior}
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo.{LiveInfo, RoomInfo}
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.http.CommonProtocol._
-import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol
-import org.seekloud.VideoMeeting.protocol.ptcl.processer2Manager.ProcessorProtocol.SeekRecord
 import org.seekloud.VideoMeeting.roomManager.Boot.{executor, scheduler, timeout}
-import org.seekloud.VideoMeeting.roomManager.common.AppSettings._
 import org.seekloud.VideoMeeting.roomManager.common.Common
 import org.seekloud.VideoMeeting.roomManager.models.dao.{RecordDao, UserInfoDao}
 import org.seekloud.VideoMeeting.roomManager.core.RoomActor._
 import org.seekloud.VideoMeeting.roomManager.protocol.ActorProtocol
 import org.seekloud.VideoMeeting.roomManager.protocol.CommonInfoProtocol.WholeRoomInfo
-import org.seekloud.VideoMeeting.roomManager.utils.{DistributorClient, ProcessorClient}
+import org.seekloud.VideoMeeting.roomManager.utils.ProcessorClient
 import org.slf4j.LoggerFactory
-
-import scala.collection.mutable
 import scala.concurrent.duration.{FiniteDuration, _}
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -39,8 +34,8 @@ object RoomManager {
 
   case class ExistRoom(roomId:Long,replyTo:ActorRef[Boolean]) extends Command
 
-  case class DelaySeekRecord(wholeRoomInfo:WholeRoomInfo, totalView:Int, roomId:Long, startTime:Long, liveId: String) extends Command
-  case class OnSeekRecord(wholeRoomInfo:WholeRoomInfo, totalView:Int, roomId:Long, startTime:Long, liveId: String) extends Command
+  case class DelaySeekRecord(wholeRoomInfo:WholeRoomInfo, roomId:Long, startTime:Long, liveId: String) extends Command
+  case class OnSeekRecord(wholeRoomInfo:WholeRoomInfo, roomId:Long, startTime:Long, liveId: String) extends Command
 
   //case class FinishPull(roomId: Long, startTime: Long, liveId: String) extends Command
 
@@ -52,7 +47,7 @@ object RoomManager {
 
   def create():Behavior[Command] = {
     Behaviors.setup[Command]{ctx =>
-      implicit val stashBuffer = StashBuffer[Command](Int.MaxValue)
+      implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       log.info(s"${ctx.self.path} setup")
       Behaviors.withTimers[Command]{implicit timer =>
 //        idle(mutable.HashMap.empty[Long,RoomInfo])
@@ -153,7 +148,7 @@ object RoomManager {
 
         case SearchRoom(userId, roomId, replyTo) =>
           if(roomId == Common.TestConfig.TEST_ROOM_ID){
-            log.debug(s"${ctx.self.path} get test room mpd,roomId=${roomId}")
+            log.debug(s"${ctx.self.path} get test room mpd,roomId=$roomId")
             getRoomActorOpt(roomId,ctx) match{
               case Some(actor) =>
                 val roomInfoFuture:Future[RoomInfo] = actor ? (GetRoomInfo(_))
@@ -169,10 +164,10 @@ object RoomManager {
                 roomInfoFuture.map{r =>
                   r.rtmp match {
                     case Some(v) =>
-                      log.debug(s"${ctx.self.path} search room,roomId=${roomId},rtmp=${r.rtmp}")
+                      log.debug(s"${ctx.self.path} search room,roomId=$roomId,rtmp=${r.rtmp}")
                       replyTo ! SearchRoomRsp(Some(r))//正常返回
                     case None =>
-                      log.debug(s"${ctx.self.path} search room failed,roomId=${roomId},rtmp=None")
+                      log.debug(s"${ctx.self.path} search room failed,roomId=$roomId,rtmp=None")
                       replyTo ! SearchRoomError(msg = s"${ctx.self.path} room rtmp is None")
                       /*ProcessorClient.getmpd(roomId).map{
                         case Right(rsp)=>
@@ -228,15 +223,15 @@ object RoomManager {
           Behaviors.same
 
         //延时请求获取录像（计时器）
-        case DelaySeekRecord(wholeRoomInfo, totalView, roomId, startTime, liveId) =>
+        case DelaySeekRecord(wholeRoomInfo, roomId, startTime, liveId) =>
           log.info("---- wait seconds to seek record ----")
-          timer.startSingleTimer(DelaySeekRecordKey + roomId.toString + startTime, OnSeekRecord(wholeRoomInfo, totalView, roomId, startTime, liveId), 5.seconds)
+          timer.startSingleTimer(DelaySeekRecordKey + roomId.toString + startTime, OnSeekRecord(wholeRoomInfo, roomId, startTime, liveId), 5.seconds)
           Behaviors.same
 
         //延时请求获取录像
-        case OnSeekRecord(wholeRoomInfo, totalView, roomId, startTime, liveId) =>
+        case OnSeekRecord(wholeRoomInfo, roomId, startTime, liveId) =>
           timer.cancel(DelaySeekRecordKey + roomId.toString + startTime)
-          DistributorClient.seekRecord(roomId,startTime).onComplete{
+          ProcessorClient.seekRecord(roomId,startTime).onComplete{
             case Success(v) =>
               v match{
                 case Right(rsp) =>
@@ -269,7 +264,7 @@ object RoomManager {
 
 
   private def getRoomActor(roomId:Long, ctx: ActorContext[Command]) = {
-    val childrenName = s"roomActor-${roomId}"
+    val childrenName = s"roomActor-$roomId"
     ctx.child(childrenName).getOrElse {
       val actor = ctx.spawn(RoomActor.create(roomId), childrenName)
       ctx.watchWith(actor,ChildDead(childrenName,actor))
@@ -278,7 +273,7 @@ object RoomManager {
   }
 
   private def getRoomActorOpt(roomId:Long, ctx: ActorContext[Command]) = {
-    val childrenName = s"roomActor-${roomId}"
+    val childrenName = s"roomActor-$roomId"
 //    log.debug(s"${ctx.self.path} the child = ${ctx.children},get the roomActor opt = ${ctx.child(childrenName).map(_.unsafeUpcast[RoomActor.Command])}")
     ctx.child(childrenName).map(_.unsafeUpcast[RoomActor.Command])
 

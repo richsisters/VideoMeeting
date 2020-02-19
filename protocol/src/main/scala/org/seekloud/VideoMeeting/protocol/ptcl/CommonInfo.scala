@@ -66,7 +66,6 @@ object CommonInfo {
     var userName:String,
     var headImgUrl:String,
     //用于客户端显示的房间流信息
-    var mpd: Option[String] = None,
     var rtmp: Option[String] = None
   )
 

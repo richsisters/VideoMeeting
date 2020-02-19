@@ -9,7 +9,7 @@ import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{Behaviors, StashBuffer, TimerScheduler}
 import org.seekloud.VideoMeeting.processor.Boot
 import org.seekloud.VideoMeeting.processor.Boot.{blockingDispatcher, roomManager}
-import org.seekloud.VideoMeeting.processor.common.AppSettings.{debugPath, isDebug, rtpServerDst, rtpToHost}
+import org.seekloud.VideoMeeting.processor.common.AppSettings.{rtpServerDst, rtpToHost}
 import org.seekloud.VideoMeeting.processor.core_new.RoomManager.CloseRoom
 import org.seekloud.VideoMeeting.processor.core_new.StreamPullPipe.{ClosePipe, NewBuffer}
 import org.seekloud.VideoMeeting.rtpClient.Protocol.{Command, NoStream, PullStreamData, PullStreamPacketLoss, PullStreamReqSuccess, StreamStop}

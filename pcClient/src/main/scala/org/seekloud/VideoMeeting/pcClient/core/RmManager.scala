@@ -579,7 +579,6 @@ object RmManager {
 
         case msg: JoinBegin =>
           log.debug(s"======== ${msg.audienceInfo.userName} join begin")
-          //TODO 根据人数的增加更改画面
           /*背景改变*/
 //          hostScene.resetBack()
 //

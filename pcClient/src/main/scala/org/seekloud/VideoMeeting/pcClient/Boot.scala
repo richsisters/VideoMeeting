@@ -1,5 +1,7 @@
 package org.seekloud.VideoMeeting.pcClient
 
+import java.io.File
+
 import akka.actor.typed.{ActorRef, DispatcherSelector}
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.{ActorSystem, Scheduler}

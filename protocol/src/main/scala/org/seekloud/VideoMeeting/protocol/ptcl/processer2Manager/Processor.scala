@@ -16,7 +16,7 @@ object Processor {
                          clientInfo: List[String], //存放多个参会人的liveId
                          pushLiveId:String,
                          pushLiveCode:String,
-                         layout: Int = 1
+                         startTime: Long
                        )
 
   case class NewConnectRsp(
@@ -107,5 +107,33 @@ object Processor {
                               errCode: Int = 0,
                               msg: String ="ok"
                             )extends  CommonRsp
+
+
+
+  /**  url:processor/record
+    *  post
+    */
+  case class SeekRecord(
+                         roomId:Long,
+                         startTime:Long
+                       )
+
+  case class RecordInfoRsp(
+                            errCode:Int = 0,
+                            msg:String = "ok",
+                            duration:String
+                          ) extends CommonRsp
+
+  case class RecordList(
+                         records:List[RecordData]
+                       )
+
+  case class RecordData(
+                         roomId:Long,
+                         startTime:Long
+                       )
+
+  case class RecordInfo(fileExist:Boolean,
+                        duration:String)
 
 }

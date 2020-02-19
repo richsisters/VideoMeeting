@@ -30,7 +30,8 @@ import scala.concurrent.ExecutionContextExecutor
   */
 trait HttpService extends
   ResourceService with
-  ProcessorService {
+  ProcessorService with
+  RecordService {
 
   implicit val system: ActorSystem
 
@@ -45,7 +46,7 @@ trait HttpService extends
 
   val routes =
     pathPrefix("VideoMeeting") {
-       resourceRoutes ~ processorRoute
+       resourceRoutes ~ processorRoute ~ recordRoutes
     }
 
 }

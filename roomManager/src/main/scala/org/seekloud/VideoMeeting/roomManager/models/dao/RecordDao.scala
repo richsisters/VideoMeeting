@@ -1,11 +1,7 @@
 package org.seekloud.VideoMeeting.roomManager.models.dao
 
-import java.util
-
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo.{RecordInfo, UserInfo}
-import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.http.CommonProtocol.GetRecordListRsp
-//import org.seekloud.VideoMeeting.protocol.ptcl.processer2Manager.ProcessorProtocol.RecordData
-import org.seekloud.VideoMeeting.protocol.ptcl.distributor2Manager.DistributorProtocol.RecordData
+import org.seekloud.VideoMeeting.protocol.ptcl.processer2Manager.Processor.RecordData
 import org.seekloud.VideoMeeting.roomManager.utils.DBUtil._
 import org.seekloud.VideoMeeting.roomManager.models.SlickTables._
 import slick.jdbc.PostgresProfile.api._

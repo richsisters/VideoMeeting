@@ -59,7 +59,6 @@ object AppSettings {
   val appId = appConfig.getString("appId")
   val secureKey = appConfig.getString("secureKey")
   val rtpToHost = appConfig.getString("rtpToHost")
-  val isRecord = appConfig.getBoolean("isRecord")
   val addTs = appConfig.getBoolean("addTs")
   val distributorHost = appConfig.getString("distributorHost")
   val roomManagerHost = appConfig.getString("roomManagerHost")
@@ -67,8 +66,7 @@ object AppSettings {
   val bitRate = appConfig.getInt("bitRate")
   val imageWidth = appConfig.getInt("imageWidth")
   val imageHeight = appConfig.getInt("imageHeight")
-  val isTest = appConfig.getBoolean("isTest")
-  val debugPath = appConfig.getString("debugPath")
+  val recordPath = appConfig.getString("recordPath")
 
 
   val slickConfig = config.getConfig("slick.db")
@@ -79,7 +77,6 @@ object AppSettings {
   val slickConnectTimeout = slickConfig.getInt("connectTimeout")
   val slickIdleTimeout = slickConfig.getInt("idleTimeout")
   val slickMaxLifetime = slickConfig.getInt("maxLifetime")
-  val isDebug = appConfig.getBoolean("isDebug")
 
   
   val sessionConfig = {
