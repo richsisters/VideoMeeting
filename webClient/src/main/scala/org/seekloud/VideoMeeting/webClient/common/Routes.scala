@@ -27,7 +27,7 @@ object Routes {
 
     val temporaryUser = urlbase + "/temporaryUser"
 
-    def getRecordList(sortBy:String,pageNum:Int,pageSize:Int) = urlRecord + s"/getRecordList?sortBy=$sortBy&pageNum=$pageNum&pageSize=$pageSize"
+    def getRecordList(userId:Long, sortBy:String,pageNum:Int,pageSize:Int) = urlRecord + s"/getRecordList?userId=$userId&sortBy=$sortBy&pageNum=$pageNum&pageSize=$pageSize"
 
     val getOneRecord = urlRecord + "/searchRecord"
     val watchRecordOver = urlRecord + "/watchRecordOver"

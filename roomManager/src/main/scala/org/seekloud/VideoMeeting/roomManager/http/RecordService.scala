@@ -21,10 +21,11 @@ trait RecordService {
 
   private val getRecordList = (path("getRecordList") & get) {
     parameters(
+      'userId.as[Long],
       'sortBy.as[String],
       'pageNum.as[Int],
       'pageSize.as[Int]
-    ) { case (sortBy, pageNum, pageSize) =>
+    ) { case (userId, sortBy, pageNum, pageSize) =>
       dealFutureResult {
         RecordDao.getRecordAll(sortBy, pageNum, pageSize).flatMap { recordList =>
           RecordDao.getTotalNum.map { num =>

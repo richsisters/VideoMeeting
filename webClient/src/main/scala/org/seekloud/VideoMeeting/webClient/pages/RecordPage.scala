@@ -204,57 +204,65 @@ class RecordPage(roomId:Long,time:Long) extends Page{
     getCommentInfo()
     <div>
       <div class="audienceInfo" style="margin-left: 250px;margin-top: 20px;width:60%">
-        <div class="anchorInfo">
-          <div class="showInfo">
-            <img id="headImg" src={roomCoverImg} class="showInfo-coverImg"></img>
-            <div style="margin-left:20px;color:#222">
-              <div class="recordName">{videoName}</div>
-              <div class="recordTime" style="color: #808080;font-size: 12px;margin-top: 10px;">{videoTime.map(i=>TimeTool.dateFormatDefault(i.toLong)) }</div>
-            </div>
+        <div style="display: flex;">
+          <div>
+            <div>可观看录像成员：</div>
           </div>
-        </div>
-        <div style="padding-bottom:20px!important" class="dash-video-player anchor-all" id="dash-video-player">
-          <div style="position: relative">
-            <video id="recordVideo" controls="controls" style="height:500px;width:100%;object-fit: contain;background-color: #000;" onended={()=>videoOnEnded()}>
-            <source src={mp4Url} type="video/mp4" ></source>
-          </video>
-            <div id="playback-menu" class="playback-menu-close">
-              <div class="playback-point">
-                <img class="playback-button" src="/VideoMeeting/roomManager/static/img/homePage/replay.png" onclick={()=>videoPlayback()}></img>
-                <div class="playback-text">重新播放</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="r-comment" id="r-comment">
-          <div class="rc-head">全部评论(
-            {commentInfo.map{ ci =>
-            if(ci.isEmpty){
-              0
-            }else{
-              ci.length
-            }
-          }
-            }
-            )</div>
-          <div class="rc-content">
-            <div class="comment-send">
-              <div class="user-face">
-                <img class="userface" src={headImg}></img>
-              </div>
-              <div class="textarea-container">
-                <textarea cols="80" name="msg" rows="5" placeholder="请自觉遵守互联网相关的政策法规，严禁发布色情、暴力、反动的言论。" class="ipt-txt" id="ipt-txt"
-                          onkeydown={(e:dom.KeyboardEvent)=> if (e.keyCode==13) sendComment()} ></textarea>
-                <div class="rsb-button">
-                  <button type="submit" class="comment-submit" id="comment-submit" onclick={()=>sendComment()}>发表评论</button>
+          <div>
+            <div class="anchorInfo">
+              <div class="showInfo">
+                <img id="headImg" src={roomCoverImg} class="showInfo-coverImg"></img>
+                <div style="margin-left:20px;color:#222">
+                  <div class="recordName">{videoName}</div>
+                  <div class="recordTime" style="color: #808080;font-size: 12px;margin-top: 10px;">{videoTime.map(i=>TimeTool.dateFormatDefault(i.toLong)) }</div>
                 </div>
               </div>
             </div>
-            {comments}
-          </div>
+              <div style="padding-bottom:20px!important" class="dash-video-player anchor-all" id="dash-video-player">
+                <div style="position: relative">
+                  <video id="recordVideo" controls="controls" style="height:500px;width:100%;object-fit: contain;background-color: #000;" onended={()=>videoOnEnded()}>
+                    <source src={mp4Url} type="video/mp4" ></source>
+                  </video>
+                  <div id="playback-menu" class="playback-menu-close">
+                    <div class="playback-point">
+                      <img class="playback-button" src="/VideoMeeting/roomManager/static/img/homePage/replay.png" onclick={()=>videoPlayback()}></img>
+                      <div class="playback-text">重新播放</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
+              <div class="r-comment" id="r-comment">
+                <div class="rc-head">全部评论(
+                  {commentInfo.map{ ci =>
+                  if(ci.isEmpty){
+                    0
+                  }else{
+                    ci.length
+                  }
+                }
+                  }
+                  )</div>
+                <div class="rc-content">
+                  <div class="comment-send">
+                    <div class="user-face">
+                      <img class="userface" src={headImg}></img>
+                    </div>
+                    <div class="textarea-container">
+                      <textarea cols="80" name="msg" rows="5" placeholder="请自觉遵守互联网相关的政策法规，严禁发布色情、暴力、反动的言论。" class="ipt-txt" id="ipt-txt"
+                                onkeydown={(e:dom.KeyboardEvent)=> if (e.keyCode==13) sendComment()} ></textarea>
+                      <div class="rsb-button">
+                        <button type="submit" class="comment-submit" id="comment-submit" onclick={()=>sendComment()}>发表评论</button>
+                      </div>
+                    </div>
+                  </div>
+                  {comments}
+                </div>
+
+              </div>
+          </div>
         </div>
+
 
       </div>
     </div>
