@@ -73,9 +73,9 @@ object RecorderActor {
 
   case class ReStartDrawing(clientInfo: List[String], exitLiveId: String) extends VideoCommand
 
-  case class BanClientImg(liveId: String) extends VideoCommand
+  case class BanClientImg(liveId: String,clientInfo: List[String]) extends VideoCommand
 
-  case class CancelBanImg(liveId: String) extends VideoCommand
+  case class CancelBanImg(liveId: String, clientInfo: List[String]) extends VideoCommand
 
   case object Close extends VideoCommand
 
@@ -136,7 +136,16 @@ object RecorderActor {
           if (ffFilter != null) {
             ffFilter.close()
           }
-          val ffFilterN = new FFmpegFrameFilter("[0:a][1:a] amix=inputs=2:duration=longest:dropout_transition=3:weights=1 1[a]", audioChannels)
+          val ffFilterN = if(clientInfo.size == 1){
+            new FFmpegFrameFilter(s"[0:a][1:a] amix=inputs=2:duration=longest:dropout_transition=3:weights=1 1[a]", audioChannels)
+          } else if(clientInfo.size == 2){
+            new FFmpegFrameFilter(s"[0:a][1:a][2:a] amix=inputs=3:duration=longest:dropout_transition=3:weights=1 1[a]", audioChannels)
+          } else if( clientInfo.size == 3){
+            new FFmpegFrameFilter(s"[0:a][1:a][2:a][3:a] amix=inputs=4:duration=longest:dropout_transition=3:weights=1 1[a]", audioChannels)
+          } else {
+            new FFmpegFrameFilter(s"[0:a][1:a] amix=inputs=2:duration=longest:dropout_transition=3:weights=1 1[a]", audioChannels)
+          }
+          //val ffFilterN = new FFmpegFrameFilter("[0:a][1:a] amix=inputs=2:duration=longest:dropout_transition=3:weights=1 1[a]", audioChannels)
           ffFilterN.setAudioChannels(audioChannels)
           ffFilterN.setSampleFormat(sampleFormat)
           ffFilterN.setAudioInputs(2)
@@ -213,6 +222,8 @@ object RecorderActor {
               drawer ! Image4Host(frame)
             } else if(clientInfo.contains(liveId)){
               drawer ! Image4Client(frame, liveId)
+            }else {
+              log.info(s"wrong, liveId, work got wrong img")
             }
           }
           if (frame.samples != null) {
@@ -220,11 +231,14 @@ object RecorderActor {
               if (liveId == host) {
                 ffFilter.pushSamples(0, frame.audioChannels, frame.sampleRate, ffFilter.getSampleFormat, frame.samples: _*)
               } else if (clientInfo.contains(liveId)) {
-                ffFilter.pushSamples(1, frame.audioChannels, frame.sampleRate, ffFilter.getSampleFormat, frame.samples: _*) //fixme 声音合并
+                 ffFilter.pushSamples(clientInfo.indexOf(liveId) + 1, frame.audioChannels, frame.sampleRate, ffFilter.getSampleFormat, frame.samples: _*) //fixme 声音合并
+              } else {
+                log.info(s"wrong liveId, couple got wrong audio")
               }
               val f = ffFilter.pullSamples().clone()
               if (f != null) {
                 recorder4ts.recordSamples(f.sampleRate, f.audioChannels, f.samples: _*)
+
               }
             } catch {
               case ex: Exception =>
@@ -241,12 +255,12 @@ object RecorderActor {
 
         case msg: BanOnClient =>
           log.info(s"${ctx.self} receive a msg $msg")
+          val newClientInfo = clientInfo.filter(c => c != msg.liveId)
           if(msg.isImg){
-            drawer ! BanClientImg(msg.liveId)
+            drawer ! BanClientImg(msg.liveId, newClientInfo)
           } else if(msg.isSound){
             ctx.self ! BanClientSound(msg.liveId)
           }
-          val newClientInfo = clientInfo.filter(c => c != msg.liveId)
           work(roomId,  host, newClientInfo, layout, recorder4ts, ffFilter, drawer, ts4Host, ts4Client, out, tsDiffer, canvasSize)
 
         case msg: BanClientSound =>
@@ -258,7 +272,7 @@ object RecorderActor {
           log.info(s"${ctx.self} receive a msg ${msg}")
           val newClientInfo = if(clientInfo.contains(msg.liveId))  clientInfo else clientInfo :+ msg.liveId
           if(msg.isImg){
-            drawer ! CancelBanImg(msg.liveId)
+            drawer ! CancelBanImg(msg.liveId, newClientInfo)
           }
           work(roomId,  host, newClientInfo, layout, recorder4ts, ffFilter, drawer, ts4Host, ts4Client, out, tsDiffer, canvasSize)
 
@@ -324,13 +338,19 @@ object RecorderActor {
 
         case t: BanClientImg =>
           log.info(s"${ctx.self} receive a msg $t")
-          val img = ImageIO.read(this.getClass.getResource("/img/禁止.jpg"))
-          val banImg = new BufferedImage(640, 480, img.getType)
-          ctx.self ! StartDrawing
-          clientFrame.put(t.liveId, banImg)
           graph.clearRect(0,0,canvasSize._1, canvasSize._2)
-          draw(canvas, graph, lastTime, hostFrame, clientFrame, clientInfo, recorder4ts, convert4Host, convert, layout, bgImg, roomId, canvasSize)
+//          val img = ImageIO.read(this.getClass.getResource("/img/禁止.jpg"))
+//          val banImg = new BufferedImage(640, 480, img.getType) //覆盖不成功
+          ctx.self ! StartDrawing
+          clientFrame.remove(t.liveId)
+         // clientFrame.put(t.liveId, banImg)
+          draw(canvas, graph, lastTime, hostFrame, clientFrame, t.clientInfo, recorder4ts, convert4Host, convert, layout, bgImg, roomId, canvasSize)
 
+        case t:CancelBanImg =>
+          log.info(s"${ctx.self} receive a msg $t")
+          graph.clearRect(0,0,canvasSize._1, canvasSize._2)
+          ctx.self ! StartDrawing
+          draw(canvas, graph, lastTime, hostFrame, clientFrame, t.clientInfo, recorder4ts, convert4Host, convert, layout, bgImg, roomId, canvasSize)
 
         case StartDrawing =>
           //根据不同的参会人数设置不同的排列方式
