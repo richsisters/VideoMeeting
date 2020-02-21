@@ -223,7 +223,7 @@ object RecorderActor {
             } else if(clientInfo.contains(liveId)){
               drawer ! Image4Client(frame, liveId)
             }else {
-              log.info(s"wrong, liveId, work got wrong img")
+              log.debug(s"wrong, liveId, work got wrong img")
             }
           }
           if (frame.samples != null) {
@@ -233,7 +233,7 @@ object RecorderActor {
               } else if (clientInfo.contains(liveId)) {
                  ffFilter.pushSamples(clientInfo.indexOf(liveId) + 1, frame.audioChannels, frame.sampleRate, ffFilter.getSampleFormat, frame.samples: _*) //fixme 声音合并
               } else {
-                log.info(s"wrong liveId, couple got wrong audio")
+                log.debug(s"wrong liveId, couple got wrong audio")
               }
               val f = ffFilter.pullSamples().clone()
               if (f != null) {

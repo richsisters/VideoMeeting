@@ -107,7 +107,7 @@ class AudienceController(
 
     override def joinReq(roomId: Long): Unit = {
       if (RmManager.userInfo.nonEmpty) {
-        WarningDialog.initWarningDialog("连线申请已发送！")
+        WarningDialog.initWarningDialog("加入会议申请已发送！")
         rmManager ! RmManager.JoinRoomReq(roomId)
       } else {
         WarningDialog.initWarningDialog("请先登录哦~")
@@ -211,32 +211,35 @@ class AudienceController(
             rmManager ! RmManager.StartJoin(msg.hostLiveId.get, msg.joinInfo.get)
             audienceScene.hasReqJoin = false
           } else if (msg.errCode == 300001) {
-            WarningDialog.initWarningDialog("房主未开通连线功能!")
+            WarningDialog.initWarningDialog("主持人未开通连线功能!")
             audienceScene.hasReqJoin = false
           } else if (msg.errCode == 300002) {
-            WarningDialog.initWarningDialog("房主拒绝连线申请!")
+            WarningDialog.initWarningDialog("主持人拒绝连线申请!")
             audienceScene.hasReqJoin = false
           }
 
-        case ForceExitRsp =>
+        case msg:ForceExitRsp =>
+          WarningDialog.initWarningDialog(s"主持人强制用户${msg.userId}退出会议")
           log.debug("got force exit rsp!")
           rmManager ! RmManager.StopJoinAndWatch
 
         case msg: BanOnMemberRsp =>
           log.debug("got ban on member rsp!")
           if(msg.image)
+            WarningDialog.initWarningDialog(s"主持人屏蔽用户${msg.userId}的画面")
             audienceScene.imageToggleBtn.setDisable(true)
           if(msg.sound)
+            WarningDialog.initWarningDialog(s"主持人屏蔽用户${msg.userId}的声音")
             audienceScene.soundToggleBtn.setDisable(true)
-          rmManager ! RmManager.ChangeOption4Audience(!msg.image, !msg.sound)
+          //rmManager ! RmManager.ChangeOption4Audience(!msg.image, !msg.sound)
 
         case msg: CancelBanOnMemberRsp =>
           log.debug("got  cancel ban on member rsp!")
           if(msg.image)
-            audienceScene.imageToggleBtn.setDisable(false)
+          audienceScene.imageToggleBtn.setDisable(false)
           if(msg.sound)
             audienceScene.soundToggleBtn.setDisable(false)
-          rmManager ! RmManager.ChangeOption4Audience(msg.image, msg.sound)
+          //rmManager ! RmManager.ChangeOption4Audience(msg.image, msg.sound)
 
         case msg:StartMeetingRsp =>
           if (msg.errCode == 0) {
@@ -247,19 +250,19 @@ class AudienceController(
 
         case HostDisconnect(hostLiveId) =>
           Boot.addToPlatform {
-            WarningDialog.initWarningDialog("主持人~")
+            WarningDialog.initWarningDialog("主持人连接断开，互动功能已关闭！")
           }
           rmManager ! RmManager.StopJoinAndWatch
 
 
         case HostCloseRoom =>
           Boot.addToPlatform {
-            WarningDialog.initWarningDialog("房主连接断开，互动功能已关闭！")
+            WarningDialog.initWarningDialog("主持人结束会议")
           }
 
         case HostStopPushStream2Client =>
           Boot.addToPlatform({
-            WarningDialog.initWarningDialog("主播已停止直播，请换个房间观看哦~")
+            WarningDialog.initWarningDialog("主播已停止直播~")
           })
 
         case msg: AudienceJoinRsp =>

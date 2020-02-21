@@ -27,7 +27,7 @@ trait RecordService {
       'pageSize.as[Int]
     ) { case (userId, sortBy, pageNum, pageSize) =>
       dealFutureResult {
-        RecordDao.getRecordAll(sortBy, pageNum, pageSize).flatMap { recordList =>
+        RecordDao.getRecordAll(userId, sortBy, pageNum, pageSize).flatMap { recordList =>
           RecordDao.getTotalNum.map { num =>
             complete(GetRecordListRsp(num, recordList))
           }

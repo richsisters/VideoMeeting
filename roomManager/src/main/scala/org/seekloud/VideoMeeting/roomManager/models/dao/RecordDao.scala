@@ -12,8 +12,10 @@ import scala.concurrent.Future
 
 object RecordDao {
 
-  def addRecord(roomId:Long, recordName:String, recordDes:String, startTime:Long, coverImg:String, viewNum:Int, likeNum:Int,duration:String) = {
-    db.run(tRecord += rRecord(1, roomId, startTime, coverImg, recordName, recordDes, viewNum, likeNum,duration))
+  def addRecord(roomId:Long, recordName:String, recordDes:String, startTime:Long, coverImg:String, viewNum:Int, likeNum:Int,duration:String,host: Long, attendList: List[Long]) = {
+    val attend = attendList.map(l => l.toString + ";").toString()
+    val hostAndAttend = host + ";" + attend
+    db.run(tRecord += rRecord(1, roomId, startTime, coverImg, recordName, recordDes, viewNum, likeNum, duration, "", hostAndAttend))
   }
 
   def searchRecord(roomId:Long, startTime:Long):Future[Option[RecordInfo]] = {
@@ -62,8 +64,8 @@ object RecordDao {
 
 
 
-  def getRecordAll(sortBy:String,pageNum:Int,pageSize:Int) :Future[List[RecordInfo]]= {
-    val records = if (sortBy == "time") db.run(tRecord.sortBy(_.startTime.reverse).drop((pageNum - 1) * pageSize).take(pageSize).result)
+  def getRecordAll(userId: Long, sortBy:String,pageNum:Int,pageSize:Int) :Future[List[RecordInfo]]= {
+    val records = if (sortBy == "time") db.run(tRecord.filter(_.attend.like(userId.toString)).sortBy(_.startTime.reverse).drop((pageNum - 1) * pageSize).take(pageSize).result)
     else if (sortBy == "view") db.run(tRecord.sortBy(_.viewNum.reverse).drop((pageNum - 1) * pageSize).take(pageSize).result)
     else db.run(tRecord.sortBy(_.likeNum.reverse).drop((pageNum - 1) * pageSize).take(pageSize).result)
     records.flatMap{ls =>
@@ -126,19 +128,21 @@ object RecordDao {
 
 
   def main(args: Array[String]): Unit = {
-    def update() = {
-      db.run(tRecord.filter(_.roomId =!= 5l).result.headOption).flatMap{valueOpt =>
-        if(valueOpt.nonEmpty){
-          db.run(tRecord.filter(_.roomId === 5l).map(_.likeNum).update(valueOpt.get.likeNum + 1))
-        }else{
-          Future(-1)
-        }
-      }
-    }
-    val a = List(2l,3l,4l).map{roomId =>
-      db.run(tRecord.filter(_.roomId === roomId).result)
-    }
-    val b = Future.sequence(a).map(_.flatten)
+
+//    addRecord(20l,"","",90l,"",9,8,"")
+//    def update() = {
+//      db.run(tRecord.filter(_.roomId =!= 5l).result.headOption).flatMap{valueOpt =>
+//        if(valueOpt.nonEmpty){
+//          db.run(tRecord.filter(_.roomId === 5l).map(_.likeNum).update(valueOpt.get.likeNum + 1))
+//        }else{
+//          Future(-1)
+//        }
+//      }
+//    }
+//    val a = List(2l,3l,4l).map{roomId =>
+//      db.run(tRecord.filter(_.roomId === roomId).result)
+//    }
+//    val b = Future.sequence(a).map(_.flatten)
 
 //    db.run(tRecord.forceInsert(rRecord(-1l,4l,4554l)))//强制插入不过滤自增项
 //    db.run(tRecord ++= List(rRecord(-1l,4l,4554l)))//批量插入，过滤自增项
