@@ -1,4 +1,5 @@
 import java.io.{BufferedReader, File, InputStreamReader}
+import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
 import org.bytedeco.javacpp.Loader
@@ -7,10 +8,24 @@ object VideoDuration {
 
   def ts2mp4():String = {
     val ffmpeg = Loader.load(classOf[org.bytedeco.ffmpeg.ffmpeg])
-    val pb = new ProcessBuilder(ffmpeg, "-i", s"/Users/wang/Downloads/out_1.ts", "-c:v", "libx264", "-c:a", "copy", s"/Users/wang/Desktop/out_1.mp4")
+    val pb = new ProcessBuilder(ffmpeg, "-i", s"/Users/wang/Downloads/out.ts", "-c:v", "libx264", "-c:a", "copy", "-preset", "faster", s"/Users/wang/Desktop/out_1.mp4")
+    println(s"start == ${System.currentTimeMillis()}")
     val process = pb.start()
-    println("change end...")
-    "/Users/wang/Desktop/out_1.mp4"
+    val code = process.waitFor(10, TimeUnit.SECONDS)
+    val bw = new BufferedReader(new InputStreamReader(process.getErrorStream))
+    var line = ""
+    while ({
+      line = bw.readLine()
+      line != null
+    }) {
+      println(line)
+    }
+    bw.close()
+    println(s"code == $code")
+    if(code == 0){
+      println(s"end == ${System.currentTimeMillis()}")
+    }
+    ""
   }
 
   private def getVideoDuration(src: String) ={

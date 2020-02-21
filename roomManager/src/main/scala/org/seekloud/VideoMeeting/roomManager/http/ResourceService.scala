@@ -57,6 +57,7 @@ trait ResourceService {
       getFromResourceDirectory("music")
     } ~
     pathPrefix("record" / Segment / Segment){(roomId, startTime) =>
+      log.debug(s"roomId=$roomId, startTime=$startTime")
       getFromDirectory(s"/home/teamgwc/VideoMeeting/processor/record/$roomId/$startTime")
     }
 

@@ -1,8 +1,9 @@
 package org.seekloud.VideoMeeting.processor.core_new
 
-import java.io.{File, InputStream, OutputStream}
+import java.io._
 import java.nio.channels.Channels
 import java.nio.channels.Pipe.{SinkChannel, SourceChannel}
+import java.util.concurrent.TimeUnit
 
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
@@ -11,11 +12,15 @@ import org.seekloud.VideoMeeting.processor.stream.PipeStream
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
-import org.seekloud.VideoMeeting.processor.Boot.{streamPullActor, streamPushActor}
+import org.seekloud.VideoMeeting.processor.Boot.{executor, streamPullActor, streamPushActor}
 import org.seekloud.VideoMeeting.protocol.ptcl.processer2Manager.Processor.{RecordData, RecordInfo}
 
 import scala.collection.mutable
 import org.bytedeco.javacpp.Loader
+import org.seekloud.byteobject.MiddleBufferInJvm
+
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 /**
   * Created by sky
@@ -30,7 +35,32 @@ object RoomActor {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
-  sealed trait Command
+  trait Command
+
+  private final case class SwitchBehavior(
+                                           name: String,
+                                           behavior: Behavior[Command],
+                                           durationOpt: Option[FiniteDuration] = None,
+                                           timeOut: TimeOut = TimeOut("busy time error")
+                                         ) extends Command
+
+  private case class TimeOut(msg: String) extends Command
+
+  private final val InitTime = Some(5.minutes)
+
+  private final case object BehaviorChangeKey
+
+  private[this] def switchBehavior(ctx: ActorContext[Command],
+                                   behaviorName: String,
+                                   behavior: Behavior[Command],
+                                   durationOpt: Option[FiniteDuration] = None,
+                                   timeOut: TimeOut = TimeOut("busy time error"))
+                                  (implicit stashBuffer: StashBuffer[Command],
+                                   timer: TimerScheduler[Command]) = {
+    timer.cancel(BehaviorChangeKey)
+    durationOpt.foreach(timer.startSingleTimer(BehaviorChangeKey, timeOut, _))
+    stashBuffer.unstashAll(ctx, behavior)
+  }
 
   //case class NewRoom(roomId: Long, host: String, client1: String, client2: String, client3: String, pushLiveId: String, pushLiveCode: String, layout: Int) extends Command
   case class NewRoom(roomId: Long, host: String, clientInfo: List[String], pushLiveId: String, pushLiveCode: String, startTime:Long) extends Command
@@ -71,6 +101,7 @@ object RoomActor {
   def create(roomId: Long, host: String, clientInfo: List[String], pushLiveId: String, pushLiveCode: String,  startTime: Long): Behavior[Command]= {
     Behaviors.setup[Command]{ ctx =>
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
+      implicit val sendBuffer: MiddleBufferInJvm = new MiddleBufferInJvm(8192)
       Behaviors.withTimers[Command] {
         implicit timer =>
           log.info(s"roomActor start----")
@@ -85,6 +116,7 @@ object RoomActor {
     pullInfoList: List[String],
     pushInfoOption: Option[String]
   )(implicit stashBuffer: StashBuffer[Command],
+    sendBuffer:MiddleBufferInJvm,
     timer: TimerScheduler[Command]):Behavior[Command] = {
     Behaviors.receive[Command]{(ctx, msg) =>
       msg match {
@@ -252,15 +284,42 @@ object RoomActor {
         case ChildDead4PushPipe(roomId, startTime, liveId, childName, value) =>
           log.info(s"$childName is dead ")
           pushPipeMap.remove(liveId)
-          saveRecord(roomId, startTime)
-          timer.startSingleTimer(Timer4Stop, Stop, 1500.milli)
-          work(grabberMap, recorderMap, pullInfoList, None)
+          saveRecord(roomId, startTime).onComplete{
+            case Success(value) =>
+              log.info(s"save record success!")
+              ctx.self ! SwitchBehavior("work", work(grabberMap, recorderMap, pullInfoList, None))
+
+            case Failure(exception) =>
+              log.error(s"save record error! $exception")
+          }
+          switchBehavior(ctx,"busy",busy(),InitTime,TimeOut("busy"))
 
         case _ =>
           log.info(s"unknown msg:$msg")
           Behaviors.same
       }
     }
+  }
+
+  private def busy()(implicit stashBuffer: StashBuffer[Command],
+    timer: TimerScheduler[Command],
+    sendBuffer: MiddleBufferInJvm
+  ): Behavior[Command] =
+    Behaviors.receive[Command] { (ctx, msg) =>
+      msg match {
+        case SwitchBehavior(name, b, durationOpt, timeOut) =>
+          ctx.self ! Stop
+          switchBehavior(ctx, name, b, durationOpt, timeOut)
+
+        case TimeOut(m) =>
+          log.debug(s"${ctx.self.path} is time out when busy, msg=$m")
+          Behaviors.stopped
+
+        case x =>
+          stashBuffer.stash(x)
+          Behavior.same
+
+      }
   }
 
   def getGrabberActor(ctx: ActorContext[Command], roomId: Long, liveId: String, source: InputStream, recorderRef: ActorRef[RecorderActor.Command]) = {
@@ -299,12 +358,28 @@ object RoomActor {
     }.unsafeUpcast[StreamPushPipe.Command]
   }
 
-  def saveRecord(roomId: Long, startTime: Long):Unit = {
+  def saveRecord(roomId: Long, startTime: Long): Future[Int] = {
     log.info("begin to save record...")
     val ffmpeg = Loader.load(classOf[org.bytedeco.ffmpeg.ffmpeg])
-    val pb = new ProcessBuilder(ffmpeg, "-i", s"$recordPath$roomId/$startTime/out.ts", "-b:v", "1M", "-movflags", "faststart", s"$recordPath$roomId/$startTime/record.mp4")
-    pb.start()
-    log.info("save record end...")
+    Future{
+      val pb = new ProcessBuilder(ffmpeg, "-i", s"$recordPath$roomId/$startTime/out.ts", "-c:v", "libx264", "-c:a", "copy", "-preset", "faster", s"$recordPath$roomId/$startTime/record.mp4")
+      val process = pb.start()
+      process.waitFor(10, TimeUnit.SECONDS)
+      val buffer4Error = new BufferedReader(new InputStreamReader(process.getErrorStream))
+      var line = ""
+      val sb = new StringBuilder()
+      while ({
+        line = buffer4Error.readLine()
+        line != null
+      }) {
+        sb.append(line)
+      }
+//      log.info(s"${sb.toString()}")
+      1
+    }.recover{
+      case e: Exception =>
+        log.error(s"save record error! $e")
+        -1
+    }
   }
-
 }
