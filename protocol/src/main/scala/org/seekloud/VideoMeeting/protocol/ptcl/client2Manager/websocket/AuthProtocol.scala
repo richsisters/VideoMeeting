@@ -225,9 +225,9 @@ object AuthProtocol {
   case object HostCloseRoom extends WsMsgRm2Audience //房主关闭房间通知房间所有用户
   case class HostCloseRoom() extends WsMsgRm2Audience //房主关闭房间通知房间所有用户，class方便后台一些代码的处理
 
-  case object ForceExitRsp extends WsMsgRm2Audience //用户被主持人强制退出
+  case class ForceExitRsp(userId: Long) extends WsMsgRm2Audience //用户被主持人强制退出
 
-  case class BanOnMemberRsp(image: Boolean, sound: Boolean) extends WsMsgRm2Audience//用户被主持人屏蔽声音或者图像
+  case class BanOnMemberRsp(userId: Long, image: Boolean, sound: Boolean) extends WsMsgRm2Audience//用户被主持人屏蔽声音或者图像
 
   case class CancelBanOnMemberRsp(image: Boolean, sound: Boolean) extends WsMsgRm2Audience//用户被主持人取消屏蔽声音或者图像
 

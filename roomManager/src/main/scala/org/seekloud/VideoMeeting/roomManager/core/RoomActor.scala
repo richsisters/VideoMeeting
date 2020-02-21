@@ -507,7 +507,7 @@ object RoomActor {
           log.debug(s"host force user-$userId4Member to leave")
           ProcessorClient.forceExit(roomId, liveInfoMap(userId4Member).liveId, System.currentTimeMillis())
           liveInfoMap.remove(userId4Member)
-          dispatchTo(List((userId4Member, false)), ForceExitRsp)
+          dispatchTo(List((userId4Member, false)), ForceExitRsp(userId4Member))
         } else{
           log.debug(s"host force user-$userId4Member to leave, but there is no user!")
         }
@@ -517,7 +517,7 @@ object RoomActor {
         if(liveInfoMap.contains(userId4Member)){
           log.debug(s"user-$userId4Member can't ${if(image) "show up" else ""} ${if(sound) "and speak" else ""}")
           ProcessorClient.banOnClient(roomId, liveInfoMap(userId4Member).liveId, image, sound)
-          dispatchTo(List((userId4Member, false)), BanOnMemberRsp(image, sound))
+          dispatchTo(List((userId4Member, false)), BanOnMemberRsp(userId4Member, image, sound))
         } else{
           log.debug(s"host ban user-$userId4Member, but there is no user!")
         }
