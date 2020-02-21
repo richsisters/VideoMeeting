@@ -60,7 +60,7 @@ class HomePage extends Page{
       </div>
     }
 
-      {if(dom.window.localStorage.getItem("userName") != null && dom.window.localStorage.getItem("isTemUser") == null)
+      {if(dom.window.localStorage.getItem("userName") != null)
         {
           <div class="record" style="margin-top: 40px;">
           <div class="zone-title">

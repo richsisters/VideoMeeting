@@ -226,7 +226,8 @@ object RoomActor {
             case None =>
           }
           if (startTime != -1l) {
-            roomManager ! RoomManager.DelaySeekRecord(wholeRoomInfo, roomId, startTime, wholeRoomInfo.liveInfo.liveId)
+            val attendList = liveInfoMap.map( l => l._1).toList
+            roomManager ! RoomManager.DelaySeekRecord(wholeRoomInfo, roomId, attendList, startTime, wholeRoomInfo.liveInfo.liveId)
           }
           dispatchTo(subscribe)(subscribe.filter(r => r._1 != (wholeRoomInfo.roomInfo.userId, false)).keys.toList, HostCloseRoom())
           Behaviors.stopped
@@ -435,7 +436,8 @@ object RoomActor {
             if(v != wholeRoomInfo.liveInfo.liveId)
               ProcessorClient.closeRoom(roomId)
             if (startTime != -1l) {
-              roomManager ! RoomManager.DelaySeekRecord(wholeRoomInfo, roomId, startTime, v)
+              val attendList = liveInfoMap.map( l => l._1).toList
+              roomManager ! RoomManager.DelaySeekRecord(wholeRoomInfo, roomId, attendList, startTime, v)
             }
           case None =>
         }
