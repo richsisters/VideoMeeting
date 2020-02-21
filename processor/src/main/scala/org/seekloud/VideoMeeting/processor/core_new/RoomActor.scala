@@ -15,6 +15,7 @@ import org.seekloud.VideoMeeting.processor.Boot.{streamPullActor, streamPushActo
 import org.seekloud.VideoMeeting.protocol.ptcl.processer2Manager.Processor.{RecordData, RecordInfo}
 
 import scala.collection.mutable
+import org.bytedeco.javacpp.Loader
 
 /**
   * Created by sky
@@ -46,11 +47,11 @@ object RoomActor {
 
   case class CloseRoom(roomId: Long) extends Command
 
-  case class ChildDead4Grabber(roomId: Long, childName: String, value: ActorRef[GrabberActor.Command]) extends Command// fixme liveID
+  case class ChildDead4Grabber(childName: String, value: ActorRef[GrabberActor.Command]) extends Command// fixme liveID
 
-  case class ChildDead4Recorder(roomId: Long, childName: String, value: ActorRef[RecorderActor.Command]) extends Command
+  case class ChildDead4Recorder(childName: String, value: ActorRef[RecorderActor.Command]) extends Command
 
-  case class ChildDead4PushPipe(liveId: String, childName: String, value: ActorRef[StreamPushPipe.Command]) extends Command
+  case class ChildDead4PushPipe(roomId: Long, startTime:Long, liveId: String, childName: String, value: ActorRef[StreamPushPipe.Command]) extends Command
 
   case class ChildDead4PullPipe(liveId: String, childName: String, value: ActorRef[StreamPullPipe.Command]) extends Command
 
@@ -73,15 +74,16 @@ object RoomActor {
       Behaviors.withTimers[Command] {
         implicit timer =>
           log.info(s"roomActor start----")
-          work(mutable.Map[Long, mutable.Map[String, ActorRef[GrabberActor.Command]]](), mutable.Map[Long,ActorRef[RecorderActor.Command]](), mutable.Map[Long, List[String]]())
+          work(mutable.Map[String, ActorRef[GrabberActor.Command]](), None, List[String](), None)
       }
     }
   }
 
   def work(
-    grabberMap: mutable.Map[Long, mutable.Map[String, ActorRef[GrabberActor.Command]]],
-    recorderMap: mutable.Map[Long,ActorRef[RecorderActor.Command]],
-    roomLiveMap: mutable.Map[Long, List[String]]
+    grabberMap: mutable.Map[String, ActorRef[GrabberActor.Command]],
+    recorderMap: Option[ActorRef[RecorderActor.Command]],
+    pullInfoList: List[String],
+    pushInfoOption: Option[String]
   )(implicit stashBuffer: StashBuffer[Command],
     timer: TimerScheduler[Command]):Behavior[Command] = {
     Behaviors.receive[Command]{(ctx, msg) =>
@@ -108,11 +110,10 @@ object RoomActor {
           val recorderActor = getRecorderActor(ctx, msg.roomId, msg.host, msg.clientInfo, msg.pushLiveId, msg.pushLiveCode, pushOut)
           val grabber4host = getGrabberActor(ctx, msg.roomId, msg.host, pullInput4Host, recorderActor)
 
-          grabberMap.put(msg.roomId, mutable.Map(msg.host -> grabber4host)) //fixme
+          grabberMap.put(msg.host, grabber4host)
           //grabberMap(msg.roomId).put(msg.host, grabber4host)
 
-          roomLiveMap.put(msg.roomId,List(msg.host, msg.pushLiveId) ::: msg.clientInfo)
-
+          val newPullInfoList = msg.host :: msg.clientInfo
 
           msg.clientInfo.foreach{ clientId =>
 
@@ -127,7 +128,7 @@ object RoomActor {
             val pullPipe4client = getPullPipe(ctx, msg.roomId, clientId, pullOut4Client)
             pullPipeMap.put(clientId, pullPipe4client)
 
-            grabberMap(msg.roomId).put(clientId, grabber4client)
+            grabberMap.put(clientId, grabber4client)
 
           }
 
@@ -140,61 +141,48 @@ object RoomActor {
           pullPipeMap.put(msg.host, pullPipe4host)
           pushPipeMap.put(msg.pushLiveId, pushPipe4recorder)
 
-          recorderMap.put(msg.roomId, recorderActor)
           streamPushActor ! StreamPushActor.NewLive(msg.pushLiveId, msg.pushLiveCode)
-          Behaviors.same
+
+          work(grabberMap, Some(recorderActor), newPullInfoList, Some(msg.pushLiveId))
 
         case msg:Recorder =>
           log.info(s"${ctx.self} receive a msg $msg")
-          val grabberActorMap = grabberMap.get(msg.roomId)
-          if(grabberActorMap.isDefined){
-            grabberActorMap.get.foreach(_._2 ! GrabberActor.Recorder(msg.recorderRef))
-          } else {
-            log.info(s"${msg.roomId} grabbers not exist")
-          }
+          grabberMap.foreach(_._2 ! GrabberActor.Recorder(msg.recorderRef))
           Behaviors.same
 
         case msg:ForceExit4Client =>
           log.info(s"${ctx.self} receive a msg $msg")
 
-          if(roomLiveMap.get(msg.roomId).nonEmpty){
+          if(pullInfoList.nonEmpty){
             streamPullActor ! StreamPullActor.StopPull4Client(msg.liveId)
-            roomLiveMap.get(msg.roomId).foreach{live =>
-              live.foreach{l =>
-                if(l == msg.liveId){
-                  pullPipeMap.get(l).foreach( a => a ! StreamPullPipe.ClosePipe)
-                  pullPipeMap.remove(msg.liveId)
-                }
+            pullInfoList.foreach{l =>
+              if(l == msg.liveId){
+                pullPipeMap.get(l).foreach( a => a ! StreamPullPipe.ClosePipe)
+                pullPipeMap.remove(msg.liveId)
               }
             }
           } else {
             log.info(s"${msg.roomId}  pipe not exist when forceExit4Client")
           }
 
-          val grabberActorMap = grabberMap.get(msg.roomId)
-          if(grabberActorMap.isDefined){
-            grabberActorMap.get.foreach( grabber =>
-              if(grabber._1 == msg.liveId){
-                grabber._2 ! GrabberActor.StopGrabber
-              }
-            )
-          } else {
-            log.info(s"${msg.roomId}  grabbers not exist when forceExit4Client")
+          grabberMap.foreach{grabber =>
+            if(grabber._1 == msg.liveId){
+              grabber._2 ! GrabberActor.StopGrabber
+            }
           }
 
-          if(recorderMap.get(msg.roomId).nonEmpty) {
-            recorderMap.get(msg.roomId).foreach(_ ! RecorderActor.ClientExit(msg.liveId))
+          if(recorderMap.isDefined) {
+            recorderMap.foreach(_ ! RecorderActor.ClientExit(msg.liveId))
           } else {
             log.info(s"${msg.roomId}  recorder not exist when forceExit4Client")
           }
-
 
           Behaviors.same
 
         case msg: BanOnClient =>
           log.info(s"${ctx.self} receive a msg $msg")
-          if(recorderMap.get(msg.roomId).nonEmpty) {
-            recorderMap.get(msg.roomId).foreach(_ ! RecorderActor.BanOnClient(msg.liveId, msg.isImg, msg.isSound))
+          if(recorderMap.isDefined) {
+            recorderMap.foreach(_ ! RecorderActor.BanOnClient(msg.liveId, msg.isImg, msg.isSound))
           } else {
             log.info(s"${msg.roomId}  recorder not exist when forceExit4Client")
           }
@@ -202,8 +190,8 @@ object RoomActor {
 
         case msg: CancelBan =>
           log.info(s"${ctx.self} receive a msg $msg")
-          if(recorderMap.get(msg.roomId).nonEmpty) {
-            recorderMap.get(msg.roomId).foreach(_ ! RecorderActor.CancelBan(msg.liveId, msg.isImg, msg.isSound))
+          if(recorderMap.isDefined) {
+            recorderMap.foreach(_ ! RecorderActor.CancelBan(msg.liveId, msg.isImg, msg.isSound))
           } else {
             log.info(s"${msg.roomId}  recorder not exist when forceExit4Client")
           }
@@ -215,37 +203,29 @@ object RoomActor {
 
         case CloseRoom(roomId) =>
           log.info(s"${ctx.self} receive a msg $msg")
-          if(grabberMap.get(roomId).nonEmpty){
-            grabberMap.get(roomId).foreach{g => g.foreach(_._2 ! GrabberActor.StopGrabber)}
-            grabberMap.remove(roomId)
-          } else {
-            log.info(s"${roomId}  grabbers not exist when closeRoom")
-          }
-          if(recorderMap.get(roomId).nonEmpty) {
-            recorderMap.get(roomId).foreach(_ ! RecorderActor.StopRecorder)
-            recorderMap.remove(roomId)
-          } else{
-            log.info(s"${roomId}  recorder not exist when closeRoom")
 
-          }
-          if(roomLiveMap.get(roomId).nonEmpty){
-            streamPullActor ! StreamPullActor.RoomClose(roomLiveMap(roomId))
-            roomLiveMap.get(roomId).foreach{live =>
-              live.foreach{l =>
-                pullPipeMap.get(l).foreach( a => a ! StreamPullPipe.ClosePipe)
-                timer.startSingleTimer(Timer4PipeClose(l), ClosePipe(l),1000.milli)
-              }
+          if(pullInfoList.nonEmpty){
+            streamPullActor ! StreamPullActor.RoomClose(pullInfoList)
+            pullInfoList.foreach{l =>
+              pullPipeMap.get(l).foreach(a => a ! StreamPullPipe.ClosePipe)
             }
-            roomLiveMap.remove(roomId)
           } else {
-            log.info(s"${roomId}  pipe not exist when closeRoom")
+            log.info(s"$roomId pipe not exist when closeRoom")
           }
-          timer.startSingleTimer(Timer4Stop, Stop, 1500.milli)
+
+          grabberMap.foreach(g => g._2 ! GrabberActor.StopGrabber)
+
+          recorderMap.foreach(_ ! RecorderActor.StopRecorder)
+
+          if(pushInfoOption.isDefined){
+            pushPipeMap.get(pushInfoOption.get).foreach( a => a ! StreamPushPipe.ClosePipe)
+          }else{
+            log.info(s"$roomId  push live not exist when closeRoom")
+          }
+
           Behaviors.same
 
         case ClosePipe(liveId) =>
-          log.debug(s"close pipe 4 push ${pushPipeMap.get(liveId)}")
-          pushPipeMap.get(liveId).foreach( a => a ! StreamPushPipe.ClosePipe)
           pullPipeMap.remove(liveId)
           pushPipeMap.remove(liveId)
           pipeMap.remove(liveId)
@@ -255,31 +235,31 @@ object RoomActor {
           log.info(s"${ctx.self} stopped ------")
           Behaviors.stopped
 
-        case ChildDead4Grabber(roomId, childName, value) =>
-          log.info(s"${childName} is dead ")
-          grabberMap.remove(roomId)
-          Behaviors.same
+        case ChildDead4Grabber(childName, value) =>
+          log.info(s"$childName is dead ")
+          grabberMap.clear()
+          work(grabberMap, recorderMap, pullInfoList, pushInfoOption)
 
-        case ChildDead4Recorder(roomId, childName, value) =>
-          log.info(s"${childName} is dead ")
-          recorderMap.remove(roomId)
-          Behaviors.same
+        case ChildDead4Recorder(childName, value) =>
+          log.info(s"$childName is dead ")
+          work(grabberMap, None, pullInfoList, pushInfoOption)
 
         case ChildDead4PullPipe(liveId, childName, value) =>
-          log.info(s"${childName} is dead ")
+          log.info(s"$childName is dead ")
           pullPipeMap.remove(liveId)
-          Behaviors.same
+          work(grabberMap, recorderMap, pullInfoList.filter(l => l != liveId), pushInfoOption)
 
-        case ChildDead4PushPipe(liveId, childName, value) =>
-          log.info(s"${childName} is dead ")
+        case ChildDead4PushPipe(roomId, startTime, liveId, childName, value) =>
+          log.info(s"$childName is dead ")
           pushPipeMap.remove(liveId)
-          Behaviors.same
+          saveRecord(roomId, startTime)
+          timer.startSingleTimer(Timer4Stop, Stop, 1500.milli)
+          work(grabberMap, recorderMap, pullInfoList, None)
 
         case _ =>
           log.info(s"unknown msg:$msg")
           Behaviors.same
       }
-
     }
   }
 
@@ -287,7 +267,7 @@ object RoomActor {
     val childName = s"grabberActor_$liveId"
     ctx.child(childName).getOrElse{
       val actor = ctx.spawn(GrabberActor.create(roomId, liveId, source, recorderRef), childName)
-      ctx.watchWith(actor,ChildDead4Grabber(roomId, childName, actor))
+      ctx.watchWith(actor,ChildDead4Grabber(childName, actor))
       actor
     }.unsafeUpcast[GrabberActor.Command]
   }
@@ -296,7 +276,7 @@ object RoomActor {
     val childName = s"recorderActor_$pushLiveId"
     ctx.child(childName).getOrElse{
       val actor = ctx.spawn(RecorderActor.create(roomId, host, clientInfo: List[String], 0, out), childName)
-      ctx.watchWith(actor,ChildDead4Recorder(roomId, childName, actor))
+      ctx.watchWith(actor,ChildDead4Recorder(childName, actor))
       actor
     }.unsafeUpcast[RecorderActor.Command]
   }
@@ -314,13 +294,17 @@ object RoomActor {
     val childName = s"pushPipeActor_$pushLiveId"
     ctx.child(childName).getOrElse{
       val actor = ctx.spawn(StreamPushPipe.create(roomId, pushLiveId, pushLiveCode, source, startTime), childName)
-      ctx.watchWith(actor, ChildDead4PushPipe(pushLiveId, childName, actor) )
+      ctx.watchWith(actor, ChildDead4PushPipe(roomId, startTime, pushLiveId, childName, actor) )
       actor
     }.unsafeUpcast[StreamPushPipe.Command]
   }
 
-
-
-
+  def saveRecord(roomId: Long, startTime: Long):Unit = {
+    log.info("begin to save record...")
+    val ffmpeg = Loader.load(classOf[org.bytedeco.ffmpeg.ffmpeg])
+    val pb = new ProcessBuilder(ffmpeg, "-i", s"$recordPath$roomId/$startTime/out.ts", "-b:v", "1M", "-movflags", "faststart", s"$recordPath$roomId/$startTime/record.mp4")
+    pb.start()
+    log.info("save record end...")
+  }
 
 }

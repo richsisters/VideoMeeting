@@ -7,10 +7,10 @@ object VideoDuration {
 
   def ts2mp4():String = {
     val ffmpeg = Loader.load(classOf[org.bytedeco.ffmpeg.ffmpeg])
-    val pb = new ProcessBuilder(ffmpeg, "-i", s"/Users/wang/Downloads/out.ts", "-b:v", "1M", "-movflags", "faststart", s"/Users/wang/Desktop/test_1.mp4")
+    val pb = new ProcessBuilder(ffmpeg, "-i", s"/Users/wang/Downloads/out_1.ts", "-c:v", "libx264", "-c:a", "copy", s"/Users/wang/Desktop/out_1.mp4")
     val process = pb.start()
     println("change end...")
-    "/Users/wang/Desktop/test_1.mp4"
+    "/Users/wang/Desktop/out_1.mp4"
   }
 
   private def getVideoDuration(src: String) ={
@@ -31,6 +31,31 @@ object VideoDuration {
     val duration = (sb.toString().toDouble * 1000).toInt
     processor.destroy()
     millis2HHMMSS(duration)
+  }
+
+  private def getVideoDuration_1(src: String) = {
+    val ffmpeg = Loader.load(classOf[org.bytedeco.ffmpeg.ffmpeg])
+    val pb = new ProcessBuilder(ffmpeg, "-i", s"$src")
+    val processor = pb.start()
+
+    val br = new BufferedReader(new InputStreamReader(processor.getErrorStream))
+    val sb = new StringBuilder()
+    var s = ""
+    s = br.readLine()
+    while(s!=null){
+      sb.append(s)
+      s = br.readLine()
+    }
+    br.close()
+
+    val regex = "Duration: (.*?),"
+    val p = Pattern.compile(regex)
+    val m = p.matcher(sb.toString())
+    if(m.find()) {
+      m.group(1)
+    }else{
+      "00:00:00.00"
+    }
   }
 
   def millis2HHMMSS(sec: Double): String = {
@@ -70,6 +95,6 @@ object VideoDuration {
     println("start...")
     val a = ts2mp4()
     println(s"===$a")
-    println(s"duration:${getVideoDuration(a)}")
+    println(s"duration:${getVideoDuration_1("/Users/wang/Downloads/out_1.ts")}")
   }
 }

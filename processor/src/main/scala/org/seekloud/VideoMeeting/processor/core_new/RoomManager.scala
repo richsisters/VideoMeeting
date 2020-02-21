@@ -1,6 +1,7 @@
 package org.seekloud.VideoMeeting.processor.core_new
 
 import java.io.{BufferedReader, File, InputStreamReader}
+import java.util.regex.Pattern
 
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
@@ -120,7 +121,7 @@ object RoomManager {
           roomInfoMap.remove(msg.roomId)
           Behaviors.same
 
-        case ChildDead(roomId, childName, value) =>
+        case ChildDead(roomId, childName, valuesz) =>
           log.info(s"${childName} is dead ")
           roomInfoMap.remove(roomId)
           Behaviors.same
@@ -173,23 +174,28 @@ object RoomManager {
   }
 
   private def getVideoDuration(roomId:Long,startTime:Long) ={
-    val ffprobe = Loader.load(classOf[org.bytedeco.ffmpeg.ffprobe])
-    //容器时长（container duration）
-    val pb = new ProcessBuilder(ffprobe,"-v","error","-show_entries","format=duration", "-of","csv=p=0","-i", s"$recordPath$roomId/$startTime/record.mp4")
+    val ffmpeg = Loader.load(classOf[org.bytedeco.ffmpeg.ffmpeg])
+    val pb = new ProcessBuilder(ffmpeg, "-i", s"$recordPath$roomId/$startTime/out.ts")
     val processor = pb.start()
-    val br = new BufferedReader(new InputStreamReader(processor.getInputStream))
+
+    val br = new BufferedReader(new InputStreamReader(processor.getErrorStream))
     val sb = new StringBuilder()
-    var line:String = ""
-    while ({
-      line = br.readLine()
-      line != null
-    }){
-      sb.append(line)
+    var s = ""
+    s = br.readLine()
+    while(s!=null){
+      sb.append(s)
+      s = br.readLine()
     }
     br.close()
-    val duration = (sb.toString().toDouble * 1000).toInt
-    processor.destroy()
-    millis2HHMMSS(duration)
+
+    val regex = "Duration: (.*?),"
+    val p = Pattern.compile(regex)
+    val m = p.matcher(sb.toString())
+    if(m.find()) {
+      m.group(1)
+    }else{
+      "00:00:00.00"
+    }
   }
 
   def millis2HHMMSS(sec: Double): String = {

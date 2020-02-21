@@ -12,7 +12,6 @@ import org.seekloud.VideoMeeting.processor.Boot.streamPushActor
 import org.seekloud.VideoMeeting.processor.common.AppSettings._
 import scala.concurrent.duration._
 import scala.collection.mutable
-import org.bytedeco.javacpp.Loader
 
 /**
   * Created by sky
@@ -58,7 +57,7 @@ object StreamPushPipe {
           } else{
             file.createNewFile()
           }
-          work(roomId, liveId, liveCode, source,ByteBuffer.allocate(1316), new FileOutputStream(file), startTime)
+          work(roomId, liveId, liveCode, source,ByteBuffer.allocate(1316), new FileOutputStream(file))
       }
     }
   }
@@ -68,8 +67,7 @@ object StreamPushPipe {
            liveCode: String,
            source:SourceChannel,
            dataBuf:ByteBuffer,
-           out:FileOutputStream,
-           startTime: Long)
+           out:FileOutputStream)
     (implicit timer: TimerScheduler[Command],
       stashBuffer: StashBuffer[Command]): Behavior[Command] = {
     Behaviors.receive[Command] { (ctx, msg) =>
@@ -107,7 +105,6 @@ object StreamPushPipe {
           source.close()
           dataBuf.clear()
           out.close()
-          saveRecord(roomId, startTime)
           Behaviors.stopped
 
         case x =>
@@ -115,14 +112,6 @@ object StreamPushPipe {
           Behaviors.same
       }
     }
-  }
-
-  def saveRecord(roomId: Long, startTime: Long):Unit = {
-    log.info("begin to save record...")
-    val ffmpeg = Loader.load(classOf[org.bytedeco.ffmpeg.ffmpeg])
-    val pb = new ProcessBuilder(ffmpeg, "-i", s"$recordPath$roomId/$startTime/out.ts", "-b:v", "1M", "-movflags", "faststart", s"$recordPath$roomId/$startTime/record.mp4")
-    pb.start()
-    log.info("save record end...")
   }
 }
 
