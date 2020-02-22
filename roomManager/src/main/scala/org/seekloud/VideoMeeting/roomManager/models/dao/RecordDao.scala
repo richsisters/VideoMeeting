@@ -44,6 +44,10 @@ object RecordDao {
     db.run(tRecord.filter(_.id === recordId).delete)
   }
 
+  def getAttend(recordId:Long) ={
+    db.run(tRecord.filter(_.id === recordId).result)
+  }
+
   def searchRecordById(recordId:Long) ={
     db.run(tRecord.filter(_.id === recordId).result.headOption)
   }
@@ -64,8 +68,8 @@ object RecordDao {
 
 
 
-  def getRecordAll(userId: Long, sortBy:String,pageNum:Int,pageSize:Int) :Future[List[RecordInfo]]= {
-    val records = if (sortBy == "time") db.run(tRecord.filter(_.attend.like(userId.toString)).sortBy(_.startTime.reverse).drop((pageNum - 1) * pageSize).take(pageSize).result)
+  def getRecordAll(userId: String, sortBy:String,pageNum:Int,pageSize:Int) :Future[List[RecordInfo]]= {
+    val records = if (sortBy == "time") db.run(tRecord.filter(_.attend.like(s"%$userId%")).sortBy(_.startTime.reverse).drop((pageNum - 1) * pageSize).take(pageSize).result)
     else if (sortBy == "view") db.run(tRecord.sortBy(_.viewNum.reverse).drop((pageNum - 1) * pageSize).take(pageSize).result)
     else db.run(tRecord.sortBy(_.likeNum.reverse).drop((pageNum - 1) * pageSize).take(pageSize).result)
     records.flatMap{ls =>
@@ -86,8 +90,8 @@ object RecordDao {
   }
 
 
-  def getTotalNum(userId: Long) = {
-    db.run(tRecord.filter(_.attend.like(userId.toString)).length.result)
+  def getTotalNum(userId: String) = {
+    db.run(tRecord.filter(_.attend.like(s"%$userId%")).length.result)
   }
 
   def updateViewNum(roomId:Long, startTime:Long, num:Int) = {
@@ -128,32 +132,15 @@ object RecordDao {
 
 
   def main(args: Array[String]): Unit = {
-    val a: List[Long] = List(100, 20, 30)
-    val b = "55"
-    val c = a.mkString
-    println(c)
 
-//    addRecord(20l,"","",90l,"",9,8,"")
-//    def update() = {
-//      db.run(tRecord.filter(_.roomId =!= 5l).result.headOption).flatMap{valueOpt =>
-//        if(valueOpt.nonEmpty){
-//          db.run(tRecord.filter(_.roomId === 5l).map(_.likeNum).update(valueOpt.get.likeNum + 1))
-//        }else{
-//          Future(-1)
-//        }
-//      }
+    val a = List(100,200,300)
+    println(a)
+//    getTotalNum("10069").map{
+//      r =>
+//        println("okokokokokoko" + r)
+//    }.recover{
+//      case x : Exception =>
+//        println(s"${x.getMessage}")
 //    }
-//    val a = List(2l,3l,4l).map{roomId =>
-//      db.run(tRecord.filter(_.roomId === roomId).result)
-//    }
-//    val b = Future.sequence(a).map(_.flatten)
-
-//    db.run(tRecord.forceInsert(rRecord(-1l,4l,4554l)))//强制插入不过滤自增项
-//    db.run(tRecord ++= List(rRecord(-1l,4l,4554l)))//批量插入，过滤自增项
-//    db.run(tRecord.forceInsertAll(Seq(rRecord(-1l,4l,4554l),rRecord(5l,65l,6356l))))
-//    val a = List(4)
-//    val b = mutable.LinkedList(3)
-//    val c = a ++: b
-//    println(c)
   }
 }

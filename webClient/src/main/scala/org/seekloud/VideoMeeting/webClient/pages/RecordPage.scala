@@ -47,6 +47,7 @@ class RecordPage(roomId:Long,time:Long) extends Page{
   private val videoTime = Var(dom.window.localStorage.getItem("recordStartTime"))
   private val videoName = Var(dom.window.localStorage.getItem("recordName"))
   val commentInfo = Var(List.empty[CommentInfo])
+  val attend = Var(List.empty[String])
 
   def exitRecord(): Future[Unit] ={
     val exitUserId = (dom.window.localStorage.getItem("isTemUser"), dom.window.localStorage.getItem("userId")) match{
@@ -124,6 +125,7 @@ class RecordPage(roomId:Long,time:Long) extends Page{
           dom.window.localStorage.setItem("recordCoverImg", rsp.recordInfo.coverImg)
           dom.window.localStorage.setItem("recordStartTime", rsp.recordInfo.startTime.toString)
           watchRecordEndInfo = WatchRecordEnd(rsp.recordInfo.recordId, newData)
+          getAttend(rsp.recordInfo.recordId)
           roomCoverImg := rsp.recordInfo.coverImg
           videoTime := rsp.recordInfo.startTime.toString
           videoName := rsp.recordInfo.recordName
@@ -137,6 +139,23 @@ class RecordPage(roomId:Long,time:Long) extends Page{
       case Left(e) =>
         PopWindow.commonPop(s"get url error in watchRecord: $e")
     }
+  }
+
+  def getAttend(recordId: Long): Unit ={
+    val data = GetAttend(recordId).asJson.noSpaces
+    Http.postJsonAndParse[GetAttendRsp](Routes.UserRoutes.getAttend,data).map{
+      case Right(rsp) =>
+        if(rsp.errCode == 0){
+          attend := rsp.attendList
+          println("********" + attend)
+        }else{
+          PopWindow.commonPop(s"get url error in getAttend: ${rsp.msg}")
+        }
+
+      case Left(e) =>
+        PopWindow.commonPop(s"get url error in getAttend: $e")
+    }
+
   }
 
   def videoPlayback(): Unit ={
@@ -203,10 +222,18 @@ class RecordPage(roomId:Long,time:Long) extends Page{
     init()
     getCommentInfo()
     <div>
-      <div class="audienceInfo" style="margin-left: 250px;margin-top: 20px;width:60%">
+      <div class="audienceInfo" style="margin-left: 25px;margin-top: 20px;width:60%">
         <div style="display: flex;">
           <div>
-            <div>可观看录像成员：</div>
+            <div style="width: 200px">可观看录像成员：</div>
+            {
+            attend.map{
+              l => l.map{
+                s =>
+                  <div> {s}</div>
+              }
+            }
+            }
           </div>
           <div>
             <div class="anchorInfo">

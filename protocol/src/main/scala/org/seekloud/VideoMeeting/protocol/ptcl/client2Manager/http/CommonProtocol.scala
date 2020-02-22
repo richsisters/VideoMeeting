@@ -101,6 +101,17 @@ object CommonProtocol {
     msg: String = "ok"
   ) extends Response
 
+  case class GetAttend(
+                      recordId: Long
+                      )extends Request
+
+  case class GetAttendRsp(
+                         attendList: List[String],
+                         errCode: Int = 0,
+                         msg: String = "ok"
+                         ) extends Response
+
+
   /*case class GetAuthorRecordListReq(
     roomId: Long,
     sortBy: String,

@@ -30,6 +30,7 @@ object Routes {
     def getRecordList(userId:Long, sortBy:String,pageNum:Int,pageSize:Int) = urlRecord + s"/getRecordList?userId=$userId&sortBy=$sortBy&pageNum=$pageNum&pageSize=$pageSize"
 
     val getOneRecord = urlRecord + "/searchRecord"
+    val getAttend = urlRecord + "/getAttend"
     val watchRecordOver = urlRecord + "/watchRecordOver"
     val getCommentInfo = "/VideoMeeting/roomManager/recordComment/getRecordCommentList"
     val sendCommentInfo = "/VideoMeeting/roomManager/recordComment/addRecordComment"

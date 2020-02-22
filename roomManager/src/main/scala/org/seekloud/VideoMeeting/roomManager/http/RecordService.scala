@@ -27,8 +27,8 @@ trait RecordService {
       'pageSize.as[Int]
     ) { case (userId, sortBy, pageNum, pageSize) =>
       dealFutureResult {
-        RecordDao.getRecordAll(userId, sortBy, pageNum, pageSize).flatMap { recordList =>
-          RecordDao.getTotalNum(userId).map { num =>
+        RecordDao.getRecordAll(userId.toString, sortBy, pageNum, pageSize).flatMap { recordList =>
+          RecordDao.getTotalNum(userId.toString).map { num =>
             complete(GetRecordListRsp(num, recordList))
           }
         }.recover {
@@ -60,6 +60,20 @@ trait RecordService {
         }
       case Left(e) =>
         complete(CommonRsp(100070, s"parse error:$e"))
+    }
+  }
+
+  private val getAttend = (path("getAttend") & post) {
+    entity(as[Either[Error, GetAttend]]) {
+      case Right(req) =>
+        dealFutureResult {
+          RecordDao.getAttend(req.recordId).map { r =>
+            val a = r.map(l => l.attend.replace(";"," ")).toList
+                  complete(GetAttendRsp(a))
+          }
+        }
+      case Left(e) =>
+        complete(CommonRsp(10021, s"parse error:$e"))
     }
   }
 
@@ -137,6 +151,6 @@ trait RecordService {
 
 
   val recordRoutes: Route = pathPrefix("record") {
-    getRecordList ~ searchRecord ~ watchRecordOver ~ getAuthorRecordList ~ deleteRecord ~ addRecordAddr
+    getRecordList ~ searchRecord ~ watchRecordOver ~ getAuthorRecordList ~ deleteRecord ~ addRecordAddr ~ getAttend
   }
 }
