@@ -13,8 +13,8 @@ import scala.concurrent.Future
 object RecordDao {
 
   def addRecord(roomId:Long, recordName:String, recordDes:String, startTime:Long, coverImg:String, viewNum:Int, likeNum:Int,duration:String,host: Long, attendList: List[Long]) = {
-    val attend = attendList.map(l => l.toString + ";").toString()
-    val hostAndAttend = host + ";" + attend
+    val attend = attendList.mkString(";")
+    val hostAndAttend = host.toString + ";" + attend
     db.run(tRecord += rRecord(1, roomId, startTime, coverImg, recordName, recordDes, viewNum, likeNum, duration, "", hostAndAttend))
   }
 
@@ -86,8 +86,8 @@ object RecordDao {
   }
 
 
-  def getTotalNum = {
-    db.run(tRecord.length.result)
+  def getTotalNum(userId: Long) = {
+    db.run(tRecord.filter(_.attend.like(userId.toString)).length.result)
   }
 
   def updateViewNum(roomId:Long, startTime:Long, num:Int) = {
@@ -128,6 +128,10 @@ object RecordDao {
 
 
   def main(args: Array[String]): Unit = {
+    val a: List[Long] = List(100, 20, 30)
+    val b = "55"
+    val c = a.mkString
+    println(c)
 
 //    addRecord(20l,"","",90l,"",9,8,"")
 //    def update() = {
