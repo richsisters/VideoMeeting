@@ -148,7 +148,7 @@ object RecorderActor {
           //val ffFilterN = new FFmpegFrameFilter("[0:a][1:a] amix=inputs=2:duration=longest:dropout_transition=3:weights=1 1[a]", audioChannels)
           ffFilterN.setAudioChannels(audioChannels)
           ffFilterN.setSampleFormat(sampleFormat)
-          ffFilterN.setAudioInputs(2)
+          ffFilterN.setAudioInputs(clientInfo.size + 1)
           ffFilterN.start()
           single(roomId,  host, clientInfo,layout, recorder4ts, ffFilterN, drawer, ts4Host, ts4Client, hostImage, clientImage, out, tsDiffer, canvasSize)
 
@@ -242,7 +242,7 @@ object RecorderActor {
               }
             } catch {
               case ex: Exception =>
-                log.debug(s"$liveId record sample error system: $ex")
+               // log.debug(s"$liveId record sample error system: $ex")
             }
           }
           Behaviors.same
