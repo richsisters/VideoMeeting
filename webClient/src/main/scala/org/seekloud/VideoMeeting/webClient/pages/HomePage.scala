@@ -121,7 +121,12 @@ class HomePage extends Page{
   override def render: Elem = {
     //获取所有直播
     //获取第一页的录像
+
 //    getRecordList("time",1,perPageSize)
+    if(dom.window.localStorage.getItem("userName") != null){
+      getRecordList("time",1,perPageSize)
+      println("okokokokokokok")
+    }
     <div style="min-height: 800px">
       {recordArea}
       <div id="record-pageContainer">
