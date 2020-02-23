@@ -104,7 +104,7 @@ object PlayerManager {
       needTime = needTimestamp
       implicit val stashBuffer: StashBuffer[SupervisorCmd] = StashBuffer[SupervisorCmd](Int.MaxValue)
       Behaviors.withTimers[SupervisorCmd] { implicit timer =>
-        idle(mutable.HashMap.empty, mutable.HashMap.empty, mutable.HashMap.empty, mutable.HashMap.empty, mutable.HashMap.empty, mutable.HashMap.empty, mutable.HashMap.empty)
+        idle(mutable.HashMap.empty, mutable.HashMap.empty, mutable.HashMap.empty, mutable.HashMap.empty, mutable.HashMap.empty, mutable.HashMap.empty)
       }
     }
 
@@ -112,7 +112,6 @@ object PlayerManager {
   private def idle(
     mediaSettingsMap: mutable.HashMap[String, MediaSettings], //playId -> mediaSettings
     gcMap: mutable.HashMap[String, GraphicsContext], //playId -> gc
-    recordActorMap: mutable.HashMap[String, ActorRef[RecordActor.recordCmd]], //playId -> recordActor
     playerGrabberMap: mutable.HashMap[String, (ActorRef[PlayerGrabber.MonitorCmd], Either[String, InputStream])], //playId -> (input, playerGrabber)
     imageActorMap: mutable.HashMap[String, ActorRef[ImageActor.ImageCmd]], //playId -> imageActor
     soundActorMap: mutable.HashMap[String, ActorRef[SoundActor.SoundCmd]], //playId -> soundActor
@@ -143,27 +142,7 @@ object PlayerManager {
             gcMap.put(playId, gc.get)
           }
 
-          idle(mediaSettingsMap, gcMap, recordActorMap, playerGrabberMap, imageActorMap, soundActorMap, replyToMap)
-
-
-        case StartRec(outFilePath) =>
-          if (playerGrabberMap.isEmpty) {
-            log.debug("目前无播放中的流，无法录制。")
-          } else {
-            playerGrabberMap.foreach {
-              case (playId, (_, input)) =>
-                val replyTo = replyToMap(playId)
-                val settings = mediaSettingsMap(playId)
-                val outFile = new File(s"$outFilePath\\$playId-${System.currentTimeMillis()}")
-                if (!recordActorMap.contains(playId)) {
-                  val recordActor = getRecorder(replyTo, ctx, playId, input, settings, outFile)
-                  recordActorMap.put(playId, recordActor)
-                  log.debug(s"开始录制:$playId")
-                }
-            }
-          }
-          idle(mediaSettingsMap, gcMap, recordActorMap, playerGrabberMap, imageActorMap, soundActorMap, replyToMap)
-
+          idle(mediaSettingsMap, gcMap, playerGrabberMap, imageActorMap, soundActorMap, replyToMap)
 
         case msg@MediaInfo(playId, gc, replyTo, hasVideo, hasAudio, format, frameRate, width, height, sampleRate, channels) =>
           val playerGrabberOpt = playerGrabberMap.get(playId)
@@ -226,31 +205,7 @@ object PlayerManager {
           if (playerGrabberMap.contains(playId)) {
             playerGrabberMap -= playId
           }
-          idle(mediaSettingsMap, gcMap, recordActorMap, playerGrabberMap, imageActorMap, soundActorMap, replyToMap)
-
-
-        case RecGrabberFailInit(playId, replyTo, ex) =>
-          // todo
-          replyTo ! RecorderInitFailed(playId, ex)
-          ctx.self ! StopRec()
-          replyTo ! RecordStopped()
-          log.debug(s"录制grabber初始化失败, playId:$playId, 已停止所有录制")
-          if (recordActorMap.contains(playId)) {
-            recordActorMap -= playId
-          }
-          idle(mediaSettingsMap, gcMap, recordActorMap, playerGrabberMap, imageActorMap, soundActorMap, replyToMap)
-
-
-        case RecorderFailInit(playId, replyTo, ex) =>
-          // todo
-          replyTo ! RecorderInitFailed(playId, ex)
-          ctx.self ! StopRec()
-          replyTo ! RecordStopped()
-          log.debug(s"录制recorder初始化失败, playId:$playId, 已停止所有录制")
-          if (recordActorMap.contains(playId)) {
-            recordActorMap -= playId
-          }
-          idle(mediaSettingsMap, gcMap, recordActorMap, playerGrabberMap, imageActorMap, soundActorMap, replyToMap)
+          idle(mediaSettingsMap, gcMap, playerGrabberMap, imageActorMap, soundActorMap, replyToMap)
 
         case PausePlay(playId) =>
           if (gcMap.contains(playId)) { //自主播放
@@ -307,20 +262,6 @@ object PlayerManager {
           }
           Behaviors.same
 
-        case StopRec() =>
-          if (recordActorMap.isEmpty) {
-//            log.debug("目前无录制中的流。")
-          } else {
-            recordActorMap.foreach {
-              case (playId, recordActor) =>
-                recordActor ! StopRecord
-                recordActorMap -= playId
-                log.debug(s"停止录制：$playId")
-            }
-          }
-          idle(mediaSettingsMap, gcMap, recordActorMap, playerGrabberMap, imageActorMap, soundActorMap, replyToMap)
-
-
         case x =>
           log.warn(s"unknown msg in idle: $x")
           Behaviors.unhandled
@@ -346,18 +287,4 @@ object PlayerManager {
     playerGrabber
   }
 
-  private def getRecorder(
-    replyTo: ActorRef[Messages.RTCommand],
-    ctx: ActorContext[SupervisorCmd],
-    playId: String,
-    input: Either[String, InputStream],
-    settings: MediaSettings,
-    outFile: File
-  ) = {
-    val childName = s"recorder-$playId"
-    val recordActor = ctx.child(childName).getOrElse {
-      ctx.spawn(RecordActor.create(playId, replyTo, input, ctx.self, settings, outFile, debug), childName)
-    }.unsafeUpcast[RecordActor.recordCmd]
-    recordActor
-  }
 }

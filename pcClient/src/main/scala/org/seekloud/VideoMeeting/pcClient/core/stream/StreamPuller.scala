@@ -9,7 +9,7 @@ import org.seekloud.VideoMeeting.pcClient.Boot
 import org.seekloud.VideoMeeting.pcClient.common.Constants.AudienceStatus
 import org.seekloud.VideoMeeting.pcClient.common.Ids
 import org.seekloud.VideoMeeting.pcClient.component.WarningDialog
-import org.seekloud.VideoMeeting.pcClient.core.stream.LiveManager.{JoinInfo, WatchInfo}
+import org.seekloud.VideoMeeting.pcClient.core.stream.LiveManager.PullInfo
 import org.seekloud.VideoMeeting.player.sdk.MediaPlayer
 import org.seekloud.VideoMeeting.rtpClient.Protocol._
 import org.seekloud.VideoMeeting.rtpClient.{Protocol, PullStreamClient}
@@ -72,10 +72,9 @@ object StreamPuller {
 
   def create(
     liveId: String,
+    pullInfo: PullInfo,
     parent: ActorRef[LiveManager.LiveCommand],
     mediaPlayer: MediaPlayer,
-    joinInfo: Option[JoinInfo],
-    watchInfo: Option[WatchInfo],
     audienceScene: Option[AudienceScene],
     hostScene: Option[HostScene]
   ): Behavior[PullCommand] =
@@ -83,17 +82,16 @@ object StreamPuller {
       log.info(s"StreamPuller-$liveId is starting.")
       implicit val stashBuffer: StashBuffer[PullCommand] = StashBuffer[PullCommand](Int.MaxValue)
       Behaviors.withTimers[PullCommand] { implicit timer =>
-        init(liveId, parent, mediaPlayer, joinInfo, watchInfo, audienceScene, hostScene, None)
+        init(liveId, pullInfo, parent, mediaPlayer, audienceScene, hostScene, None)
       }
 
     }
 
   private def init(
     liveId: String,
+    pullInfo: PullInfo,
     parent: ActorRef[LiveManager.LiveCommand],
     mediaPlayer: MediaPlayer,
-    joinInfo: Option[JoinInfo],
-    watchInfo: Option[WatchInfo],
     audienceScene: Option[AudienceScene],
     hostScene: Option[HostScene],
     pullClient: Option[PullStreamClient]
@@ -109,7 +107,7 @@ object StreamPuller {
           timer.startSingleTimer(PullStartTimeOut, PullStartTimeOut, 5.seconds)
           audienceScene.foreach(_.startPackageLoss())
           hostScene.foreach(_.startPackageLoss())
-          init(liveId, parent, mediaPlayer, joinInfo, watchInfo, audienceScene, hostScene, Some(msg.pullClient))
+          init(liveId, pullInfo, parent, mediaPlayer, audienceScene, hostScene, Some(msg.pullClient))
 
         case PullStreamReady =>
           log.info(s"StreamPuller-$liveId ready for pull.")
@@ -135,26 +133,14 @@ object StreamPuller {
           val sink = mediaPipe.sink()
           val source = mediaPipe.source()
           sink.configureBlocking(false)
-          //          source.configureBlocking(false)
-          //          val inputStream = new ChannelInputStream(source)
           val inputStream = Channels.newInputStream(source)
-          if (joinInfo.nonEmpty) {
-            audienceScene.foreach(_.autoReset())
-            hostScene.foreach(_.resetBack())
-            val playId = Ids.getPlayId(AudienceStatus.CONNECT, roomId = Some(joinInfo.get.roomId), audienceId = Some(joinInfo.get.audienceId))
-            mediaPlayer.setTimeGetter(playId, pullClient.get.getServerTimestamp)
-            val videoPlayer = ctx.spawn(VideoPlayer.create(playId, audienceScene, None, None), s"videoPlayer$playId")
-            mediaPlayer.start(playId, videoPlayer, Right(inputStream), Some(joinInfo.get.gc), None)
-          }
+          audienceScene.foreach(_.autoReset())
+          hostScene.foreach(_.resetBack())
+          val playId = Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId)
+          mediaPlayer.setTimeGetter(playId, pullClient.get.getServerTimestamp)
+          val videoPlayer = ctx.spawn(VideoPlayer.create(playId, audienceScene, None, None), s"videoPlayer$playId")
+          mediaPlayer.start(playId, videoPlayer, Right(inputStream), Some(pullInfo.gc), None)
 
-          if (watchInfo.nonEmpty) {
-            audienceScene.foreach(_.autoReset())
-            val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = Some(watchInfo.get.roomId))
-            mediaPlayer.setTimeGetter(playId, pullClient.get.getServerTimestamp)
-            val videoPlayer = ctx.spawn(VideoPlayer.create(playId, audienceScene, None, None), s"videoPlayer$playId")
-            mediaPlayer.start(playId, videoPlayer, Right(inputStream), Some(watchInfo.get.gc), None)
-
-          }
           stashBuffer.unstashAll(ctx, pulling(liveId, parent, pullClient.get, mediaPlayer, sink, audienceScene, hostScene))
 
         case GetLossAndBand =>

@@ -63,10 +63,6 @@ class HostController(
       rmManager ! RmManager.HostStartMeeting(roomId)
     }
 
-    override def shutJoin(): Unit = {
-      rmManager ! RmManager.ShutJoin
-    }
-
     override def gotoHomeScene(): Unit = {
       rmManager ! RmManager.BackToHome
     }
@@ -206,14 +202,9 @@ class HostController(
             if (!hostScene.tb3.isSelected) {
               hostScene.tb3.setGraphic(hostScene.connectionIcon1)
             }
-
               val userId = msg.joinInfo.get.userId
               val userName = msg.joinInfo.get.userName
               hostScene.updateAcceptList(userId, userName)
-
-//            hostScene.connectionStateText.setText(s"与${msg.joinInfo.get.userName}连线中")
-//            hostScene.connectStateBox.getChildren.add(hostScene.shutConnectionBtn)
-//            isConnecting = true
           }
 
         } else {

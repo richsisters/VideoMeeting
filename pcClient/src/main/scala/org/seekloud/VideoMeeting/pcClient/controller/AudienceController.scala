@@ -52,28 +52,6 @@ class AudienceController(
 
   }
 
-//  def updateRecCommentList(): Unit = {
-//    RMClient.getRecCommentList(audienceScene.getRecordInfo.roomId, audienceScene.getRecordInfo.startTime).map {
-//      case Right(rst) =>
-//        if (rst.errCode == 0) {
-//          Boot.addToPlatform {
-////            log.debug(s"${System.currentTimeMillis()},update recCommentList success:${rst.recordCommentList}")
-//            audienceScene.barrage.refreshRecBarrage(rst.recordCommentList)
-//            audienceScene.recCommentBoard.updateCommentsList(rst.recordCommentList)
-//          }
-//        } else {
-//          Boot.addToPlatform(
-//            WarningDialog.initWarningDialog(s"${rst.msg}")
-//          )
-//        }
-//      case Left(e) =>
-//        log.error(s"getRecCommentList error: $e")
-//        Boot.addToPlatform(
-//          WarningDialog.initWarningDialog(s"获取评论失败:$e")
-//        )
-//    }
-//  }
-
   def addRecComment(
     roomId:Long,          //录像的房间id
     recordTime:Long,      //录像的时间戳

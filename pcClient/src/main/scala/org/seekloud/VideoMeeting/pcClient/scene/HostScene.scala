@@ -106,8 +106,6 @@ object HostScene {
 
     def startMeeting(roomId: Long)
 
-    def shutJoin()
-
     def gotoHomeScene()
 
     def setFullScreen()
@@ -208,59 +206,12 @@ class HostScene(stage: Stage) {
   startBox.getChildren.add(startBtn)
   startBox.setAlignment(Pos.CENTER_LEFT)
 
-  val shutConnectionBtn = new Button("中断")
-  shutConnectionBtn.getStyleClass.add("hostScene-middleArea-shutConnectionBtn")
-  Common.addButtonEffect(shutConnectionBtn)
-  shutConnectionBtn.setOnAction {
-    _ => listener.shutJoin()
-  }
+
   val connectStateBox = new HBox()
   connectStateBox.getChildren.add(connectionStateText)
   connectStateBox.setSpacing(10)
   connectStateBox.setAlignment(Pos.CENTER_LEFT)
   connectStateBox.setSpacing(10)
-
-//  /*录像相关*/
-//  val recordRadioBtn1 = new RadioButton("录制自己")
-////  val recordRadioBtn2 = new RadioButton("录制别人")
-//
-//  val recordToggle = new ToggleGroup()
-//  recordRadioBtn1.setToggleGroup(recordToggle)
-////  recordRadioBtn2.setToggleGroup(recordToggle)
-//
-//  val recordRadioBox = new HBox(10, recordRadioBtn1)
-//  private var recordType = "录制自己"
-//
-//  recordToggle.selectedToggleProperty().addListener(new ChangeListener[Toggle]() {
-//    override def changed(observable: ObservableValue[_ <: Toggle], oldValue: Toggle, newValue: Toggle): Unit = {
-//      import javafx.scene.control.RadioButton
-//      val temp_rb = newValue.asInstanceOf[RadioButton]
-//      recordType = newValue.asInstanceOf[RadioButton].getText
-//    }
-//  })
-//
-//  val recordOptions: ObservableList[String] =
-//    FXCollections.observableArrayList(
-//      "录制自己"
-//      )
-//  val recordChoiceCBx = new ComboBox(recordOptions)
-//  recordChoiceCBx.setValue("无模式")
-//  val AILabel = new Label("AI模式：")
-//  AILabel.setFont(Font.font(15))
-//  val AIBox = new HBox(AILabel, recordChoiceCBx)
-//  AIBox.setSpacing(10)
-//  AIBox.setAlignment(Pos.CENTER_LEFT)
-//
-//
-//
-//
-//  val pathLabel = new Text(s"选择录制文件保存路径：")
-//  pathLabel.setFont(Font.font(15))
-//  val pathField = new TextField(s"${Constants.recordPath}")
-//  pathField.setPrefWidth(width * 0.15)
-//  val chooseFileBtn = new Button("浏览")
-
-//  val commentFiled = new TextField() //留言输入框
 
   /**
     * 左侧导航栏
@@ -282,8 +233,6 @@ class HostScene(stage: Stage) {
 
   val tb1 = new ToggleButton("房间 ", roomInfoIcon)
   tb1.getStyleClass.add("hostScene-leftArea-toggleButton")
-//  val tb2 = new ToggleButton("设置 ", setIcon)
-//  tb2.getStyleClass.add("hostScene-leftArea-toggleButton")
   val tb3 = new ToggleButton("开会 ", connectionIcon)
   tb3.getStyleClass.add("hostScene-leftArea-toggleButton")
   /**

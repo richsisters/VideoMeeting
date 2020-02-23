@@ -37,9 +37,7 @@ object LiveManager {
 
   val dispatcher: DispatcherSelector = DispatcherSelector.fromConfig("akka.actor.my-blocking-dispatcher")
 
-  case class JoinInfo(roomId: Long, audienceId: Long, gc: GraphicsContext)
-
-  case class WatchInfo(roomId: Long, gc: GraphicsContext)
+  case class PullInfo(roomId: Long, gc: GraphicsContext)
 
   sealed trait LiveCommand
 
@@ -66,7 +64,7 @@ object LiveManager {
 
   final case class Ask4State(reply: ActorRef[Boolean]) extends LiveCommand
 
-  final case class PullStream(liveId: String, joinInfo: Option[JoinInfo] = None, watchInfo: Option[WatchInfo] = None, audienceScene: Option[AudienceScene] = None, hostScene: Option[HostScene] = None) extends LiveCommand
+  final case class PullStream(liveId: String, pullInfo: PullInfo, audienceScene: Option[AudienceScene] = None, hostScene: Option[HostScene] = None) extends LiveCommand
 
   final case object StopPull extends LiveCommand
 
@@ -162,7 +160,7 @@ object LiveManager {
         case msg: PullStream =>
           if (streamPuller.isEmpty) {
             val pullChannel = new PullChannel
-            val puller = getStreamPuller(ctx, msg.liveId, mediaPlayer, msg.joinInfo, msg.watchInfo, msg.audienceScene, msg.hostScene)
+            val puller = getStreamPuller(ctx, msg.liveId, msg.pullInfo, mediaPlayer,  msg.audienceScene, msg.hostScene)
             val rtpClient = new PullStreamClient(AppSettings.host, NetUtil.getFreePort, pullChannel.serverPullAddr, puller, AppSettings.rtpServerDst)
             puller ! StreamPuller.InitRtpClient(rtpClient)
             idle(parent, mediaPlayer, captureActor, streamPusher, Some((msg.liveId, puller)), isStart = true, isRegular = isRegular)
@@ -245,15 +243,14 @@ object LiveManager {
   private def getStreamPuller(
     ctx: ActorContext[LiveCommand],
     liveId: String,
+    pullInfo: PullInfo,
     mediaPlayer: MediaPlayer,
-    joinInfo: Option[JoinInfo],
-    watchInfo: Option[WatchInfo],
     audienceScene : Option[AudienceScene],
     hostScene: Option[HostScene]
   ) = {
     val childName = s"streamPuller-$liveId"
     ctx.child(childName).getOrElse {
-      val actor = ctx.spawn(StreamPuller.create(liveId, ctx.self, mediaPlayer, joinInfo, watchInfo, audienceScene, hostScene), childName)
+      val actor = ctx.spawn(StreamPuller.create(liveId, pullInfo, ctx.self, mediaPlayer, audienceScene, hostScene), childName)
       ctx.watchWith(actor, ChildDead(childName, actor))
       actor
     }.unsafeUpcast[StreamPuller.PullCommand]

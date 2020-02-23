@@ -15,12 +15,14 @@ object Ids {
   private[this] val log = LoggerFactory.getLogger(this.getClass)
 
 
-  def getPlayId(audienceStatus: Int, roomId: Option[Long] = None, audienceId: Option[Long] = None, startTime: Option[Long] = None): String = {
+  def getPlayId(audienceStatus: Int, roomId: Long): String = {
 
     val playId = audienceStatus match {
-      case AudienceStatus.LIVE => s"room${roomId.get}"
-      case AudienceStatus.CONNECT => s"room${roomId.get}-audience${audienceId.get}"
-      case AudienceStatus.RECORD => s"record${roomId.get}-${startTime.get}"
+      case AudienceStatus.LIVE => s"room$roomId"
+      case AudienceStatus.CONNECT => s"room$roomId-connect"
+      case _ =>
+        //do nothing
+        ""
     }
 
     playId

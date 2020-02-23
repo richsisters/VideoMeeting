@@ -171,28 +171,6 @@ class MediaPlayer () {
 
   }
 
-  /**
-    * 开始录制
-    *
-    * */
-  def startRecord(outFilePath: String) : Unit = {
-    if(playerManager != null){
-      playerManager ! PlayerManager.StartRec(outFilePath)
-
-    }
-  }
-
-  /**
-    * 结束录制
-    *
-    * */
-  def stopRecord() : Unit = {
-    if(playerManager != null){
-      playerManager ! PlayerManager.StopRec()
-
-    }
-  }
-
   /*开启同步rtpServer时间戳*/
   def setTimeGetter(playId: String, func: () => Long): Unit = {
     if (playerManager != null) {
