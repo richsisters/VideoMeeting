@@ -484,6 +484,13 @@ object RmManager {
 
         case HostFinishMeeting =>
           log.debug(s"videoMeeting ${roomInfo.get.roomId} stop.")
+          if (hostStatus == HostStatus.CONNECT) {
+            Boot.addToPlatform {
+              hostScene.connectionStateText.setText(s"目前状态：无连接~")
+              hostScene.startBtn.setSelected(false)
+            }
+            sender.foreach(_ ! HostShutJoin(roomInfo.get.roomId))
+          }
           liveManager ! LiveManager.SwitchMediaMode(isJoin = false, hostScene.resetBack)
           val playId = Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT, roomInfo.get.roomId)
           mediaPlayer.stop(playId, hostScene.resetBack)
