@@ -91,19 +91,11 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
     timeline.setCycleCount(Animation.INDEFINITE)
     val keyFrame = new KeyFrame(Duration.millis(2000), { _ =>
       listener.ask4Loss()
-      //      ppp
     })
     timeline.getKeyFrames.add(keyFrame)
     timeline.play()
   }
 
-  //  def ppp = {
-  //    val  CPUMemInfo= NetUsage.getCPUMemInfo
-  //    CPUMemInfo.foreach { i =>
-  //      val (cpu, memPer, memByte, proName) = (i.CPU, i.memPer, i.memByte, i.proName)
-  ////      println(f"cpu：$cpu%.3f" + " %  " + f"mem percent：$memPer%.2f" + " %" + f"mem：$memByte")
-  //    }
-  //  }
   override def finalize(): Unit = {
     //    println("release")
     super.finalize()
@@ -116,7 +108,6 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
   private[this] val log = LoggerFactory.getLogger(this.getClass)
   var watchUrl: Option[String] = None
   var liveId: Option[String] = None
-  //  var recordUrl: Option[String] = None
   var commentPrefix = "effectType0"
 
   var isFullScreen = false
@@ -134,13 +125,7 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
   val commentFiled = new TextField()
 
   /*屏幕下方功能条*/
-  val liveBar: LiveBar = if(!isRecord){
-    //看直播
-    new LiveBar(Constants.WindowStatus.AUDIENCE_LIVE, width = Constants.DefaultPlayer.width, height = Constants.DefaultPlayer.height * 0.1)
-  } else {
-    //看录像
-    new LiveBar(Constants.WindowStatus.AUDIENCE_REC, width = Constants.DefaultPlayer.width, height = Constants.DefaultPlayer.height * 0.1, Some(album.toRecordInfo.duration))
-  }
+  val liveBar: LiveBar = new LiveBar(Constants.WindowStatus.AUDIENCE, width = Constants.DefaultPlayer.width, height = Constants.DefaultPlayer.height * 0.1)
 
   liveBar.fullScreenIcon.setOnAction{ _ =>
     if(!isFullScreen) listener.setFullScreen(isRecord)
@@ -161,21 +146,6 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
 
   liveBar.startTimer()
 
-  liveBar.playToggleButton.setOnAction {
-    _ =>
-      if (liveBar.playToggleButton.isSelected) {
-        listener.continuePlayRec(album.toRecordInfo)
-        liveBar.resetStartPlayTime(System.currentTimeMillis())
-        Tooltip.install(liveBar.playToggleButton, new Tooltip("点击暂停"))
-      } else {
-        listener.pausePlayRec(album.toRecordInfo)
-        liveBar.isPlaying = false
-        //        liveBar.hasplayedTime = liveBar.showedPlayTime
-        Tooltip.install(liveBar.playToggleButton, new Tooltip("点击继续"))
-      }
-
-  }
-
   val liveBarBox: VBox = liveBar.barVBox
 
   /*emoji*/
@@ -194,36 +164,6 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
   gc.drawImage(backImg, 0, 0, gc.getCanvas.getWidth, gc.getCanvas.getHeight)
   val connectionBg = new Image("img/connectionBg.jpg")
 
-
-  /*record*/
-  val media: Media = if (isRecord) new Media(recordUrl) else null
-  val playerPane: PlayerPane = if (isRecord) new PlayerPane(media, liveBar) else null
-  private val player: MediaPlayer = if (isRecord) playerPane.getMediaPlayer else null
-  val recView: MediaView = if (isRecord) playerPane.getMediaView else null
-  if (isRecord) {
-    recView.setFitHeight(Constants.DefaultPlayer.width)
-    recView.setFitHeight(Constants.DefaultPlayer.height)
-  }
-
-  def playRecord(): Unit = {
-    player.setStartTime(new util.Duration(0))
-    player.play()
-  }
-
-  def pauseRecord(): Unit = {
-    player.pause()
-  }
-
-  def stopRecord(): Unit = {
-    player.stop()
-  }
-
-  def continueRecord(): Unit = {
-    val status = player.getStatus
-    if ((status eq Status.UNKNOWN) || (status eq Status.HALTED)) return
-    if ((status eq Status.PAUSED) || (status eq Status.STOPPED) || (status eq Status.READY)) player.play()
-  }
-
   def resetBack(): Unit = {
     gc.drawImage(connectionBg, 0, 0, gc.getCanvas.getWidth, gc.getCanvas.getHeight)
     val sWidth = gc.getCanvas.getWidth
@@ -235,21 +175,17 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
     gc.fillText(s"连线中", imgView.getWidth / 2 - 40, imgView.getHeight / 8)
   }
 
-
   def loadingBack(): Unit = {
     gc.drawImage(waitPulling, 0, 0, gc.getCanvas.getWidth, gc.getCanvas.getHeight)
   }
 
-
   def autoReset(): Unit = {
-
     audienceStatus match {
       case AudienceStatus.LIVE =>
         loadingBack()
       case AudienceStatus.CONNECT =>
         resetBack()
     }
-
   }
 
   private val scene = new Scene(group, width, height)
@@ -303,8 +239,6 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
 
 
     val viewIcon = Common.getImageView("img/view.png", 30, 30)
-//    val viewLabel = new Label(album.observerNum.toString, viewIcon)
-//    viewLabel.setPadding(new Insets(0,0,0,6))
 
     val IDcard = if(!isRecord){
       new HBox(header, userInfo)
@@ -377,7 +311,7 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
     }
 
     def createButtonBox: HBox = {
-      val linkBtn = new Button("申请连线", new ImageView("img/link.png"))
+      val linkBtn = new Button("加入会议", new ImageView("img/link.png"))
       linkBtn.getStyleClass.add("audienceScene-leftArea-linkBtn")
       linkBtn.setOnAction{ _ =>
         if(!hasReqJoin) {
@@ -388,7 +322,7 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
       }
       Common.addButtonEffect(linkBtn)
 
-      val exitBtn = new Button("中断连线", new ImageView("img/shutdown.png"))
+      val exitBtn = new Button("退出会议", new ImageView("img/shutdown.png"))
       exitBtn.getStyleClass.add("audienceScene-leftArea-linkBtn")
       exitBtn.setOnAction(_ => listener.quitJoin(album.roomId, album.userId))
       Common.addButtonEffect(exitBtn)
@@ -441,54 +375,16 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
     }
 
     val livePane = new StackPane()
-    if (!isRecord) {
-      livePane.getChildren.addAll(imgView, statisticsCanvas)
-    } else {
-      livePane.getChildren.addAll(playerPane.getMediaView)
-    }
+    livePane.getChildren.addAll(imgView, statisticsCanvas)
     livePane.setAlignment(Pos.BOTTOM_RIGHT)
-
     livePane.addEventHandler(MouseEvent.MOUSE_ENTERED, (_: MouseEvent) => {
       livePane.setAlignment(Pos.BOTTOM_RIGHT)
       livePane.getChildren.add(liveBarBox)
-
-      //      if (isRecord) {
-      //        livePane.setAlignment(Pos.BOTTOM_RIGHT)
-      //        livePane.getChildren.add(playerPane.mediaTopBar)
-      //      }
-      //        playerPane.addTopAndBottom()
     })
-
     livePane.addEventHandler(MouseEvent.MOUSE_EXITED, (_: MouseEvent) => {
       livePane.setAlignment(Pos.BASELINE_RIGHT)
       livePane.getChildren.remove(liveBarBox)
-      //      if (isRecord) {
-      //        livePane.setAlignment(Pos.BOTTOM_RIGHT)
-      //        livePane.getChildren.remove(playerPane.mediaTopBar)
-      //      }
-      //        playerPane.removeTopAndBottom()
     })
-
-//    val gift = new GiftBar(group)
-
-//    def sendGiftAction(input: TextField, btn: Button, name: String, giftDes: VBox, giftType: Int): Unit = {
-//      btn.setOnAction(_ => {
-//        if (input.getText.nonEmpty) {
-////          listener.sendCmt(Comment(RmManager.userInfo.get.userId, album.roomId,s"送出${input.getText()}个$name！", extension = Some(s"gift$giftType")))
-//          input.clear()
-//          group.getChildren.remove(giftDes)
-//        }
-//        else WarningDialog.initWarningDialog("请输入数量")
-//      }
-//                      )
-//    }
-
-//    sendGiftAction(gift.input1, gift.sendBtn1, "冰可乐", gift.gift1Des, 1)
-//    sendGiftAction(gift.input2, gift.sendBtn2, "雪糕", gift.gift2Des, 2)
-//    sendGiftAction(gift.input3, gift.sendBtn3, "巧克力", gift.gift3Des, 3)
-//    sendGiftAction(gift.input4, gift.sendBtn4, "鲜花", gift.gift4Des, 4)
-//    sendGiftAction(gift.input5, gift.sendBtn5, "飞船", gift.gift5Des, 5)
-//    sendGiftAction(gift.input6, gift.sendBtn6, "火箭", gift.gift6Des, 6)
 
     val hBox = new HBox()
     if (!isRecord) {
@@ -510,13 +406,9 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
       vBox.setSpacing(30)
       vBox.setPadding(new Insets(50, 44, 0, 44))
     }
-
     vBox.setAlignment(Pos.TOP_CENTER)
     vBox
-
-
   }
-
 
   def addAllElement(): Unit = {
     group.getChildren.clear()
@@ -532,7 +424,6 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
     fullScreenImage.getChildren.addAll(imgView, statisticsCanvas)
     fullScreenImage.setLayoutX(0)
     fullScreenImage.setLayoutY(0)
-    if (isRecord) fullScreenImage.getChildren.addAll(recView, liveBarBox)
     group.getChildren.add(fullScreenImage)
   }
 
@@ -553,8 +444,5 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
     //    info.values.headOption.foreach(i => ctx.fillText(f"丢包率：${i.lossScale2}%.2f" + " %", Constants.DefaultPlayer.width / 5 * 4, 20))
     ctx.restore()
   }
-
-
-
 
 }

@@ -341,31 +341,6 @@ object RmManager {
             Behaviors.same
           }
 
-        case msg: GoToRecord =>
-          val audienceScene = new AudienceScene(msg.recordInfo.toAlbum, isRecord = true, msg.url)
-          val audienceController = new AudienceController(stageCtx, audienceScene, ctx.self)
-          audienceScene.playRecord()
-          /*media player播放*/
-          //          val playId = Ids.getPlayId(AudienceStatus.RECORD, roomId = Some(msg.recordInfo.roomId), startTime = Some(msg.recordInfo.startTime))
-          //          val videoPlayer = ctx.spawn(VideoPlayer.create(playId), s"videoPlayer$playId")
-          //          mediaPlayer.start(playId, videoPlayer, Left(msg.url), Some(audienceScene.gc), None)
-          Boot.addToPlatform {
-            roomController.foreach(_.removeLoading())
-            audienceController.showScene()
-          }
-          switchBehavior(ctx, "audienceBehavior", audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, audienceLiveInfo = None, audienceStatus = AudienceStatus.RECORD))
-
-//        case msg: ChangeHeader =>
-//          log.info("change header.")
-//          this.userInfo = userInfo.map(_.copy(headImgUrl = msg.newHeaderUrl))
-//          homeController.foreach(_.showScene())
-//          Behaviors.same
-
-//        case msg: ChangeCover =>
-//          log.info("change cover.")
-//          this.roomInfo = roomInfo.map(_.copy(coverImgUrl = msg.newCoverUrl))
-//          Behaviors.same
-
         case msg: ChangeUserName =>
           log.info("change userName.")
           this.userInfo = userInfo.map(_.copy(userName = msg.newUserName))
@@ -521,9 +496,7 @@ object RmManager {
         case msg: StartLive =>
           log.info(s"${msg.liveId} start live.")
           hostController.isLive = true
-          Boot.addToPlatform {
-            hostScene.allowConnect()
-          }
+          ctx.self ! ChangeMode(Some(true), None, None)
           liveManager ! LiveManager.PushStream(msg.liveId, msg.liveCode)
           Behaviors.same
 
@@ -750,10 +723,8 @@ object RmManager {
               mediaPlayer.stop(playId, audienceScene.autoReset)
               liveManager ! LiveManager.StopPush
               liveManager ! LiveManager.DeviceOff
-            case AudienceStatus.RECORD =>
-//              val playId = s"record${audienceScene.getRecordInfo.roomId}time${audienceScene.getRecordInfo.startTime}"
-//              mediaPlayer.stop(playId, audienceScene.resetBack)
-              audienceScene.pauseRecord()
+            case _ =>
+              //do nothing
           }
 
           Boot.addToPlatform {
@@ -1044,7 +1015,6 @@ object RmManager {
           hController.foreach(_.wsMessageHandle(message))
           aController.foreach(_.wsMessageHandle(message))
         }
-
 
       case _ => //do nothing
       log.debug("nothing")

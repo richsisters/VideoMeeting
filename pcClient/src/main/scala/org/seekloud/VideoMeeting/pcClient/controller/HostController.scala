@@ -26,7 +26,6 @@ class HostController(
   private[this] val log = LoggerFactory.getLogger(this.getClass)
 //  var isConnecting = false
   var isLive = false
-//  var likeNum: Int = RmManager.roomInfo.get.like
 
   def showScene(): Unit = {
     Boot.addToPlatform(
@@ -56,19 +55,8 @@ class HostController(
     }
 
     override def audienceAcceptance(userId: Long, accept: Boolean, newRequest: AudienceListInfo): Unit = {
-//      if (!isConnecting) {
-//        rmManager ! RmManager.AudienceAcceptance(userId, accept)
-//        hostScene.audObservableList.remove(newRequest)
-//      } else {
-//        if ( !accept) {
-          rmManager ! RmManager.AudienceAcceptance(userId, accept)
-          hostScene.audObservableList.remove(newRequest)
-//        } else {
-//          Boot.addToPlatform {
-//            WarningDialog.initWarningDialog(s"无法重复连线，请先断开当前连线。")
-//          }
-//        }
-//      }
+        rmManager ! RmManager.AudienceAcceptance(userId, accept)
+        hostScene.audObservableList.remove(newRequest)
     }
 
     override def startMeeting(roomId: Long): Unit = {
@@ -114,22 +102,8 @@ class HostController(
       }
     }
 
-
     override def changeOption(bit: Option[Int] = None, re: Option[String] = None, frameRate: Option[Int] = None, needImage: Boolean = true, needSound: Boolean = true): Unit = {
       rmManager ! RmManager.ChangeOption(bit, re, frameRate, needImage, needSound)
-    }
-
-    override def recordOption(recordOrNot: Boolean, recordType: String, path: Option[String] = None): Unit = {
-      if (!isLive) {
-        recordType match {
-          case "录制自己" => rmManager ! RmManager.RecordOption(recordOrNot, path)
-          case "录制别人" => path.foreach(i => rmManager ! RmManager.StartRecord(i))
-        }
-      } else {
-        Boot.addToPlatform {
-          WarningDialog.initWarningDialog("直播中不能更改设置哦~")
-        }
-      }
     }
 
     override def ask4Loss(): Unit = {
@@ -269,12 +243,12 @@ class HostController(
 
       case HostStopPushStream2Client =>
         Boot.addToPlatform {
-          WarningDialog.initWarningDialog("直播成功停止，已通知所有观众。")
+          WarningDialog.initWarningDialog("会议结束，已通知所有参会者。")
         }
 
       case BanOnAnchor =>
         Boot.addToPlatform {
-          WarningDialog.initWarningDialog("你的直播已被管理员禁止！")
+          WarningDialog.initWarningDialog("你的会议已被管理员禁止！")
         }
         rmManager ! RmManager.BackToHome
 

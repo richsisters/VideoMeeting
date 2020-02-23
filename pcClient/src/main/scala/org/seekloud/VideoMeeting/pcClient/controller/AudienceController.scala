@@ -133,23 +133,15 @@ class AudienceController(
         audienceScene.removeAllElement()
         //        context.getStage.setFullScreenExitHint("s")
         context.getStage.setFullScreen(true)
-        if (isRecord) {
-          audienceScene.recView.setLayoutX(0)
-          audienceScene.recView.setLayoutY(0)
-          audienceScene.recView.setFitWidth(context.getStageWidth)
-          audienceScene.recView.setFitHeight(context.getStageHeight)
-        }
-        else {
-          audienceScene.imgView.setLayoutX(0)
-          audienceScene.imgView.setLayoutY(0)
-          audienceScene.imgView.setWidth(context.getStageWidth)
-          audienceScene.imgView.setHeight(context.getStageHeight)
-          audienceScene.statisticsCanvas.setLayoutX(0)
-          audienceScene.statisticsCanvas.setLayoutY(0)
-          audienceScene.statisticsCanvas.setWidth(context.getStageWidth)
-          audienceScene.statisticsCanvas.setHeight(context.getStageHeight)
-          audienceScene.gc.drawImage(audienceScene.backImg, 0, 0, context.getStageWidth, context.getStageHeight)
-        }
+        audienceScene.imgView.setLayoutX(0)
+        audienceScene.imgView.setLayoutY(0)
+        audienceScene.imgView.setWidth(context.getStageWidth)
+        audienceScene.imgView.setHeight(context.getStageHeight)
+        audienceScene.statisticsCanvas.setLayoutX(0)
+        audienceScene.statisticsCanvas.setLayoutY(0)
+        audienceScene.statisticsCanvas.setWidth(context.getStageWidth)
+        audienceScene.statisticsCanvas.setHeight(context.getStageHeight)
+        audienceScene.gc.drawImage(audienceScene.backImg, 0, 0, context.getStageWidth, context.getStageHeight)
         audienceScene.isFullScreen = true
       }
     }
@@ -160,12 +152,6 @@ class AudienceController(
         audienceScene.imgView.setHeight(Constants.DefaultPlayer.height)
         audienceScene.statisticsCanvas.setWidth(Constants.DefaultPlayer.width)
         audienceScene.statisticsCanvas.setHeight(Constants.DefaultPlayer.height)
-
-        if (isRecord) {
-          audienceScene.recView.setFitWidth(Constants.DefaultPlayer.width)
-          audienceScene.recView.setFitHeight(Constants.DefaultPlayer.height)
-        }
-
         audienceScene.addAllElement()
         context.getStage.setFullScreen(false)
         audienceScene.isFullScreen = false
@@ -201,10 +187,7 @@ class AudienceController(
           rmManager ! HeartBeat
 
         case msg: RcvComment =>
-          Boot.addToPlatform {
-//            audienceScene.commentBoard.updateComment(msg)
-//            audienceScene.barrage.updateBarrage(msg)
-          }
+         //do nothing
 
         case msg: JoinRsp =>
           if (msg.errCode == 0) {
@@ -231,7 +214,6 @@ class AudienceController(
           if(msg.sound)
             WarningDialog.initWarningDialog(s"主持人屏蔽用户${msg.userId}的声音")
             audienceScene.soundToggleBtn.setDisable(true)
-          //rmManager ! RmManager.ChangeOption4Audience(!msg.image, !msg.sound)
 
         case msg: CancelBanOnMemberRsp =>
           log.debug("got  cancel ban on member rsp!")
@@ -239,7 +221,6 @@ class AudienceController(
           audienceScene.imageToggleBtn.setDisable(false)
           if(msg.sound)
             audienceScene.soundToggleBtn.setDisable(false)
-          //rmManager ! RmManager.ChangeOption4Audience(msg.image, msg.sound)
 
         case msg:StartMeetingRsp =>
           if (msg.errCode == 0) {

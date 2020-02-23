@@ -69,8 +69,7 @@ object Constants {
 
   object WindowStatus{
     val HOST = 0
-    val AUDIENCE_LIVE = 1
-    val AUDIENCE_REC = 2
+    val AUDIENCE = 1
   }
 
   val barrageColors = List(
