@@ -107,7 +107,8 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
 
   private[this] val log = LoggerFactory.getLogger(this.getClass)
   var watchUrl: Option[String] = None
-  var liveId: Option[String] = None
+  var liveId4Connect:Option[String] = None
+  var liveId4Live: Option[String] = None
   var commentPrefix = "effectType0"
 
   var isFullScreen = false
@@ -144,6 +145,7 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
       listener.changeOption(needImage = imageToggleBtn.isSelected, needSound = soundToggleBtn.isSelected)
   }
 
+  liveBar.resetStartLiveTime(System.currentTimeMillis())
   liveBar.startTimer()
 
   val liveBarBox: VBox = liveBar.barVBox
@@ -170,7 +172,7 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
     val sHeight = gc.getCanvas.getHeight
     gc.setFont(Font.font(emojiFont, 25))
     gc.setFill(Color.BLACK)
-    gc.fillText(s"等待会议开启～", sWidth / 2 , sHeight / 2)
+    gc.fillText(s"等待会议开启～", sWidth / 2 - 40, sHeight / 2)
   }
 
   def loadingBack(): Unit = {
@@ -208,13 +210,16 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
     this.listener = listener
   }
 
-  def updateAttendList(userId: Long, userName: String): Unit = {
+  def updateAttendList(userId: Long, userName: String, add:Boolean): Unit = {
 
     val newRequest = AttendList(
       new SimpleStringProperty(s"$userName")
     )
-    audAttendList.add(newRequest)
 
+    if(add)
+      audAttendList.add(newRequest)
+    else
+      audAttendList.remove(newRequest)
   }
 
   def createIDcard: HBox = {

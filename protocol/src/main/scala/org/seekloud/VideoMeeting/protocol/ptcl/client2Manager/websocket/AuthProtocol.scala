@@ -153,7 +153,7 @@ object AuthProtocol {
   case object BanOnAnchor extends WsMsgRm2Host//禁播消息
 
   /*主持人权限*/
-  case class ForceExit(userId4Member: Long) extends WsMsgHost //强制某个用户退出
+  case class ForceExit(userId4Member: Long, userName4Member: String) extends WsMsgHost //强制某个用户退出
 
   case class BanOnMember(userId4Member: Long, image: Boolean, sound: Boolean) extends WsMsgHost //屏蔽某人声音活着图像
 
@@ -225,12 +225,18 @@ object AuthProtocol {
   case object HostCloseRoom extends WsMsgRm2Audience //房主关闭房间通知房间所有用户
   case class HostCloseRoom() extends WsMsgRm2Audience //房主关闭房间通知房间所有用户，class方便后台一些代码的处理
 
-  case class ForceExitRsp(userId: Long) extends WsMsgRm2Audience //用户被主持人强制退出
+  case class UpdateRoomInfo2Client(
+                                    roomName: String,
+                                    roomDec: String
+                                  ) extends WsMsgRm2Audience
+
+  case object HostStopPushStream2Client extends WsMsgRm2Audience
+
+  case class ForceExitRsp(userId: Long, userName: String) extends WsMsgRm2Audience//用户被主持人强制退出
 
   case class BanOnMemberRsp(userId: Long, image: Boolean, sound: Boolean) extends WsMsgRm2Audience//用户被主持人屏蔽声音或者图像
 
   case class CancelBanOnMemberRsp(image: Boolean, sound: Boolean) extends WsMsgRm2Audience//用户被主持人取消屏蔽声音或者图像
-
 
   /**
     * 所有用户
@@ -252,12 +258,5 @@ object AuthProtocol {
     color:String = "#FFFFFF",
     extension: Option[String] = None
   ) extends WsMsgRm
-
-  case class UpdateRoomInfo2Client(
-    roomName: String,
-    roomDec: String
-  ) extends WsMsgRm2Audience
-
-  case object HostStopPushStream2Client extends WsMsgRm2Audience
 
 }

@@ -1,8 +1,6 @@
 package org.seekloud.VideoMeeting.pcClient.common
 
 import org.seekloud.VideoMeeting.pcClient.common.Constants.AudienceStatus
-import org.seekloud.VideoMeeting.pcClient.core.stream.LiveManager.{JoinInfo, WatchInfo}
-import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo.RecordInfo
 import org.slf4j.LoggerFactory
 
 /**

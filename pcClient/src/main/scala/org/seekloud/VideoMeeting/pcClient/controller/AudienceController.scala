@@ -15,7 +15,7 @@ import org.seekloud.VideoMeeting.pcClient.component.WarningDialog
 import org.seekloud.VideoMeeting.pcClient.core.RmManager.HeartBeat
 import org.seekloud.VideoMeeting.pcClient.scene.AudienceScene.AudienceSceneListener
 import org.seekloud.VideoMeeting.pcClient.utils.RMClient
-import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo.{RecordInfo, UserDes}
+import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo.{RecordInfo, UserDes, UserInfo}
 
 import scala.concurrent.Future
 
@@ -181,11 +181,13 @@ class AudienceController(
 
         case msg:ForceExitRsp =>
           WarningDialog.initWarningDialog(s"主持人强制用户${msg.userId}退出会议")
-          log.debug("got force exit rsp!")
-          rmManager ! RmManager.StopJoinAndWatch
+          if(RmManager.userInfo.nonEmpty && msg.userId == RmManager.userInfo.get.userId){
+            rmManager ! RmManager.StopJoinAndWatch
+          }
+          audienceScene.updateAttendList(msg.userId, msg.userName, false)
+
 
         case msg: BanOnMemberRsp =>
-          log.debug("got ban on member rsp!")
           if(msg.image)
             WarningDialog.initWarningDialog(s"主持人屏蔽用户${msg.userId}的画面")
             audienceScene.imageToggleBtn.setDisable(true)
@@ -231,7 +233,7 @@ class AudienceController(
 
               val userId = msg.joinInfo.get.userId
               val userName = msg.joinInfo.get.userName
-              audienceScene.updateAttendList(userId, userName)
+              audienceScene.updateAttendList(userId, userName, true)
 
             }
 

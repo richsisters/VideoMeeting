@@ -106,6 +106,8 @@ object HostScene {
 
     def startMeeting(roomId: Long)
 
+    def stopMeeting()
+
     def gotoHomeScene()
 
     def setFullScreen()
@@ -118,7 +120,7 @@ object HostScene {
 
     def gotoInviteDialog()
 
-    def exitMember(userId: Long)
+    def exitMember(userId: Long, userName:String)
 
     def banMember(userId: Long, image: Boolean, sound:Boolean)
 
@@ -193,7 +195,7 @@ class HostScene(stage: Stage) {
         listener.startMeeting(RmManager.roomInfo.get.roomId)
         startBtn.setText("结束会议")
       }else{
-        listener.stopLive()
+        listener.stopMeeting()
         liveBar.soundToggleButton.setDisable(false)
         liveBar.imageToggleButton.setDisable(false)
         liveBar.endTimer()
@@ -218,17 +220,14 @@ class HostScene(stage: Stage) {
     *
     **/
   val roomInfoIcon = new ImageView("img/roomInfo.png")
-  roomInfoIcon.setFitWidth(20)
-  roomInfoIcon.setFitHeight(20)
-  val setIcon = new ImageView("img/liveState1.png")
-  setIcon.setFitWidth(20)
-  setIcon.setFitHeight(20)
+  roomInfoIcon.setFitWidth(30)
+  roomInfoIcon.setFitHeight(30)
   val connectionIcon = new ImageView("img/connection.png")
-  connectionIcon.setFitWidth(20)
-  connectionIcon.setFitHeight(20)
+  connectionIcon.setFitWidth(30)
+  connectionIcon.setFitHeight(30)
   val connectionIcon1 = new ImageView("img/connection1.png")
-  connectionIcon1.setFitWidth(20)
-  connectionIcon1.setFitHeight(20)
+  connectionIcon1.setFitWidth(30)
+  connectionIcon1.setFitHeight(30)
   val audienceIcon: ImageView = Common.getImageView("img/watching.png", 20, 20)
 
   val tb1 = new ToggleButton("房间 ", roomInfoIcon)
@@ -241,8 +240,6 @@ class HostScene(stage: Stage) {
     **/
 //  val emoji = new Emoji(commentFiled, width * 0.6, height * 0.7)
 //  val emojiFont: String = emoji.emojiFont
-
-
 
   /**
     * canvas
@@ -265,7 +262,7 @@ class HostScene(stage: Stage) {
     gc.drawImage(connectionBg, 0, 0, sWidth, sHeight)
     gc.drawImage(waitPulling, sWidth / 2, sHeight / 4, sWidth / 2, sHeight / 2)
     gc.drawImage(waitPulling, 0, sHeight / 4, sWidth / 2, sHeight / 2)
-//    gc.setFont(Font.font(emojiFont, 25))
+    gc.setFont(Font.font(25))
     gc.setFill(Color.BLACK)
     gc.fillText(s"会议中", liveImage.getWidth / 2 - 40, liveImage.getHeight / 8)
   }
@@ -399,7 +396,7 @@ class HostScene(stage: Stage) {
 
     exitBtn.setOnAction{event =>
       log.debug(s"强制用户$userId 退出...")
-      listener.exitMember(userId)
+      listener.exitMember(userId, userName)
       audAcceptList.remove(newRequest)
     }
 
@@ -407,11 +404,9 @@ class HostScene(stage: Stage) {
       if(banOnImage.isSelected){
         log.debug(s"屏蔽用户$userId 图像...")
         listener.banMember(userId, true, false)
-        Tooltip.install(banOnImage, new Tooltip("点击开启该用户图像"))
       } else{
         log.debug(s"开启用户$userId 图像...")
         listener.cancelBan(userId, true, false)
-        Tooltip.install(banOnImage, new Tooltip("点击屏蔽该用户图像"))
       }
     }
 

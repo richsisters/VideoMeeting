@@ -244,7 +244,7 @@ object StreamPuller {
           parent ! LiveManager.PullerStopped
           Boot.addToPlatform {
             WarningDialog.initWarningDialog("播放中的流已被关闭!")
-            hostScene.foreach(_.listener.shutJoin())
+            hostScene.foreach(h => h.listener.stopMeeting())
 //            audienceScene.foreach(a => a.listener.quitJoin(a.getRoomInfo.roomId))
           }
           Behaviors.stopped

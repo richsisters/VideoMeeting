@@ -18,8 +18,7 @@ import org.seekloud.VideoMeeting.pcClient.scene.{HomeScene, HostScene, RoomScene
 import org.seekloud.VideoMeeting.pcClient.utils.RMClient
 import org.seekloud.VideoMeeting.pcClient.Boot.executor
 import org.seekloud.VideoMeeting.pcClient.component.WarningDialog
-import org.seekloud.VideoMeeting.pcClient.core.RmManager.{GetRecordDetail, GetRoomDetail, GoToWatch}
-import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo.{RecordInfo, RoomInfo}
+import org.seekloud.VideoMeeting.pcClient.core.RmManager.{GetRoomDetail, GoToWatch}
 import org.slf4j.LoggerFactory
 
 import scala.collection.immutable.VectorBuilder
@@ -71,8 +70,6 @@ class RoomController(
         showLoading()
         if (roomScene.liveMode && roomScene.roomList.exists(_.roomId == roomId)) {
           rmManager ! GetRoomDetail(roomScene.roomList.find(_.roomId == roomId).get.roomId)
-        } else if (!roomScene.liveMode && roomScene.recordList.flatMap(_._2).exists(r => r.roomId == roomId && r.startTime == timestamp)) {
-          rmManager ! GetRecordDetail(roomScene.recordList.flatMap(_._2).filter(r => r.roomId == roomId && r.startTime == timestamp).head)
         } else {
           removeLoading()
         }

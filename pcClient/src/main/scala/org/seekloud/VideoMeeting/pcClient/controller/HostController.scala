@@ -1,13 +1,15 @@
 package org.seekloud.VideoMeeting.pcClient.controller
 
 import akka.actor.typed.ActorRef
+import javafx.beans.property.{SimpleObjectProperty, SimpleStringProperty}
+import javafx.scene.control.{Button, ToggleButton}
 import org.seekloud.VideoMeeting.pcClient.Boot
 import org.seekloud.VideoMeeting.pcClient.common.{Constants, StageContext}
 import org.seekloud.VideoMeeting.pcClient.component.WarningDialog
 import org.seekloud.VideoMeeting.pcClient.core.RmManager
 import org.seekloud.VideoMeeting.pcClient.core.RmManager.HeartBeat
-import org.seekloud.VideoMeeting.pcClient.scene.{HostScene, AudienceScene}
-import org.seekloud.VideoMeeting.pcClient.scene.HostScene.{HostSceneListener, AudienceListInfo}
+import org.seekloud.VideoMeeting.pcClient.scene.{AudienceScene, HostScene}
+import org.seekloud.VideoMeeting.pcClient.scene.HostScene.{AudienceListInfo, HostSceneListener}
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol._
 import org.slf4j.LoggerFactory
 
@@ -63,6 +65,10 @@ class HostController(
       rmManager ! RmManager.HostStartMeeting(roomId)
     }
 
+    override def stopMeeting(): Unit = {
+      rmManager ! RmManager.HostFinishMeeting
+    }
+
     override def gotoHomeScene(): Unit = {
       rmManager ! RmManager.BackToHome
     }
@@ -114,8 +120,8 @@ class HostController(
       }
     }
 
-    override def exitMember(userId: Long): Unit = {
-      rmManager ! RmManager.ForceExit(userId)
+    override def exitMember(userId: Long, userName:String): Unit = {
+      rmManager ! RmManager.ForceExit(userId, userName)
     }
 
     override def banMember(userId: Long, image: Boolean, sound: Boolean): Unit = {
@@ -212,25 +218,6 @@ class HostController(
             WarningDialog.initWarningDialog(s"参会者加入出错:${msg.msg}")
           }
         }
-
-//      case AudienceDisconnect =>
-//        //观众断开，提醒主播，去除连线观众信息
-//        rmManager ! RmManager.JoinStop
-//        Boot.addToPlatform {
-//          if (!hostScene.tb3.isSelected) {
-//            hostScene.tb3.setGraphic(hostScene.connectionIcon1)
-//          }
-//          hostScene.connectionStateText.setText(s"目前状态：无连接")
-//          hostScene.connectStateBox.getChildren.remove(hostScene.shutConnectionBtn)
-//          isConnecting = false
-//        }
-
-//      case msg: ReFleshRoomInfo =>
-////        log.debug(s"host receive likeNum update: ${msg.roomInfo.like}")
-//        likeNum = msg.roomInfo.like
-//        Boot.addToPlatform {
-//          hostScene.likeLabel.setText(likeNum.toString)
-//        }
 
       case HostStopPushStream2Client =>
         Boot.addToPlatform {

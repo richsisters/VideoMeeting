@@ -436,7 +436,7 @@ object RoomActor {
             if(v != wholeRoomInfo.liveInfo.liveId)
               ProcessorClient.closeRoom(roomId)
             if (startTime != -1l) {
-              val attendList = liveInfoMap.map( l => l._1).toList
+              val attendList = liveInfoMap.keys.toList
               roomManager ! RoomManager.DelaySeekRecord(wholeRoomInfo, roomId, attendList, startTime, v)
             }
           case None =>
@@ -502,12 +502,12 @@ object RoomActor {
         }
         switchBehavior(ctx, "busy", busy(), InitTime, TimeOut("busy"))
 
-      case ForceExit(userId4Member) =>
+      case ForceExit(userId4Member, userName4Member) =>
         if(liveInfoMap.contains(userId4Member)){
           log.debug(s"host force user-$userId4Member to leave")
           ProcessorClient.forceExit(roomId, liveInfoMap(userId4Member).liveId, System.currentTimeMillis())
           liveInfoMap.remove(userId4Member)
-          dispatchTo(List((userId4Member, false)), ForceExitRsp(userId4Member))
+          dispatchTo(subscribers.filter(_._1._1 != userId).keys.toList,ForceExitRsp(userId4Member, userName4Member))
         } else{
           log.debug(s"host force user-$userId4Member to leave, but there is no user!")
         }
