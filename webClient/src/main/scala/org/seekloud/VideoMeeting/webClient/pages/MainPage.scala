@@ -13,9 +13,6 @@ import io.circe.generic.auto._
 import org.scalajs.dom.Event
 import org.scalajs.dom.html.Input
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo._
-import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.http.AdminProtocol._
-import org.seekloud.VideoMeeting.protocol.ptcl._
-import org.seekloud.VideoMeeting.protocol.ptcl.rtmp2Manager.RtmpProtocol.{GetTokenReq, GetTokenRsp}
 import org.seekloud.VideoMeeting.webClient.common.Components.PopWindow
 
 import scala.concurrent.ExecutionContext.Implicits.global
