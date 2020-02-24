@@ -15,7 +15,7 @@ import org.seekloud.VideoMeeting.webClient.pages.MainPage.recordInfo
 import org.seekloud.VideoMeeting.webClient.pages.MainPage.{recordId, recordTime}
 import scala.xml.Elem
 
-class HomePage extends Page{
+class RecordList extends Page{
   private val recordList = Var(List.empty[RecordInfo])
   private val recordNumber = Var(0)
   private var recordPageNum = 0
@@ -60,8 +60,8 @@ class HomePage extends Page{
       </div>
     }
 
-      {if(dom.window.localStorage.getItem("userName") != null)
-        {
+//      {if(dom.window.localStorage.getItem("userName") != null)
+//        {
           <div class="record" style="margin-top: 40px;">
           <div class="zone-title">
             <div class="record-head-img">
@@ -77,18 +77,18 @@ class HomePage extends Page{
               {rl.map(createRecordItem)}
             </div>
           </div>
-        }else{
-        <div class="record" style="margin-top: 40px;">
-        <div class="zone-title">
-          <div class="record-head-img">
-           <img class="img-record" src="/VideoMeeting/roomManager/static/img/homePage/record.png"></img>
-         </div>
-          <div class="record-head-text">录像</div>
-          <div class="record-head-number">登录后才可以查看会议录像哦～</div>
-        </div>
-        </div>
-         }
-      }
+//        }else{
+//        <div class="record" style="margin-top: 40px;">
+//        <div class="zone-title">
+//          <div class="record-head-img">
+//           <img class="img-record" src="/VideoMeeting/roomManager/static/img/homePage/record.png"></img>
+//         </div>
+//          <div class="record-head-text">录像</div>
+//          <div class="record-head-number">登录后才可以查看会议录像哦～</div>
+//        </div>
+//        </div>
+//         }
+//      }
 
 
   }
@@ -123,10 +123,9 @@ class HomePage extends Page{
     //获取第一页的录像
 
 //    getRecordList("time",1,perPageSize)
-    if(dom.window.localStorage.getItem("userName") != null){
+//    if(dom.window.localStorage.getItem("userName") != null){
       getRecordList("time",1,perPageSize)
-      println("okokokokokokok")
-    }
+//    }
     <div style="min-height: 800px">
       {recordArea}
       <div id="record-pageContainer">
