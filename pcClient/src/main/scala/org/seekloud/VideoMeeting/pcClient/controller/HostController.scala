@@ -61,8 +61,8 @@ class HostController(
         hostScene.audObservableList.remove(newRequest)
     }
 
-    override def startMeeting(roomId: Long): Unit = {
-      rmManager ! RmManager.HostStartMeeting(roomId)
+    override def startMeetingRecord(): Unit = {
+      rmManager ! RmManager.HostStartMeetingRecord
     }
 
     override def stopMeeting(): Unit = {

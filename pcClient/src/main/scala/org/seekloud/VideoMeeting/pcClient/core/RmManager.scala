@@ -110,7 +110,7 @@ object RmManager {
 
   final case class AudienceAcceptance(userId: Long, accept: Boolean) extends RmCommand
 
-  final case class HostStartMeeting(roomId: Long) extends RmCommand
+  final case object HostStartMeetingRecord extends RmCommand
 
   final case object HostFinishMeeting extends RmCommand
 
@@ -447,12 +447,12 @@ object RmManager {
           sender.foreach(_ ! JoinAccept(roomInfo.get.roomId, msg.userId, ClientType.PC, msg.accept))
           Behaviors.same
 
-//        case msg: HostStartMeeting =>
+//        case msg: HostStartMeetingRecord =>
 //          log.debug(s"videoMeeting ${msg.roomId} begin.")
 //          hostScene.resetBack()
 //          liveManager ! LiveManager.SwitchMediaMode(isJoin = true, reset = hostScene.resetBack)
 //          assert(roomInfo.nonEmpty)
-//          sender.foreach(_ ! StartMeeting( msg.roomId))
+//          sender.foreach(_ ! StartMeetingRecord)
 //          Behaviors.same
 
         case HostFinishMeeting =>
