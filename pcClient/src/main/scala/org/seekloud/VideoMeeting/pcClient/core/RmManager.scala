@@ -110,7 +110,7 @@ object RmManager {
 
   final case class AudienceAcceptance(userId: Long, accept: Boolean) extends RmCommand
 
-  final case class HostStartMeeting(roomId: Long) extends RmCommand
+  final case object HostStartMeetingRecord extends RmCommand
 
   final case object HostFinishMeeting extends RmCommand
 
@@ -447,12 +447,12 @@ object RmManager {
           sender.foreach(_ ! JoinAccept(roomInfo.get.roomId, msg.userId, ClientType.PC, msg.accept))
           Behaviors.same
 
-//        case msg: HostStartMeeting =>
+//        case msg: HostStartMeetingRecord =>
 //          log.debug(s"videoMeeting ${msg.roomId} begin.")
 //          hostScene.resetBack()
 //          liveManager ! LiveManager.SwitchMediaMode(isJoin = true, reset = hostScene.resetBack)
 //          assert(roomInfo.nonEmpty)
-//          sender.foreach(_ ! StartMeeting( msg.roomId))
+//          sender.foreach(_ ! StartMeetingRecord)
 //          Behaviors.same
 
         case HostFinishMeeting =>
@@ -658,13 +658,13 @@ object RmManager {
             log.info("audiencestatus is unkonwn...")
           Behaviors.same
 
-        case msg: StartJoin => //todo 加入会议之后首先推流，然后拉取所有流
+        case msg: StartJoin =>
           log.info(s"Start join.")
           liveManager ! LiveManager.PushStream(msg.audienceLiveInfo.liveId, msg.audienceLiveInfo.liveCode)
+          audienceScene.audienceStatus = AudienceStatus.CONNECT
           audienceScene.autoReset()
-//          val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = audienceScene.getRoomInfo.roomId)
-//          mediaPlayer.stop(playId, audienceScene.autoReset)
-
+          val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = audienceScene.getRoomInfo.roomId)
+          mediaPlayer.stop(playId, audienceScene.autoReset)
           timer.startSingleTimer(PullDelay, PullStream4Others(msg.hostLiveId :: msg.attendLiveId), 1.seconds)
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, audienceStatus)
 

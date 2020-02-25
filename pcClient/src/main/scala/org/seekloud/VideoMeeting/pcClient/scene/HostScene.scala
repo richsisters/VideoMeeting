@@ -102,7 +102,7 @@ object HostScene {
 
     def audienceAcceptance(userId: Long, accept: Boolean, newRequest: AudienceListInfo)
 
-    def startMeeting(roomId: Long)
+    def startMeetingRecord()
 
     def stopMeeting()
 
@@ -177,34 +177,48 @@ class HostScene(stage: Stage) {
   var roomDesArea = new TextArea(s"${RmManager.roomInfo.get.roomDes}")
   roomDesArea.setPrefSize(width * 0.15, height * 0.1)
 
-  val connectionStateText = new Text("目前状态：会议未开始～")
+  val connectionStateText = new Text("目前状态：录像未开始～")
   connectionStateText.getStyleClass.add("hostScene-leftArea-text")
 
   val startIcon = new ImageView("img/会议.png")
   startIcon.setFitHeight(15)
   startIcon.setFitWidth(15)
-  val startBtn = new ToggleButton("开始会议", startIcon)
+  val startBtn = new ToggleButton("开始录像", startIcon)
   startBtn.setSelected(false)
   startBtn.getStyleClass.add("hostScene-leftArea-start")
 
   startBtn.setOnAction {
     _ =>
-      if(startBtn.isSelected && isLive){
-        listener.startMeeting(RmManager.roomInfo.get.roomId)
-        startBtn.setText("结束会议")
-      }else{
-        listener.stopMeeting()
-        liveBar.soundToggleButton.setDisable(false)
-        liveBar.imageToggleButton.setDisable(false)
-        liveBar.endTimer()
-        isLive = false
-        startBtn.setText("开始会议")
-      }
+//      if(startBtn.isSelected && isLive){
+      listener.startMeetingRecord()
+      connectionStateText.setText("录像中")
+//        startBtn.setText("结束会议")
+//      }else{
+//        listener.stopMeeting()
+//        liveBar.soundToggleButton.setDisable(false)
+//        liveBar.imageToggleButton.setDisable(false)
+//        liveBar.endTimer()
+//        isLive = false
+//        startBtn.setText("开始会议")
+//      }
+  }
+
+
+  val endIcon = new ImageView("img/end.png")
+  endIcon.setFitHeight(15)
+  endIcon.setFitWidth(15)
+  val endButton = new ToggleButton("结束会议", endIcon)
+  endButton.setSelected(false)
+  endButton.getStyleClass.add("hostScene-leftArea-start")
+  endButton.setOnAction{
+    _ =>
+      listener.stopMeeting()
   }
 
   val startBox = new HBox()
-  startBox.getChildren.add(startBtn)
+  startBox.getChildren.addAll(startBtn, endButton)
   startBox.setAlignment(Pos.CENTER_LEFT)
+  startBox.setSpacing(30)
 
 
   val connectStateBox = new HBox()
@@ -236,13 +250,6 @@ class HostScene(stage: Stage) {
   tb3.setPrefWidth(140)
 
   /**
-    * emoji
-    *
-    **/
-//  val emoji = new Emoji(commentFiled, width * 0.6, height * 0.7)
-//  val emojiFont: String = emoji.emojiFont
-
-  /**
     * canvas
     *
     **/
@@ -265,7 +272,7 @@ class HostScene(stage: Stage) {
     gc.drawImage(waitPulling, 0, sHeight / 4, sWidth / 2, sHeight / 2)
     gc.setFont(Font.font(25))
     gc.setFill(Color.BLACK)
-    gc.fillText(s"会议中", liveImage.getWidth / 2 - 40, liveImage.getHeight / 8)
+    gc.fillText(s"录像中", liveImage.getWidth / 2 - 40, liveImage.getHeight / 8)
   }
 
 
@@ -274,11 +281,6 @@ class HostScene(stage: Stage) {
     val sHeight = gc.getCanvas.getHeight
     gc.drawImage(waitPulling, 0, 0, sWidth, sHeight)
   }
-
-  /*观看列表*/
-//  val watchingList = new WatchingList(width * 0.1, width * 0.15, height * 0.8, Some(tb4))
-//  val watchingState: Text = watchingList.watchingState
-//  val watchingTable: TableView[WatchingList.WatchingListInfo] = watchingList.watchingTable
 
   /*屏幕下方功能条*/
   val liveBar = new LiveBar(Constants.WindowStatus.HOST, liveImage.getWidth, liveImage.getHeight * 0.1)
