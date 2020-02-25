@@ -4,7 +4,6 @@ import scala.xml.Elem
 import org.scalajs.dom
 import org.scalajs.dom.html._
 import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.http.CommonProtocol.{SearchRoomReq, SearchRoomRsp}
-import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol.{Comment, LikeRoom}
 import org.seekloud.VideoMeeting.webClient.actors.WebSocketRoom
 import org.seekloud.VideoMeeting.webClient.common.Routes
 import org.seekloud.VideoMeeting.webClient.util.{Globals, Http}
