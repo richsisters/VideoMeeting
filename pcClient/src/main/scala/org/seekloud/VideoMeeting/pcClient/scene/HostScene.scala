@@ -231,9 +231,12 @@ class HostScene(stage: Stage) {
   val audienceIcon: ImageView = Common.getImageView("img/watching.png", 20, 20)
 
   val tb1 = new ToggleButton("房间 ", roomInfoIcon)
+  tb1.setPrefWidth(140)
   tb1.getStyleClass.add("hostScene-leftArea-toggleButton")
   val tb3 = new ToggleButton("开会 ", connectionIcon)
   tb3.getStyleClass.add("hostScene-leftArea-toggleButton")
+  tb3.setPrefWidth(140)
+
   /**
     * emoji
     *

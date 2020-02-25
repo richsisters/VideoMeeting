@@ -13,9 +13,6 @@ import io.circe.generic.auto._
 import org.scalajs.dom.Event
 import org.scalajs.dom.html.Input
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo._
-import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.http.AdminProtocol._
-import org.seekloud.VideoMeeting.protocol.ptcl._
-import org.seekloud.VideoMeeting.protocol.ptcl.rtmp2Manager.RtmpProtocol.{GetTokenReq, GetTokenRsp}
 import org.seekloud.VideoMeeting.webClient.common.Components.PopWindow
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -107,7 +104,15 @@ object MainPage extends PageSwitcher {
             clearRecordInfo()
             clearRoomInfo()
           }
-          new HomePage().render
+          new Home().render
+        case "recordList" :: Nil =>
+          exitShow := emptyHTML
+          //返回首页时关闭websocket
+          if(dom.window.localStorage.getItem("roomId") != null){
+            clearRecordInfo()
+            clearRoomInfo()
+          }
+          new RecordList().render
         case "Record":: roomId :: time :: Nil =>
           clearRoomInfo()
           exitShow := exitButton
@@ -115,7 +120,6 @@ object MainPage extends PageSwitcher {
           preRecord.get.render
         case x =>
           clearRoomInfo()
-          goHome
           emptyHTML
       }
   }
@@ -239,6 +243,7 @@ object MainPage extends PageSwitcher {
             //userInfo = rsp.userInfo.get
             dom.window.localStorage.removeItem("isTemUser")
             menuShow := userShow
+            dom.window.location.hash = s"#/recordList"
           } else {
             println("don't get userInfo")
             PopWindow.commonPop(s"don't get userInfo")
@@ -272,6 +277,7 @@ object MainPage extends PageSwitcher {
             //            userInfo = rsp.userInfo.get
             dom.window.localStorage.removeItem("isTemUser")
             menuShow := userShow
+            dom.window.location.hash = s"#/recordList"
           } else {
             PopWindow.commonPop(s"don't get userInfo")
           }
@@ -300,6 +306,7 @@ object MainPage extends PageSwitcher {
     if(dom.window.localStorage.getItem("myRoomId") != null){
       dom.window.localStorage.removeItem("myRoomId")
     }
+    dom.window.location.hash = s"#/Home"
     refresh()
   }
 
@@ -309,7 +316,7 @@ object MainPage extends PageSwitcher {
     //需要判断通过hash本页面是哪个页面
     //在home界面不需要任何操作
     if(dom.window.location.hash.contains("Home")){
-      goHome
+//      goHome
     }
     //live界面登出后以游客方式进入房间，在live里面refresh只用reload就行了
     if(dom.window.location.hash.contains("Live")){
@@ -327,11 +334,7 @@ object MainPage extends PageSwitcher {
       }
       else{
         openOrClose()
-//        dom.window.location.reload()
       }
-    }
-    if(dom.window.location.hash.contains("Admin")){
-      goHome
     }
   }
 
@@ -339,8 +342,5 @@ object MainPage extends PageSwitcher {
     dom.window.location.hash = s"#/Record/$recordId/$recordTime"
   }
 
-  def goHome = {
-    dom.window.location.hash = s"#/Home"
-  }
 
 }
