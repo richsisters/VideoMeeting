@@ -151,46 +151,30 @@ class HostController(
           }
         }
 
-      case msg:StartMeetingRsp =>
-        if (msg.errCode == 0) {
-          rmManager ! RmManager.PullFromProcessor(msg.liveId)
-          Boot.addToPlatform{
-            hostScene.connectionStateText.setText(s"会议进行中")
-          }
-        }else{
-          WarningDialog.initWarningDialog("转接错误 test")
-        }
-
       case InviteRsp =>
         Boot.addToPlatform {
           WarningDialog.initWarningDialog("邀请邮件已发送")
         }
 
-      case msg: ModifyRoomRsp =>
-        //若失败，信息改成之前的信息
-//        log.debug(s"get ModifyRoomRsp: $msg")
-        if (msg.errCode == 0) {
-          //          log.debug(s"更改房间信息成功！")
-          Boot.addToPlatform {
-            WarningDialog.initWarningDialog("更改房间信息成功！")
-          }
-          // do nothing
-        } else {
-          log.debug(s"更改房间信息失败！原房间信息为：${hostScene.roomInfoMap}")
-          Boot.addToPlatform {
-            val roomName = hostScene.roomInfoMap(RmManager.roomInfo.get.roomId).head
-            val roomDes = hostScene.roomInfoMap(RmManager.roomInfo.get.roomId)(1)
-            hostScene.roomNameField.setText(roomName)
-            hostScene.roomDesArea.setText(roomDes)
-          }
-        }
+//      case msg: ModifyRoomRsp =>
+//        //若失败，信息改成之前的信息
+////        log.debug(s"get ModifyRoomRsp: $msg")
+//        if (msg.errCode == 0) {
+//          //          log.debug(s"更改房间信息成功！")
+//          Boot.addToPlatform {
+//            WarningDialog.initWarningDialog("更改房间信息成功！")
+//          }
+//          // do nothing
+//        } else {
+//          log.debug(s"更改房间信息失败！原房间信息为：${hostScene.roomInfoMap}")
+//          Boot.addToPlatform {
+//            val roomName = hostScene.roomInfoMap(RmManager.roomInfo.get.roomId).head
+//            val roomDes = hostScene.roomInfoMap(RmManager.roomInfo.get.roomId)(1)
+//            hostScene.roomNameField.setText(roomName)
+//            hostScene.roomDesArea.setText(roomDes)
+//          }
+//        }
 
-      case msg: ChangeModeRsp =>
-        if (msg.errCode != 0) {
-          Boot.addToPlatform {
-            WarningDialog.initWarningDialog("该项设置目前不可用！")
-          }
-        }
 
       case msg: AudienceJoin =>
         //将该条信息展示在host页面(TableView)

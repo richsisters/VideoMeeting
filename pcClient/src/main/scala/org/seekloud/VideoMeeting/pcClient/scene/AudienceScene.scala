@@ -25,7 +25,6 @@ import org.seekloud.VideoMeeting.pcClient.core.RmManager
 import org.seekloud.VideoMeeting.pcClient.core.stream.StreamPuller.{BandWidthInfo, PackageLossInfo}
 import org.seekloud.VideoMeeting.pcClient.utils.{NetUsage, TimeUtil}
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo.{RecordInfo, RoomInfo, UserDes}
-import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol.Comment
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable

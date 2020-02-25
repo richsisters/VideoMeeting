@@ -164,9 +164,6 @@ class AudienceController(
           //          log.debug(s"heartbeat: ${msg.ts}")
           rmManager ! HeartBeat
 
-        case msg: RcvComment =>
-         //do nothing
-
         case msg: JoinRsp =>
           if (msg.errCode == 0) {
             rmManager ! RmManager.StartJoin(msg.hostLiveId.get, msg.joinInfo.get)
@@ -197,13 +194,6 @@ class AudienceController(
           audienceScene.imageToggleBtn.setDisable(false)
           if(msg.sound)
             audienceScene.soundToggleBtn.setDisable(false)
-
-        case msg:StartMeetingRsp =>
-          if (msg.errCode == 0) {
-            rmManager ! RmManager.PullFromProcessor(msg.liveId)
-          }else{
-            WarningDialog.initWarningDialog("转接错误 test")
-          }
 
         case HostDisconnect(hostLiveId) =>
           Boot.addToPlatform {

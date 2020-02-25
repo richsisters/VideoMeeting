@@ -18,8 +18,6 @@ import javafx.scene.layout._
 import javafx.scene.text.Text
 import org.seekloud.VideoMeeting.pcClient.common.{Constants, Pictures}
 import org.seekloud.VideoMeeting.pcClient.core.RmManager
-import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo
-import org.seekloud.VideoMeeting.protocol.ptcl.client2Manager.websocket.AuthProtocol.Comment
 import org.slf4j.LoggerFactory
 import javafx.geometry.Pos
 import javafx.scene.canvas.{Canvas, GraphicsContext}

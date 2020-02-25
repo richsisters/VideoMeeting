@@ -136,12 +136,6 @@ object RmManager {
 
   final case object AudienceWsEstablish extends RmCommand
 
-//  final case class SendComment(comment: Comment) extends RmCommand
-
-  final case class SendJudgeLike(judgeLike: JudgeLike) extends RmCommand
-
-  final case class SendLikeRoom(likeRoom: LikeRoom) extends RmCommand
-
   final case class JoinRoomReq(roomId: Long) extends RmCommand
 
   final case class StartJoin(hostLiveId: String, audienceLiveInfo: LiveInfo) extends RmCommand //开始和主播连线
@@ -456,13 +450,13 @@ object RmManager {
           sender.foreach(_ ! Invite(email, meeting))
           Behaviors.same
 
-        case msg: ModifyRoom =>
-          sender.foreach(_ ! ModifyRoomInfo(msg.name, msg.des))
-          Behaviors.same
-
-        case msg: ChangeMode =>
-          sender.foreach(_ ! ChangeLiveMode(msg.isJoinOpen, msg.aiMode, msg.screenLayout))
-          Behaviors.same
+//        case msg: ModifyRoom =>
+//          sender.foreach(_ ! ModifyRoomInfo(msg.name, msg.des))
+//          Behaviors.same
+//
+//        case msg: ChangeMode =>
+//          sender.foreach(_ ! ChangeLiveMode(msg.isJoinOpen, msg.aiMode, msg.screenLayout))
+//          Behaviors.same
 
         case msg: ChangeOption =>
           liveManager ! LiveManager.ChangeMediaOption(msg.bit, msg.re, msg.frameRate, msg.needImage, msg.needSound, hostScene.resetLoading)
@@ -474,13 +468,13 @@ object RmManager {
           sender.foreach(_ ! JoinAccept(roomInfo.get.roomId, msg.userId, ClientType.PC, msg.accept))
           Behaviors.same
 
-        case msg: HostStartMeeting =>
-          log.debug(s"videoMeeting ${msg.roomId} begin.")
-          hostScene.resetBack()
-          liveManager ! LiveManager.SwitchMediaMode(isJoin = true, reset = hostScene.resetBack)
-          assert(roomInfo.nonEmpty)
-          sender.foreach(_ ! StartMeeting( msg.roomId))
-          Behaviors.same
+//        case msg: HostStartMeeting =>
+//          log.debug(s"videoMeeting ${msg.roomId} begin.")
+//          hostScene.resetBack()
+//          liveManager ! LiveManager.SwitchMediaMode(isJoin = true, reset = hostScene.resetBack)
+//          assert(roomInfo.nonEmpty)
+//          sender.foreach(_ ! StartMeeting( msg.roomId))
+//          Behaviors.same
 
         case HostFinishMeeting =>
           log.debug(s"videoMeeting ${roomInfo.get.roomId} stop.")
@@ -574,7 +568,7 @@ object RmManager {
               if (user._1 != -1L && user._2.nonEmpty) {
                 def successFunc(): Unit = {
                   if (userInfo.nonEmpty) {
-                    ctx.self ! SendJudgeLike(JudgeLike(userInfo.get.userId, audienceScene.getRoomInfo.roomId))
+//                    ctx.self ! SendJudgeLike(JudgeLike(userInfo.get.userId, audienceScene.getRoomInfo.roomId))
                   }
                 }
 
@@ -662,16 +656,6 @@ object RmManager {
           val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
           liveManager ! LiveManager.PullStream(msg.newId, pullInfo = info, audienceScene = Some(audienceScene))
           switchBehavior(ctx, "audienceBehavior", audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, audienceStatus = AudienceStatus.CONNECT))
-
-        case msg: SendJudgeLike =>
-          sender.foreach(_ ! msg.judgeLike)
-          log.debug(s"audience send judgeLike.")
-          Behaviors.same
-
-        case msg: SendLikeRoom =>
-          sender.foreach(_ ! msg.likeRoom)
-          log.debug(s"audience send a like, UpDown:${msg.likeRoom.upDown}")
-          Behaviors.same
 
         case msg: JoinRoomReq =>
           assert(userInfo.nonEmpty)
