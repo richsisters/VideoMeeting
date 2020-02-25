@@ -96,7 +96,7 @@ object RoomActor {
                     userTableOpt.get.uid, userTableOpt.get.userName, UserInfoDao.getHeadImg(userTableOpt.get.headImg)
                     , Some(rsp.liveInfo.liveId))
                   dispatchTo(subscribers)(List((userId, false)), StartLiveRsp(Some(rsp.liveInfo)))
-                  ctx.self ! SwitchBehavior("idle", idle(roomInfo, mutable.HashMap[Long, LiveInfo](), subscribers, System.currentTimeMillis()))
+                  ctx.self ! SwitchBehavior("idle", idle(roomInfo, mutable.HashMap[Long, LiveInfo](), subscribers, System.currentTimeMillis(), false))
                 } else {
                   log.debug(s"${ctx.self.path} 开始直播被拒绝，数据库中没有该用户的数据，userId=$userId")
                   dispatchTo(subscribers)(List((userId, false)), StartLiveRefused)
@@ -121,7 +121,7 @@ object RoomActor {
 
         case TestRoom(roomInfo) =>
           //仅用户测试使用空房间
-          idle(roomInfo,  mutable.HashMap[Long, LiveInfo](), subscribers, System.currentTimeMillis())
+          idle(roomInfo,  mutable.HashMap[Long, LiveInfo](), subscribers, System.currentTimeMillis(), false)
 
         case ActorProtocol.AddUserActor4Test(userId, `roomId`, userActor) =>
           subscribers.put((userId, false), userActor)
@@ -138,8 +138,9 @@ object RoomActor {
     roomInfo: RoomInfo,
     liveInfoMap: mutable.HashMap[Long, LiveInfo], //除主持人外的所有参会者的liveInfo
     subscribe: mutable.HashMap[(Long, Boolean), ActorRef[UserActor.Command]], //需要区分订阅的用户的身份，注册用户还是临时用户(uid,是否是临时用户true:是)
-    startTime: Long)
-    (implicit stashBuffer: StashBuffer[Command],
+    startTime: Long,
+    roomState: Boolean //房间目前是否处于已录像状态
+  )(implicit stashBuffer: StashBuffer[Command],
       timer: TimerScheduler[Command],
       sendBuffer: MiddleBufferInJvm
     ): Behavior[Command] = {
@@ -154,7 +155,7 @@ object RoomActor {
           Behaviors.same
 
         case ActorProtocol.WebSocketMsgWithActor(userId, roomId, wsMsg) =>
-          handleWebSocketMsg(roomInfo, subscribe, liveInfoMap, startTime, false, dispatch(subscribe), dispatchTo(subscribe))(ctx, userId, roomId, wsMsg)
+          handleWebSocketMsg(roomInfo, subscribe, liveInfoMap, startTime, roomState, dispatch(subscribe), dispatchTo(subscribe))(ctx, userId, roomId, wsMsg)
 
         case ActorProtocol.UpdateSubscriber(join, roomId, userId, temporary, userActorOpt) =>
           //虽然房间存在，但其实主播已经关闭房间，这时的startTime=-1
@@ -185,14 +186,16 @@ object RoomActor {
             case Failure(_) =>
 
           }
-          idle(roomInfo, liveInfoMap, subscribe, startTime)
+          idle(roomInfo, liveInfoMap, subscribe, startTime, false)
 
         case ActorProtocol.HostCloseRoom(roomId) =>
-          if (startTime != -1l) {
+          dispatchTo(subscribe)(subscribe.filter(r => r._1 != (roomInfo.userId, false)).keys.toList, HostCloseRoom())
+          if(roomState){
+            log.debug(s"room-$roomId need close room...")
+            ProcessorClient.closeRoom(roomId)
             val attendList = liveInfoMap.keys.toList
             roomManager ! RoomManager.DelaySeekRecord(roomInfo, roomId, attendList, startTime)
           }
-          dispatchTo(subscribe)(subscribe.filter(r => r._1 != (roomInfo.userId, false)).keys.toList, HostCloseRoom())
           Behaviors.stopped
 
         case x =>
@@ -251,7 +254,7 @@ object RoomActor {
     msg match {
       case JoinAccept(`roomId`, userId4Audience, clientType, accept) =>
         log.info(s"${ctx.self.path} 接受加入会议请求，roomId=$roomId")
-        if (accept) {
+        if (accept && !roomState) {
           for {
             userInfoOpt <- UserInfoDao.searchById(userId4Audience)
             clientLiveInfo <- RtpClient.getLiveInfoFunc()
@@ -263,8 +266,8 @@ object RoomActor {
                   if (userInfoOpt.nonEmpty) {
                     liveInfoMap.put(userId4Audience, rsp.liveInfo)
                     val audienceInfo = AudienceInfo(userId4Audience, userInfoOpt.get.userName, userInfoOpt.get.headImg, rsp.liveInfo.liveId)
-                    log.debug("群发观众信息....")
-                    dispatch(AudienceJoinRsp(Some(audienceInfo)))
+                    log.debug("向除该用户以外的参会者群发该用户信息....")
+                    dispatchTo(subscribers.filter(_._1._1 != userId4Audience).keys.toList, AudienceJoinRsp(Some(audienceInfo)))
                     log.debug("向该用户发送JoinRsp...")
                     dispatchTo(List((userId4Audience, false)), JoinRsp(roomInfo.rtmp, Some(rsp.liveInfo), liveInfoMap.map(_._2.liveId).toList))
                   } else {
@@ -289,31 +292,6 @@ object RoomActor {
         }
         Behaviors.same
 
-      case HostShutJoin(`roomId`) =>
-        log.debug(s"${ctx.self.path} the host has shut the join in room$roomId")
-        liveInfoMap.clear()
-        dispatch(HostDisconnect(roomInfo.rtmp.get))
-        Behaviors.same
-
-
-      case HostStopPushStream(`roomId`) =>
-        log.debug(s"${ctx.self.path} host stop stream in room${roomInfo.roomId},name=${roomInfo.roomName}")
-        dispatch(HostStopPushStream2Client)
-        if (startTime != -1l) {
-          val attendList = liveInfoMap.keys.toList
-          roomManager ! RoomManager.DelaySeekRecord(roomInfo, roomId, attendList, startTime)
-        }
-        liveInfoMap.clear()
-
-        val newRoomInfo = roomInfo.copy(rtmp = None)
-        log.debug(s"${ctx.self.path} 主播userId=${userId}已经停止推流，更新房间信息，liveId=${roomInfo.rtmp}")
-        subscribers.get((userId, false)) match {
-          case Some(hostActor) =>
-            idle(newRoomInfo, liveInfoMap, mutable.HashMap((roomInfo.userId, false) -> hostActor), -1l)
-          case None =>
-            idle(newRoomInfo, liveInfoMap, mutable.HashMap.empty[(Long, Boolean), ActorRef[UserActor.Command]], -1l)
-        }
-
       case JoinReq(userId4Audience, `roomId`, clientType) =>
         UserInfoDao.searchById(userId4Audience).map { r =>
           if (r.nonEmpty) {
@@ -333,16 +311,20 @@ object RoomActor {
         log.debug(s"${ctx.self.path} 退出了会议...")
         if(liveInfoMap.contains(userId)){
           liveInfoMap.remove(userId)
-          dispatch(AuthProtocol.AudienceDisconnect(liveInfoMap(userId).liveId))
+          dispatchTo(subscribers.filter(_._1._1 != userId).keys.toList, AuthProtocol.AudienceDisconnect(liveInfoMap(userId).liveId))
         }
         Behaviors.same
 
       case ForceExit(userId4Member, userName4Member) =>
         if(liveInfoMap.contains(userId4Member)){
           log.debug(s"host force user-$userId4Member to leave")
-          ProcessorClient.forceExit(roomId, liveInfoMap(userId4Member).liveId, System.currentTimeMillis())
           liveInfoMap.remove(userId4Member)
-          dispatchTo(subscribers.filter(_._1._1 != userId).keys.toList,ForceExitRsp(userId4Member, userName4Member))
+          dispatchTo(subscribers.filter(_._1._1 != userId).keys.toList, ForceExitRsp(userId4Member, userName4Member))
+          if(roomState){
+            ProcessorClient.forceExit(roomId, liveInfoMap(userId4Member).liveId, System.currentTimeMillis())
+          } else{
+            log.debug(s"room-$roomId has not started record...")
+          }
         } else{
           log.debug(s"host force user-$userId4Member to leave, but there is no user!")
         }
@@ -351,8 +333,12 @@ object RoomActor {
       case BanOnMember(userId4Member, image, sound) =>
         if(liveInfoMap.contains(userId4Member)){
           log.debug(s"user-$userId4Member can't ${if(image) "show up" else ""} ${if(sound) "and speak" else ""}")
-          ProcessorClient.banOnClient(roomId, liveInfoMap(userId4Member).liveId, image, sound)
           dispatchTo(List((userId4Member, false)), BanOnMemberRsp(userId4Member, image, sound))
+          if(roomState){
+            ProcessorClient.banOnClient(roomId, liveInfoMap(userId4Member).liveId, image, sound)
+          } else{
+            log.debug(s"room-$roomId has not started record...")
+          }
         } else{
           log.debug(s"host ban user-$userId4Member, but there is no user!")
         }
@@ -361,8 +347,12 @@ object RoomActor {
       case CancelBan(userId4Member, image, sound) =>
         if(liveInfoMap.contains(userId4Member)){
           log.debug(s"user-$userId4Member begin to ${if(image) "show up" else ""} ${if(sound) "and speak" else ""}")
-          ProcessorClient.cancelBan(roomId, liveInfoMap(userId4Member).liveId, image, sound)
           dispatchTo(List((userId4Member, false)), CancelBanOnMemberRsp(image, sound))
+          if(roomState){
+            ProcessorClient.cancelBan(roomId, liveInfoMap(userId4Member).liveId, image, sound)
+          } else{
+            log.debug(s"room-$roomId has not started record...")
+          }
         } else{
           log.debug(s"host cancel banning user-$userId4Member, but there is no user!")
         }
@@ -370,7 +360,7 @@ object RoomActor {
 
       case StartMeetingRecord =>
         ProcessorClient.newConnect(roomId, roomInfo.rtmp.getOrElse(""), liveInfoMap.values.map(_.liveId).toList, startTime)
-        handleWebSocketMsg(roomInfo, subscribers, liveInfoMap, startTime, true, dispatch, dispatchTo)(ctx, userId, roomId, msg)
+        idle(roomInfo, liveInfoMap, subscribers, startTime, true)
 
       case PingPackage =>
         Behaviors.same

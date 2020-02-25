@@ -95,10 +95,6 @@ object AuthProtocol {
 
   case class JoinAccept(roomId: Long, userId: Long, clientType: Int, accept: Boolean) extends WsMsgHost //主持人审批某个用户加入请求
 
-  case class HostShutJoin(roomId: Long) extends WsMsgHost //断开与观众连线请求
-
-  case class HostStopPushStream(roomId: Long) extends WsMsgHost //房主停止推流
-
   case object StartMeetingRecord extends WsMsgHost //开始会议录像
 
   /*邀请好友*/
@@ -186,8 +182,8 @@ object AuthProtocol {
                               msg: String = "ok"
                             ) extends WsMsgRm //拒绝成功不发joinInfo，仅发送默认状态信息
 
-  val AudienceJoinError = AudienceJoinRsp(errCode = 400020, msg = "audience join error")
+  val AudienceJoinError = AudienceJoinRsp(errCode = 400020, msg = "用户加入会议失败")
 
-  val NoHostLiveInfoError = AudienceJoinRsp(errCode = 400030, msg = "no liveInfo")
+  val NoHostLiveInfoError = AudienceJoinRsp(errCode = 400030, msg = "没有流信息")
 
 }
