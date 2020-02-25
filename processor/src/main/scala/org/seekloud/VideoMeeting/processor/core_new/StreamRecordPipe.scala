@@ -8,7 +8,6 @@ import scala.language.implicitConversions
 import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousCloseException
 import java.nio.channels.Pipe.SourceChannel
-import org.seekloud.VideoMeeting.processor.Boot.streamPushActor
 import org.seekloud.VideoMeeting.processor.common.AppSettings._
 import scala.concurrent.duration._
 import scala.collection.mutable
@@ -22,7 +21,7 @@ import scala.collection.mutable
   * 建立recorder->pushActor 管道
   * pipe ! pushActor
   */
-object StreamPushPipe {
+object StreamRecordPipe {
   private val log = LoggerFactory.getLogger(this.getClass)
 
   sealed trait Command
@@ -41,9 +40,7 @@ object StreamPushPipe {
 
   case object Stop extends Command
 
-  private val liveCountMap = mutable.Map[String, Int]()
-
-  def create(roomId: Long, liveId: String, liveCode:String, source: SourceChannel, startTime: Long): Behavior[Command] = {
+  def create(roomId: Long, source: SourceChannel, startTime: Long): Behavior[Command] = {
     Behaviors.setup[Command] { ctx =>
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       Behaviors.withTimers[Command] {
@@ -57,14 +54,12 @@ object StreamPushPipe {
           } else{
             file.createNewFile()
           }
-          work(roomId, liveId, liveCode, source,ByteBuffer.allocate(1316), new FileOutputStream(file))
+          work(roomId, source,ByteBuffer.allocate(1316), new FileOutputStream(file))
       }
     }
   }
 
   def work(roomId: Long,
-           liveId:String,
-           liveCode: String,
            source:SourceChannel,
            dataBuf:ByteBuffer,
            out:FileOutputStream)
@@ -73,7 +68,6 @@ object StreamPushPipe {
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
         case NewLive =>
-          liveCountMap.put(liveId, 0)
           ctx.self ! SendData
           dataBuf.clear()
           Behaviors.same
@@ -84,11 +78,6 @@ object StreamPushPipe {
           if (r > 0) {
             val data = dataBuf.array().clone()
             out.write(data)
-            streamPushActor ! StreamPushActor.PushData(liveId,  data.take(r))
-            if (liveCountMap.getOrElse(liveId, 0) < 5) {
-              log.info(s"$liveId send data --")
-              liveCountMap.update(liveId, liveCountMap(liveId) + 1)
-            }
             ctx.self ! SendData
             dataBuf.clear()
           } else {

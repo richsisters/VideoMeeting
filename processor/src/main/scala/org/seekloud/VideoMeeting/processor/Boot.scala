@@ -14,7 +14,7 @@ import akka.util.Timeout
 import org.seekloud.VideoMeeting.processor.http.HttpService
 import akka.actor.typed.scaladsl.adapter._
 import akka.dispatch.MessageDispatcher
-import org.seekloud.VideoMeeting.processor.core_new.{StreamPullActor, StreamPushActor, RoomManager}
+import org.seekloud.VideoMeeting.processor.core_new.{StreamPullActor, RoomManager}
 import org.seekloud.VideoMeeting.rtpClient.Protocol.Command
 import scala.collection.mutable
 import scala.language.postfixOps
@@ -42,8 +42,6 @@ object Boot extends HttpService {
   val log: LoggingAdapter = Logging(system, getClass)
 
   val roomManager:ActorRef[RoomManager.Command] = system.spawn(RoomManager.create(),"roomManager")
-
-  val streamPushActor:ActorRef[Command]=system.spawn(StreamPushActor.create(),"streamPushActor")
 
   val streamPullActor:ActorRef[Command] = system.spawn(StreamPullActor.create(), "streamPullActor")
 
