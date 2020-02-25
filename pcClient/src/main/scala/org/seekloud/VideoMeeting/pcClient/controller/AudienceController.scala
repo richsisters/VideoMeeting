@@ -164,9 +164,10 @@ class AudienceController(
           //          log.debug(s"heartbeat: ${msg.ts}")
           rmManager ! HeartBeat
 
+
         case msg: JoinRsp =>
           if (msg.errCode == 0) {
-            rmManager ! RmManager.StartJoin(msg.hostLiveId.get, msg.joinInfo.get)
+            rmManager ! RmManager.StartJoin(msg.hostLiveId.get, msg.joinInfo.get, msg.attendInfo)
           } else{
             WarningDialog.initWarningDialog(msg.msg)
             audienceScene.hasReqJoin = false

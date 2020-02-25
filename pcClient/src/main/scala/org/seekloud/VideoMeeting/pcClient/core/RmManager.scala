@@ -77,7 +77,7 @@ object RmManager {
 
   final case class PullFromProcessor(newId:String) extends RmCommand
 
-  final case class PullConnectStream(newId:String) extends RmCommand
+  final case class PullStream4Others(liveId: List[String]) extends RmCommand
 
   final case object BackToHome extends RmCommand
 
@@ -136,9 +136,11 @@ object RmManager {
 
   final case object AudienceWsEstablish extends RmCommand
 
+//  final case class SendComment(comment: Comment) extends RmCommand
+
   final case class JoinRoomReq(roomId: Long) extends RmCommand
 
-  final case class StartJoin(hostLiveId: String, audienceLiveInfo: LiveInfo) extends RmCommand //开始和主播连线
+  final case class StartJoin(hostLiveId: String, audienceLiveInfo: LiveInfo, attendLiveId: List[String]) extends RmCommand //开始和主播连线
 
   final case object StopJoinAndWatch extends RmCommand //停止和主播连线
 
@@ -250,7 +252,7 @@ object RmManager {
                   } else {
                     Boot.addToPlatform {
                       roomController.get.removeLoading()
-                      WarningDialog.initWarningDialog(s"processor还没准备好哦~~~")
+                      WarningDialog.initWarningDialog(s"该会议室还没有准备好～～")
                     }
                   }
                 case Left(error) =>
@@ -271,10 +273,12 @@ object RmManager {
         case msg: GoToWatch =>
           val audienceScene = new AudienceScene(msg.roomInfo.toAlbum)
           val audienceController = new AudienceController(stageCtx, audienceScene, ctx.self)
+          liveManager ! LiveManager.DevicesOn(audienceScene.gc, isJoin = true) //参会者进入房间后首先画自己的流
+
           if (msg.roomInfo.rtmp.nonEmpty) {
-            audienceScene.liveId4Live = Some(msg.roomInfo.rtmp.get)
-            val info = PullInfo(msg.roomInfo.roomId, audienceScene.gc)
-            liveManager ! LiveManager.PullStream(msg.roomInfo.rtmp.get, pullInfo = info, audienceScene = Some(audienceScene))
+//            audienceScene.liveId4Live = Some(msg.roomInfo.rtmp.get)
+//            val info = PullInfo(msg.roomInfo.roomId, audienceScene.gc)
+           //liveManager ! LiveManager.PullStream(msg.roomInfo.rtmp.get, pullInfo = info, audienceScene = Some(audienceScene))
 
             ctx.self ! AudienceWsEstablish
 
@@ -286,7 +290,7 @@ object RmManager {
           } else {
             Boot.addToPlatform {
               roomController.foreach(_.removeLoading())
-              WarningDialog.initWarningDialog("processor没有给我们liveId哦~~")
+              WarningDialog.initWarningDialog("该会议室还没有准备好～～")
             }
             Behaviors.same
           }
@@ -410,23 +414,6 @@ object RmManager {
           System.gc()
           switchBehavior(ctx, "idle", idle(stageCtx, liveManager, mediaPlayer, homeController))
 
-        case msg:PullFromProcessor =>
-          hostStatus match {
-            case HostStatus.CONNECT =>
-              log.debug("ready to send pull connect stream")
-              timer.startSingleTimer(PullDelay, PullConnectStream(msg.newId), 10.seconds)
-
-            case _ =>
-              log.debug(s"========== current hostScene is ${hostScene}")
-          }
-          Behaviors.same
-
-        case msg:PullConnectStream =>
-          timer.cancel(PullDelay)
-          val pullInfo = PullInfo(roomInfo.get.roomId,hostScene.gc)
-          liveManager ! LiveManager.PullStream(msg.newId, pullInfo = pullInfo, hostScene = Some(hostScene))
-          Behaviors.same
-
         case HostLiveReq =>
           log.debug(s"Host req live.")
           assert(userInfo.nonEmpty && roomInfo.nonEmpty)
@@ -449,14 +436,6 @@ object RmManager {
         case InviteReq(email, meeting) =>
           sender.foreach(_ ! Invite(email, meeting))
           Behaviors.same
-
-//        case msg: ModifyRoom =>
-//          sender.foreach(_ ! ModifyRoomInfo(msg.name, msg.des))
-//          Behaviors.same
-//
-//        case msg: ChangeMode =>
-//          sender.foreach(_ ! ChangeLiveMode(msg.isJoinOpen, msg.aiMode, msg.screenLayout))
-//          Behaviors.same
 
         case msg: ChangeOption =>
           liveManager ! LiveManager.ChangeMediaOption(msg.bit, msg.re, msg.frameRate, msg.needImage, msg.needSound, hostScene.resetLoading)
@@ -641,22 +620,6 @@ object RmManager {
           System.gc()
           switchBehavior(ctx, "idle", idle(stageCtx, liveManager, mediaPlayer, homeController, roomController))
 
-        case msg:PullFromProcessor =>
-          audienceScene.audienceStatus = AudienceStatus.CONNECT
-          audienceScene.autoReset()
-          audienceScene.liveId4Connect = Some(msg.newId)
-          val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = audienceScene.getRoomInfo.roomId)
-          mediaPlayer.stop(playId, audienceScene.autoReset)
-          liveManager ! LiveManager.StopPull
-          timer.startSingleTimer(PullDelay, PullConnectStream(msg.newId), 1.seconds)
-          Behaviors.same
-
-        case msg:PullConnectStream =>
-          timer.cancel(PullDelay)
-          val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
-          liveManager ! LiveManager.PullStream(msg.newId, pullInfo = info, audienceScene = Some(audienceScene))
-          switchBehavior(ctx, "audienceBehavior", audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, audienceStatus = AudienceStatus.CONNECT))
-
         case msg: JoinRoomReq =>
           assert(userInfo.nonEmpty)
           val userId = userInfo.get.userId
@@ -695,27 +658,24 @@ object RmManager {
             log.info("audiencestatus is unkonwn...")
           Behaviors.same
 
-        case msg: StartJoin =>
+        case msg: StartJoin => //todo 加入会议之后首先推流，然后拉取所有流
           log.info(s"Start join.")
-//          assert(userInfo.nonEmpty)
-//
-//          val userId = userInfo.get.userId
-
-          /*背景改变*/
-//          audienceScene.audienceStatus = AudienceStatus.CONNECT
-//          audienceScene.autoReset()
-
-          /*暂停第三方播放*/
+          liveManager ! LiveManager.PushStream(msg.audienceLiveInfo.liveId, msg.audienceLiveInfo.liveCode)
+          audienceScene.autoReset()
 //          val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = audienceScene.getRoomInfo.roomId)
-//            s"room${audienceScene.getRoomInfo.roomId}"
 //          mediaPlayer.stop(playId, audienceScene.autoReset)
 
-          /*开启媒体设备，开始推流*/
-//          liveManager ! LiveManager.StopPull
-          liveManager ! LiveManager.DevicesOn(audienceScene.gc, isJoin = true)
-          liveManager ! LiveManager.PushStream(msg.audienceLiveInfo.liveId, msg.audienceLiveInfo.liveCode)
-
+          timer.startSingleTimer(PullDelay, PullStream4Others(msg.hostLiveId :: msg.attendLiveId), 1.seconds)
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, audienceStatus)
+
+        case msg: PullStream4Others =>
+          timer.cancel(PullDelay)
+          msg.liveId.foreach{ l =>
+            val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
+            liveManager ! LiveManager.PullStream(l, pullInfo = info, audienceScene = Some(audienceScene))
+          }
+          Behaviors.same
+
 
         case msg: ExitJoin =>
           log.debug("disconnection with host.")

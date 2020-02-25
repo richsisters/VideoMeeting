@@ -65,16 +65,6 @@ class RoomController(
   }
 
   roomScene.setListener(new RoomSceneListener {
-    override def enter(roomId: Long, timestamp: Long = 0L): Unit = {
-      Boot.addToPlatform {
-        showLoading()
-        if (roomScene.liveMode && roomScene.roomList.exists(_.roomId == roomId)) {
-          rmManager ! GetRoomDetail(roomScene.roomList.find(_.roomId == roomId).get.roomId)
-        } else {
-          removeLoading()
-        }
-      }
-    }
 
     override def refresh(): Unit = {
       Boot.addToPlatform {

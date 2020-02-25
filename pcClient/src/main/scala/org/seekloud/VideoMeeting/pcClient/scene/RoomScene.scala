@@ -66,8 +66,6 @@ object RoomScene {
 
   trait RoomSceneListener {
 
-    def enter(roomId: Long, timestamp: Long = 0L)
-
     //    def create()
 
     def refresh()
