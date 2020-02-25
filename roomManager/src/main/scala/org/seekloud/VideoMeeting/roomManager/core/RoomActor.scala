@@ -171,7 +171,7 @@ object RoomActor {
               log.debug(s"${ctx.self.path}用户离开房间roomId=$roomId,userId=$userId")
               subscribe.remove((userId, temporary))
               if(liveInfoMap.contains(userId)){
-                dispatch(subscribe)(AuthProtocol.AudienceDisconnect(liveInfoMap().liveId))
+                dispatch(subscribe)(AuthProtocol.AudienceDisconnect(liveInfoMap(userId).liveId))
               }
               }
             }
