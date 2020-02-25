@@ -156,33 +156,12 @@ class HostController(
           WarningDialog.initWarningDialog("邀请邮件已发送")
         }
 
-//      case msg: ModifyRoomRsp =>
-//        //若失败，信息改成之前的信息
-////        log.debug(s"get ModifyRoomRsp: $msg")
-//        if (msg.errCode == 0) {
-//          //          log.debug(s"更改房间信息成功！")
-//          Boot.addToPlatform {
-//            WarningDialog.initWarningDialog("更改房间信息成功！")
-//          }
-//          // do nothing
-//        } else {
-//          log.debug(s"更改房间信息失败！原房间信息为：${hostScene.roomInfoMap}")
-//          Boot.addToPlatform {
-//            val roomName = hostScene.roomInfoMap(RmManager.roomInfo.get.roomId).head
-//            val roomDes = hostScene.roomInfoMap(RmManager.roomInfo.get.roomId)(1)
-//            hostScene.roomNameField.setText(roomName)
-//            hostScene.roomDesArea.setText(roomDes)
-//          }
-//        }
-
-
       case msg: AudienceJoin =>
         //将该条信息展示在host页面(TableView)
         log.debug(s"Audience-${msg.userName} send join req.")
         Boot.addToPlatform {
           hostScene.updateAudienceList(msg.userId, msg.userName)
         }
-
 
       case msg: AudienceJoinRsp =>
         if (msg.errCode == 0) {
