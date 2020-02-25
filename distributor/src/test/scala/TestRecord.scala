@@ -16,15 +16,17 @@ object TestRecord {
 //    val a = System.currentTimeMillis()
 //    println("first",getVideoDuration("D:/helloMedia/2.mp4"))
 //    val b = System.currentTimeMillis()
-    println("third",calDuration("D:/helloMedia/2.mp4"))
-    val c = System.currentTimeMillis()
+//    println("third",calDuration("D:/helloMedia/2.mp4"))
+//    val c = System.currentTimeMillis()
 //    println("four",getDuration("D:/helloMedia/2.mp4"))
 //    var d = System.currentTimeMillis()
 //    println("b-a", b - a)
 //    println("c-b", c - b)
 //    println("d-c", d - c)
 //    multiHls("D:/helloMedia/0.mp4")
-    Thread.sleep(1000000)
+//    Thread.sleep(1000000)
+    println("start record...")
+    ts2mp4()
   }
 
   private def multiHls(scr:String) = {
@@ -132,6 +134,13 @@ object TestRecord {
     }else{
       "00:00:00.00"
     }
+  }
+
+  def ts2mp4() = {
+    val ffmpeg = Loader.load(classOf[org.bytedeco.ffmpeg.ffmpeg])
+    val pb = new ProcessBuilder(ffmpeg, "-i", s"/Users/wang/Downloads/out.ts", "-b:v", "1M", "-movflags", "faststart", s"/Users/wang/Desktop/test.mp4")
+    val process = pb.start()
+    println("change end...")
   }
 
 }

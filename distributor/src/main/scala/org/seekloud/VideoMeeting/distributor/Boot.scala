@@ -10,10 +10,8 @@ import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-
 import scala.language.postfixOps
 import org.seekloud.VideoMeeting.distributor.core.{EncodeManager, LiveManager, PullActor, SaveManager}
-import org.seekloud.VideoMeeting.rtpClient.Protocol._
 
 /**
   * User: yuwei
