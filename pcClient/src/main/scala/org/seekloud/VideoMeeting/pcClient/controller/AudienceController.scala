@@ -170,12 +170,8 @@ class AudienceController(
         case msg: JoinRsp =>
           if (msg.errCode == 0) {
             rmManager ! RmManager.StartJoin(msg.hostLiveId.get, msg.joinInfo.get)
-            audienceScene.hasReqJoin = false
-          } else if (msg.errCode == 300001) {
-            WarningDialog.initWarningDialog("主持人未开通连线功能!")
-            audienceScene.hasReqJoin = false
-          } else if (msg.errCode == 300002) {
-            WarningDialog.initWarningDialog("主持人拒绝连线申请!")
+          } else{
+            WarningDialog.initWarningDialog(msg.msg)
             audienceScene.hasReqJoin = false
           }
 

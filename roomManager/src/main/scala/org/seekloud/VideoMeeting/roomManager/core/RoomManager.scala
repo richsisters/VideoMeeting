@@ -10,7 +10,6 @@ import org.seekloud.VideoMeeting.roomManager.common.Common
 import org.seekloud.VideoMeeting.roomManager.models.dao.{RecordDao, UserInfoDao}
 import org.seekloud.VideoMeeting.roomManager.core.RoomActor._
 import org.seekloud.VideoMeeting.roomManager.protocol.ActorProtocol
-import org.seekloud.VideoMeeting.roomManager.protocol.CommonInfoProtocol.WholeRoomInfo
 import org.seekloud.VideoMeeting.roomManager.utils.ProcessorClient
 import org.slf4j.LoggerFactory
 import scala.concurrent.duration.{FiniteDuration, _}
@@ -34,12 +33,10 @@ object RoomManager {
 
   case class ExistRoom(roomId:Long,replyTo:ActorRef[Boolean]) extends Command
 
-  case class DelaySeekRecord(wholeRoomInfo:WholeRoomInfo, roomId:Long, attendList: List[Long], startTime:Long, liveId: String) extends Command
-  case class OnSeekRecord(wholeRoomInfo:WholeRoomInfo, roomId:Long, attendList: List[Long],  startTime:Long, liveId: String) extends Command
+  case class DelaySeekRecord(roomInfo: RoomInfo, roomId:Long, attendList: List[Long], startTime:Long) extends Command
+  case class OnSeekRecord(roomInfo: RoomInfo, roomId:Long, attendList: List[Long],  startTime:Long) extends Command
 
   //case class FinishPull(roomId: Long, startTime: Long, liveId: String) extends Command
-
-  case class GetRtmpLiveInfo(roomId:Long, replyTo:ActorRef[GetLiveInfoRsp4RM]) extends Command with RoomActor.Command
 
   private final case object DelaySeekRecordKey
 
@@ -70,9 +67,7 @@ object RoomManager {
     }
   }
 
-  private def idle(
-//                    roomInUse:mutable.HashMap[Long,RoomInfo]
-                  ) //roomId -> (roomInfo, liveInfo)
+  private def idle() //roomId -> (roomInfo, liveInfo)
                   (implicit stashBuffer: StashBuffer[Command],timer:TimerScheduler[Command]):Behavior[Command] = {
 
     Behaviors.receive[Command]{(ctx,msg) =>
@@ -126,24 +121,6 @@ object RoomManager {
 
         case r@ActorProtocol.StartRoom4Anchor(userId,roomId,actor) =>
           getRoomActor(roomId,ctx) ! r
-          Behaviors.same
-
-
-        case r@GetRtmpLiveInfo(roomId, replyTo)=>
-          getRoomActorOpt(roomId,ctx) match{
-            case Some(actor) =>actor ! r
-            case None =>
-              log.debug(s"${ctx.self.path}房间未建立")
-              replyTo ! GetLiveInfoRsp4RM(None,100041,s"获取live info 请求失败:房间不存在")
-          }
-          Behaviors.same
-
-        case r@ActorProtocol.BanOnAnchor(roomId) =>
-          getRoomActorOpt(roomId,ctx) match{
-            case Some(actor) =>actor ! r
-            case None =>
-              log.debug(s"${ctx.self.path}房间未建立")
-          }
           Behaviors.same
 
         case SearchRoom(userId, roomId, replyTo) =>
@@ -223,23 +200,22 @@ object RoomManager {
           Behaviors.same
 
         //延时请求获取录像（计时器）
-        case DelaySeekRecord(wholeRoomInfo, roomId, attendList,  startTime, liveId) =>
+        case DelaySeekRecord(roomInfo, roomId, attendList,  startTime) =>
           log.info("---- wait seconds to seek record ----")
-          timer.startSingleTimer(DelaySeekRecordKey + roomId.toString + startTime, OnSeekRecord(wholeRoomInfo, roomId, attendList, startTime, liveId), 5.seconds)
+          timer.startSingleTimer(DelaySeekRecordKey + roomId.toString + startTime, OnSeekRecord(roomInfo, roomId, attendList, startTime), 5.seconds)
           Behaviors.same
 
         //延时请求获取录像
-        case OnSeekRecord(wholeRoomInfo, roomId, attendList, startTime, liveId) =>
+        case OnSeekRecord(roomInfo, roomId, attendList, startTime) =>
           timer.cancel(DelaySeekRecordKey + roomId.toString + startTime)
           ProcessorClient.seekRecord(roomId,startTime).onComplete{
             case Success(v) =>
               v match{
                 case Right(rsp) =>
                   log.debug(s"${ctx.self.path}获取录像id${roomId}时长为duration=${rsp.duration}")
-                  RecordDao.addRecord(wholeRoomInfo.roomInfo.roomId,
-                    wholeRoomInfo.roomInfo.roomName,wholeRoomInfo.roomInfo.roomDes,startTime,
-                    UserInfoDao.getVideoImg(wholeRoomInfo.roomInfo.coverImgUrl),0,0,rsp.duration, wholeRoomInfo.roomInfo.userId, attendList)
-                  //timer.startSingleTimer(FinishPullKey + roomId.toString + startTime, FinishPull(roomId, startTime, liveId), 5.seconds)
+                  RecordDao.addRecord(roomInfo.roomId,
+                    roomInfo.roomName,roomInfo.roomDes,startTime,
+                    UserInfoDao.getVideoImg(roomInfo.coverImgUrl),0,0,rsp.duration, roomInfo.userId, attendList)
                 case Left(err) =>
                   log.debug(s"${ctx.self.path} 查询录像文件信息失败,error:$err")
               }

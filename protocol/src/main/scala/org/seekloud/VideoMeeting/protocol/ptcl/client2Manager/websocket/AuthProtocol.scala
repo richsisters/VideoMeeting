@@ -90,40 +90,10 @@ object AuthProtocol {
   val StartLiveRefused4Seal = StartLiveRsp(errCode = 200001, msg = "start live refused.account has been sealed")
   val StartLiveRefused4LiveInfoError = StartLiveRsp(errCode = 200001, msg = "start live refused because of getting live info from distributor error.")
 
-
-  /*修改房间信息*/
-  case class ModifyRoomInfo(
-    roomName: Option[String] = None,
-    roomDes: Option[String] = None
-  ) extends WsMsgHost
-
-  case class ModifyRoomRsp(errCode: Int = 0, msg: String = "ok") extends WsMsgRm2Host
-
-  val ModifyRoomError = ModifyRoomRsp(errCode = 200010, msg = "modify room error.")
-
-
-  /*设置直播内容*/
-  case class ChangeLiveMode(
-    isJoinOpen: Option[Boolean] = None, //是否开启连线
-    aiMode: Option[Int] = None, //是否开启人脸识别
-    screenLayout: Option[Int] = None //调整画面布局（对等窗口/大小窗口）
-  ) extends WsMsgHost
-
-  case class ChangeModeRsp(errCode: Int = 0, msg: String = "ok") extends WsMsgRm2Host
-
-  val ChangeModeError = ChangeModeRsp(errCode = 200020, msg = "change live mode error.")
-
-
   /*会议控制*/
   case class AudienceJoin(userId: Long, userName: String, clientType: Int) extends WsMsgRm2Host //申请加入会议者信息
 
   case class JoinAccept(roomId: Long, userId: Long, clientType: Int, accept: Boolean) extends WsMsgHost //主持人审批某个用户加入请求
-
-  case class StartMeeting(roomId: Long) extends WsMsgHost //主持人请求开始会议
-
-  case class StartMeetingRsp(roomId: Long, liveId: String, errCode:Int = 0, msg: String = "ok") extends WsMsgRm
-
-  def StartMeetingError(msg: String) = StartMeetingRsp(-1L, "", 400040, msg)
 
   case class AudienceJoinRsp(
     joinInfo: Option[AudienceInfo] = None, //参会者者信息
@@ -136,8 +106,6 @@ object AuthProtocol {
   val NoHostLiveInfoError = AudienceJoinRsp(errCode = 400030, msg = "no liveInfo")
 
   case class HostShutJoin(roomId: Long) extends WsMsgHost //断开与观众连线请求
-
-  case class AudienceDisconnect(hostLiveId: String) extends WsMsgRm2Host //观众断开连线通知（同时rm断开与观众ws）
 
   case class HostStopPushStream(roomId: Long) extends WsMsgHost //房主停止推流
 
@@ -176,47 +144,24 @@ object AuthProtocol {
   sealed trait WsMsgRm2Audience extends WsMsgRm
 
 
-  /*申请连线*/
+  /*申请加入会议*/
   case class JoinReq(userId: Long, roomId: Long, clientType: Int) extends WsMsgAudience
 
 
   case class JoinRsp(
-    hostLiveId: Option[String] = None, //房主liveId
-    joinInfo: Option[LiveInfo] = None, //连线者live信息
+    hostLiveId: Option[String] = None, //主持人liveId
+    joinInfo: Option[LiveInfo] = None, //用户自己的liveId
+    attendInfo: List[String] = Nil, //其他参会者的liveId
     errCode: Int = 0,
     msg: String = "ok"
   ) extends WsMsgRm2Audience
 
-  case class Join4AllRsp(
-                          mixLiveId: Option[String] = None,
-                          errCode: Int = 0,
-                          msg: String = "ok",
-                        ) extends WsMsgRm2Audience
-  /*
-  点赞
-   */
-  case class LikeRoom(userId: Long, roomId: Long, upDown:Int) extends WsMsgClient
+  val JoinInvalid = JoinRsp(errCode = 300001, msg = "房主未开通连线功能")
 
-  case class LikeRoomRsp(
-                          errCode: Int = 0,
-                          msg: String = "ok"
-                        ) extends WsMsgRm2Audience
+  val JoinInternalError = JoinRsp(errCode = 300001, msg = "网络问题")
+  val JoinAccountError = JoinRsp(errCode = 300001, msg = "用户信息出错")
 
-  case class JudgeLike(userId: Long, roomId:Long) extends WsMsgClient
-
-
-  case class JudgeLikeRsp(
-                          like:Boolean,                 //true->已点过赞  false->未点过赞
-                          errCode: Int = 0,
-                          msg: String = "ok"
-                        ) extends WsMsgRm2Audience
-
-  val JoinInvalid = JoinRsp(errCode = 300001, msg = "join not open.") //房主未开通连线功能
-
-  val JoinInternalError = JoinRsp(errCode = 300001, msg = "internal error") //房主未开通连线功能
-  val JoinAccountError = JoinRsp(errCode = 300001, msg = "userId error") //房主未开通连线功能
-
-  val JoinRefused = JoinRsp(errCode = 300002, msg = "host refuse your request.") //房主拒绝连线申请
+  val JoinRefused = JoinRsp(errCode = 300001, msg = "主持人拒绝您的参会申请") //房主拒绝连线申请
 
   case class AudienceShutJoin(roomId: Long, userId: Long) extends WsMsgAudience //某个用户退出会议
 
@@ -240,23 +185,7 @@ object AuthProtocol {
 
   /**
     * 所有用户
-    * 留言
     **/
-
-  case class Comment(
-    userId: Long,
-    roomId: Long,
-    comment: String,
-    color:String = "#FFFFFF",
-    extension: Option[String] = None
-  ) extends WsMsgClient
-
-  case class RcvComment(
-    userId: Long,
-    userName: String,
-    comment: String,
-    color:String = "#FFFFFF",
-    extension: Option[String] = None
-  ) extends WsMsgRm
+  case class AudienceDisconnect(audienceLiveId: String) extends WsMsgRm //通知房间内所有用户，某参会者退出
 
 }
