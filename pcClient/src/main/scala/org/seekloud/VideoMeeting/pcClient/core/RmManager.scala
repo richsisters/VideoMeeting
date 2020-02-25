@@ -658,13 +658,13 @@ object RmManager {
             log.info("audiencestatus is unkonwn...")
           Behaviors.same
 
-        case msg: StartJoin => //todo 加入会议之后首先推流，然后拉取所有流
+        case msg: StartJoin =>
           log.info(s"Start join.")
           liveManager ! LiveManager.PushStream(msg.audienceLiveInfo.liveId, msg.audienceLiveInfo.liveCode)
+          audienceScene.audienceStatus = AudienceStatus.CONNECT
           audienceScene.autoReset()
-//          val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = audienceScene.getRoomInfo.roomId)
-//          mediaPlayer.stop(playId, audienceScene.autoReset)
-
+          val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = audienceScene.getRoomInfo.roomId)
+          mediaPlayer.stop(playId, audienceScene.autoReset)
           timer.startSingleTimer(PullDelay, PullStream4Others(msg.hostLiveId :: msg.attendLiveId), 1.seconds)
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, audienceStatus)
 
