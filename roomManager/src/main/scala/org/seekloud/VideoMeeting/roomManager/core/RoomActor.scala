@@ -154,7 +154,7 @@ object RoomActor {
           Behaviors.same
 
         case ActorProtocol.WebSocketMsgWithActor(userId, roomId, wsMsg) =>
-          handleWebSocketMsg(roomInfo, subscribe, liveInfoMap, startTime, dispatch(subscribe), dispatchTo(subscribe))(ctx, userId, roomId, wsMsg)
+          handleWebSocketMsg(roomInfo, subscribe, liveInfoMap, startTime, false, dispatch(subscribe), dispatchTo(subscribe))(ctx, userId, roomId, wsMsg)
 
         case ActorProtocol.UpdateSubscriber(join, roomId, userId, temporary, userActorOpt) =>
           //虽然房间存在，但其实主播已经关闭房间，这时的startTime=-1
@@ -171,7 +171,7 @@ object RoomActor {
               log.debug(s"${ctx.self.path}用户离开房间roomId=$roomId,userId=$userId")
               subscribe.remove((userId, temporary))
               if(liveInfoMap.contains(userId)){
-                dispatch(subscribe)(AuthProtocol.AudienceDisconnect(liveInfoMap().liveId))
+                dispatch(subscribe)(AuthProtocol.AudienceDisconnect(liveInfoMap(userId).liveId))
               }
               }
             }
@@ -194,26 +194,6 @@ object RoomActor {
           }
           dispatchTo(subscribe)(subscribe.filter(r => r._1 != (roomInfo.userId, false)).keys.toList, HostCloseRoom())
           Behaviors.stopped
-
-        case ActorProtocol.StartLiveAgain(roomId) =>
-          log.debug(s"${ctx.self.path} the room actor has been exist,the host restart the room")
-          for {
-            data <- RtpClient.getLiveInfoFunc()
-          } yield {
-            data match {
-              case Right(rsp) =>
-                val newRoomInfo = roomInfo.copy(rtmp = Some(rsp.liveInfo.liveId))
-                dispatchTo(subscribe)(List((roomInfo.userId, false)), StartLiveRsp(Some(rsp.liveInfo)))
-                ctx.self ! SwitchBehavior("idle", idle(newRoomInfo, liveInfoMap, subscribe, System.currentTimeMillis()))
-
-              case Left(str) =>
-                log.debug(s"${ctx.self.path} 重新开始会议失败=$str")
-                dispatchTo(subscribe)(List((roomInfo.userId, false)), StartLiveRefused4LiveInfoError)
-                ctx.self ! ActorProtocol.HostCloseRoom(roomInfo.roomId)
-                ctx.self ! SwitchBehavior("idle", idle(roomInfo, liveInfoMap, subscribe, startTime))
-            }
-          }
-          switchBehavior(ctx, "busy", busy(), InitTime, TimeOut("busy"))
 
         case x =>
           log.debug(s"${ctx.self.path} recv an unknown msg $x")
@@ -258,6 +238,7 @@ object RoomActor {
     subscribers: mutable.HashMap[(Long, Boolean), ActorRef[UserActor.Command]], //包括主持人在内的所有用户
     liveInfoMap: mutable.HashMap[Long, LiveInfo], //除主持人外所有用户在内的liveinfo
     startTime: Long,
+    roomState: Boolean, //该房间是否开始录像
     dispatch: WsMsgRm => Unit,
     dispatchTo: (List[(Long, Boolean)], WsMsgRm) => Unit
   )
@@ -386,6 +367,10 @@ object RoomActor {
           log.debug(s"host cancel banning user-$userId4Member, but there is no user!")
         }
         Behaviors.same
+
+      case StartMeetingRecord =>
+        ProcessorClient.newConnect(roomId, roomInfo.rtmp.getOrElse(""), liveInfoMap.values.map(_.liveId).toList, startTime)
+        handleWebSocketMsg(roomInfo, subscribers, liveInfoMap, startTime, true, dispatch, dispatchTo)(ctx, userId, roomId, msg)
 
       case PingPackage =>
         Behaviors.same

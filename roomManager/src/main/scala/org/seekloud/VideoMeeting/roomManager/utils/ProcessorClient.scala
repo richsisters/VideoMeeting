@@ -18,10 +18,10 @@ object ProcessorClient extends HttpUtil{
 
   val processorBaseUrl = s"http://${AppSettings.processorIp}:${AppSettings.processorPort}/VideoMeeting/processor"
 
-  def newConnect(roomId:Long, liveId4host: String, liveId4Client: List[String], liveId4push: String, liveCode4push: String, startTIme: Long):Future[Either[String,NewConnectRsp]] = {
+  def newConnect(roomId:Long, liveId4host: String, liveId4Client: List[String], startTIme: Long):Future[Either[String,NewConnectRsp]] = {
     val url = processorBaseUrl + "/newConnect"
     log.debug(s"new connect url $url")
-    val jsonString = NewConnect(roomId, liveId4host, liveId4Client, liveId4push, liveCode4push, startTIme).asJson.noSpaces
+    val jsonString = NewConnect(roomId, liveId4host, liveId4Client, startTIme).asJson.noSpaces
     postJsonRequestSend("newConnect",url,List(),jsonString,timeOut = 60 * 1000,needLogRsp = false).map{
       case Right(v) =>
         decode[NewConnectRsp](v) match{

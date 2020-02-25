@@ -96,14 +96,6 @@ object RoomManager {
           }
           Behaviors.same
 
-        case r@ActorProtocol.StartLiveAgain(roomId) =>
-          getRoomActorOpt(roomId,ctx) match{
-            case Some(actor) => actor ! r
-            case None => log.debug(s"${ctx.self.path}重新直播请求错误，该房间已经关闭，房间id=$roomId")
-          }
-          Behaviors.same
-
-
         case r@ActorProtocol.HostCloseRoom(roomId)=>
           //如果断开websocket的用户的id能够和已经开的房间里面的信息匹配上，就说明是主播
           getRoomActorOpt(roomId, ctx) match{

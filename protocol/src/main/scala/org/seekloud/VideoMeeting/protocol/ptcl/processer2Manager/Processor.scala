@@ -14,8 +14,6 @@ object Processor {
                          roomId: Long,
                          host: String,
                          clientInfo: List[String], //存放多个参会人的liveId
-                         pushLiveId:String,
-                         pushLiveCode:String,
                          startTime: Long
                        )
 

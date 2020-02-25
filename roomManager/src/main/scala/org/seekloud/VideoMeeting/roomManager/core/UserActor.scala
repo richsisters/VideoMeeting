@@ -169,10 +169,6 @@ object UserActor {
                       ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
                     }else{
                       req match {
-                        case StartLiveReq(`userId`,token,clientType) =>
-                          roomManager ! ActorProtocol.StartLiveAgain(roomId)
-                          ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
-
                         case Invite(email, meetingNumber) =>
                           log.debug("recv invite msg! and send email to email actor")
                           emailActor ! EmailActor.SendInviteEmail(email, meetingNumber)
@@ -182,7 +178,6 @@ object UserActor {
                         case x =>
                           roomManager ! ActorProtocol.WebSocketMsgWithActor(userId,roomId,x)
                           ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
-
                       }
                     }
                   case None =>
@@ -272,7 +267,6 @@ object UserActor {
             reqOpt match{
               case Some(req) =>
                 if(temporary){
-                  //                log.debug(s"${ctx.self.path} the user is temporary, no privilege,userId=$userId in room=$roomId")
                   Behaviors.same
                 }else{
                   UserInfoDao.searchById(userId).map{
@@ -288,7 +282,6 @@ object UserActor {
                             ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
 
                           case Invite(email, meetingNumber) =>
-//                            log.debug("recv invite msg! and send email to email actor")
                             emailActor ! EmailActor.SendInviteEmail(email, meetingNumber)
                             clientActor ! Wrap(AuthProtocol.InviteRsp.asInstanceOf[WsMsgRm].fillMiddleBuffer(sendBuffer).result())
                             ctx.self ! SwitchBehavior("anchor",anchor(userId,clientActor,roomId))
