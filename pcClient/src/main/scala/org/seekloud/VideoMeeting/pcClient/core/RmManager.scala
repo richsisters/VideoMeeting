@@ -443,6 +443,7 @@ object RmManager {
 
         case msg: AudienceAcceptance =>
           log.debug(s"accept join user-${msg.userId} join.")
+          liveManager ! LiveManager.SwitchMediaMode(isJoin = true, hostScene.resetBack)
           assert(roomInfo.nonEmpty)
           sender.foreach(_ ! JoinAccept(roomInfo.get.roomId, msg.userId, ClientType.PC, msg.accept))
           Behaviors.same
