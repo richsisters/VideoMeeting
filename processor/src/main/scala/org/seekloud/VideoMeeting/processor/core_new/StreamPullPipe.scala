@@ -43,19 +43,12 @@ object StreamPullPipe {
       Behaviors.withTimers[Command] {
         implicit timer =>
           streamPullActor ! NewLive(liveId, roomId, ctx.self)
-          val file = new File(s"$recordPath${liveId}_in.ts")
-          if(file.exists()){
-            file.delete()
-            file.createNewFile()
-          } else{
-            file.createNewFile()
-          }
-          work(roomId, liveId, out, new FileOutputStream(file))
+          work(roomId, liveId, out)
       }
     }
   }
 
-  def work(roomId: Long, liveId: String, out: OutputStream, fileOut:FileOutputStream)(implicit timer: TimerScheduler[Command],
+  def work(roomId: Long, liveId: String, out: OutputStream)(implicit timer: TimerScheduler[Command],
                                                                                    stashBuffer: StashBuffer[Command]): Behavior[Command] = {
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
@@ -63,7 +56,6 @@ object StreamPullPipe {
           if (Boot.showStreamLog) {
             log.info(s"NewBuffer $liveId ${data.length}")
           }
-          fileOut.write(data)
           out.write(data)
           Behaviors.same
 
@@ -73,7 +65,6 @@ object StreamPullPipe {
 
         case Stop =>
           log.info(s"$liveId pullPipe stopped ----")
-          fileOut.close()
           out.close()
           Behaviors.stopped
 
