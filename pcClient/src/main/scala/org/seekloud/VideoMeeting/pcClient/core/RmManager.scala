@@ -447,19 +447,23 @@ object RmManager {
           sender.foreach(_ ! StartMeetingRecord)
           Behaviors.same
 
-        case HostFinishMeeting =>
+        case HostFinishMeeting => //主持人结束会议，房间内所有流都停止
           log.debug(s"videoMeeting ${roomInfo.get.roomId} stop.")
-          if (hostStatus == HostStatus.CONNECT) {
-            Boot.addToPlatform {
-//              hostScene.connectionStateText.setText(s"目前状态：无连接~")
-              hostScene.startBtn.setSelected(false)
-            }
-//            sender.foreach(_ ! HostShutJoin(roomInfo.get.roomId))
-          }
-          liveManager ! LiveManager.SwitchMediaMode(isJoin = false, hostScene.resetBack)
-          val playId = Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT, roomInfo.get.roomId)
+          timer.cancel(HeartBeat)
+          timer.cancel(PingTimeOut)
+          sender.foreach(_ ! CompleteMsgClient)
+          val playId = if(hostStatus == HostStatus.CONNECT)
+            Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT, roomId = roomInfo.get.roomId)
+          else
+            Ids.getPlayId(audienceStatus = AudienceStatus.LIVE, roomId = roomInfo.get.roomId)
           mediaPlayer.stop(playId, hostScene.resetBack)
           liveManager ! LiveManager.StopPull
+          liveManager ! LiveManager.StopPush
+          Boot.addToPlatform {
+            hostScene.stopPackageLoss()
+          }
+          hostScene.stopPackageLoss()
+          System.gc()
           hostBehavior(stageCtx, homeController, hostScene, hostController, liveManager, mediaPlayer, sender, hostStatus = HostStatus.LIVE)
 
         case msg: JoinBegin =>
@@ -660,7 +664,8 @@ object RmManager {
           audienceScene.autoReset()
           val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = audienceScene.getRoomInfo.roomId)
           mediaPlayer.stop(playId, audienceScene.autoReset)
-          timer.startSingleTimer(PullDelay, PullStream4Others(msg.hostLiveId :: msg.attendLiveId), 1.seconds)
+          println("-----------------"+ msg.hostLiveId + "========="+ msg.attendLiveId)
+          timer.startSingleTimer(PullDelay, PullStream4Others(List(msg.hostLiveId)), 1.seconds)
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, audienceStatus)
 
         case msg: PullStream4Others =>
