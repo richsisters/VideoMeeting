@@ -333,7 +333,7 @@ object RoomActor {
     log.info("begin to save record...")
     val ffmpeg = Loader.load(classOf[org.bytedeco.ffmpeg.ffmpeg])
     Future{
-      val pb = new ProcessBuilder(ffmpeg, "-i", s"$recordPath$roomId/$startTime/out.ts", "-c:v", "libx264", "-c:a", "copy", "-preset", "faster", s"$recordPath$roomId/$startTime/record.mp4")
+      val pb = new ProcessBuilder(ffmpeg, "-i", s"$recordPath$roomId/$startTime/out.ts", "-c:v", "libx264", "-c:a", "copy", "-bsf:a", "aac_adtstoasc", s"$recordPath$roomId/$startTime/record.mp4")
       val process = pb.start()
       process.waitFor(10, TimeUnit.SECONDS)
       val buffer4Error = new BufferedReader(new InputStreamReader(process.getErrorStream))
