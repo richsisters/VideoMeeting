@@ -44,10 +44,6 @@ class HostController(
       rmManager ! RmManager.HostLiveReq
     }
 
-    override def stopLive(): Unit = {
-      rmManager ! RmManager.StopLive
-    }
-
     override def modifyRoomInfo(name: Option[String], des: Option[String]): Unit = {
       rmManager ! RmManager.ModifyRoom(name, des)
     }
@@ -160,6 +156,7 @@ class HostController(
         //将该条信息展示在host页面(TableView)
         log.debug(s"Audience-${msg.userName} send join req.")
         Boot.addToPlatform {
+          println("okokoko" + msg.userName)
           hostScene.updateAudienceList(msg.userId, msg.userName)
         }
 

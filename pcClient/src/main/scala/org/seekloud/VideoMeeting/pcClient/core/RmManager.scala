@@ -100,8 +100,6 @@ object RmManager {
 
   final case class StartLive(liveId: String, liveCode: String) extends RmCommand
 
-  final case object StopLive extends RmCommand
-
   final case class ModifyRoom(name: Option[String], des: Option[String]) extends RmCommand
 
   final case class ChangeMode(isJoinOpen: Option[Boolean], aiMode: Option[Int], screenLayout: Option[Int]) extends RmCommand
@@ -427,12 +425,6 @@ object RmManager {
           liveManager ! LiveManager.PushStream(msg.liveId, msg.liveCode)
           Behaviors.same
 
-        case StopLive =>
-          liveManager ! LiveManager.StopPush
-         // sender.foreach(_ ! AuthProtocol.HostCloseRoom(roomInfo.get.roomId))
-          hostController.isLive = false
-          Behaviors.same
-
         case InviteReq(email, meeting) =>
           sender.foreach(_ ! Invite(email, meeting))
           Behaviors.same
@@ -460,10 +452,10 @@ object RmManager {
           log.debug(s"videoMeeting ${roomInfo.get.roomId} stop.")
           if (hostStatus == HostStatus.CONNECT) {
             Boot.addToPlatform {
-              hostScene.connectionStateText.setText(s"目前状态：无连接~")
+//              hostScene.connectionStateText.setText(s"目前状态：无连接~")
               hostScene.startBtn.setSelected(false)
             }
-           // sender.foreach(_ ! HostShutJoin(roomInfo.get.roomId))
+//            sender.foreach(_ ! HostShutJoin(roomInfo.get.roomId))
           }
           liveManager ! LiveManager.SwitchMediaMode(isJoin = false, hostScene.resetBack)
           val playId = Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT, roomInfo.get.roomId)

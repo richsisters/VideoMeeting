@@ -87,8 +87,6 @@ object HostScene {
 
     def startLive()
 
-    def stopLive()
-
     def modifyRoomInfo(
       name: Option[String] = None,
       des: Option[String] = None
