@@ -198,7 +198,7 @@ object ImageActor {
       val h = img.getHeight
       if (id.contains("--")) { //三人连线状态
 //        if (w / sW > h / sH) {
-          gc.drawImage(img, 0, sH / 2, sW / 2, (h * sW / w) / 2)
+          gc.drawImage(img, 0, sH / 2, sW / 2, sH / 2)
 //        } else {
 //          gc.drawImage(img, (sW - w * sH / h) / 2 + sW / 2, 0, (w * sH / h) / 2, sH / 2)
 //        }
