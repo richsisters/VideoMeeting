@@ -223,6 +223,7 @@ class AudienceController(
               audienceScene.updateAttendList(userId, userName, true)
 
             }
+            rmManager ! RmManager.OtherAudienceJoin(msg.joinInfo.get.liveId)
 
           } else {
             Boot.addToPlatform {

@@ -142,6 +142,8 @@ object RmManager {
 
   final case object StopJoinAndWatch extends RmCommand //停止和主播连线
 
+  final case class OtherAudienceJoin(liveId: String) extends RmCommand
+
   final case class ExitJoin(roomId: Long, userId: Long) extends RmCommand //主动关闭和主播的连线
 
   final case class StartRecord(outFilePath: String) extends  RmCommand //开始录制
@@ -673,6 +675,12 @@ object RmManager {
             val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
             liveManager ! LiveManager.PullStream(l, pullInfo = info, audienceScene = Some(audienceScene))
           }
+          Behaviors.same
+
+        case msg: OtherAudienceJoin =>
+          log.info(s"${ctx.self} receive a msg $msg")
+          val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
+          liveManager ! LiveManager.PullStream(msg.liveId, pullInfo = info, audienceScene = Some(audienceScene))
           Behaviors.same
 
 
