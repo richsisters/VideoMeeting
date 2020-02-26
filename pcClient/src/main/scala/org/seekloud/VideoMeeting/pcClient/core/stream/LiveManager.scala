@@ -163,7 +163,8 @@ object LiveManager {
         case msg: PullStream =>
           if (streamPuller.get(msg.liveId).isEmpty) {
             val pullChannel = new PullChannel
-            val puller = getStreamPuller(ctx, msg.liveId, msg.pullInfo, mediaPlayer,  msg.audienceScene, msg.hostScene)
+            val pullSize = streamPuller.toList.size
+            val puller = getStreamPuller(ctx, msg.liveId, msg.pullInfo, mediaPlayer,  msg.audienceScene, msg.hostScene, pullSize + 1)
             val rtpClient = new PullStreamClient(AppSettings.host, NetUtil.getFreePort, pullChannel.serverPullAddr, puller, AppSettings.rtpServerDst)
             puller ! StreamPuller.InitRtpClient(rtpClient)
             streamPuller.put(msg.liveId, puller)
@@ -260,11 +261,12 @@ object LiveManager {
     pullInfo: PullInfo,
     mediaPlayer: MediaPlayer,
     audienceScene : Option[AudienceScene],
-    hostScene: Option[HostScene]
+    hostScene: Option[HostScene],
+    index: Int
   ) = {
     val childName = s"streamPuller-$liveId"
     ctx.child(childName).getOrElse {
-      val actor = ctx.spawn(StreamPuller.create(liveId, pullInfo, ctx.self, mediaPlayer, audienceScene, hostScene), childName)
+      val actor = ctx.spawn(StreamPuller.create(liveId, pullInfo, ctx.self, mediaPlayer, audienceScene, hostScene, index), childName)
       ctx.watchWith(actor, ChildDead(childName, actor))
       actor
     }.unsafeUpcast[StreamPuller.PullCommand]

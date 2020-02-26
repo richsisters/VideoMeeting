@@ -161,7 +161,7 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
   val statisticsCanvas = new Canvas(Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
   val ctx: GraphicsContext = statisticsCanvas.getGraphicsContext2D
 
-  val backImg = new Image("img/loading.jpg")
+  val backImg = new Image("img/background.jpg")
   gc.drawImage(backImg, 0, 0, gc.getCanvas.getWidth, gc.getCanvas.getHeight)
   val connectionBg = new Image("img/connectionBg.jpg")
 

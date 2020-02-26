@@ -76,13 +76,14 @@ object StreamPuller {
     parent: ActorRef[LiveManager.LiveCommand],
     mediaPlayer: MediaPlayer,
     audienceScene: Option[AudienceScene],
-    hostScene: Option[HostScene]
+    hostScene: Option[HostScene],
+    index: Int
   ): Behavior[PullCommand] =
     Behaviors.setup[PullCommand] { ctx =>
       log.info(s"StreamPuller-$liveId is starting.")
       implicit val stashBuffer: StashBuffer[PullCommand] = StashBuffer[PullCommand](Int.MaxValue)
       Behaviors.withTimers[PullCommand] { implicit timer =>
-        init(liveId, pullInfo, parent, mediaPlayer, audienceScene, hostScene, None)
+        init(liveId, pullInfo, parent, mediaPlayer, audienceScene, hostScene, None, index)
       }
 
     }
@@ -94,7 +95,8 @@ object StreamPuller {
     mediaPlayer: MediaPlayer,
     audienceScene: Option[AudienceScene],
     hostScene: Option[HostScene],
-    pullClient: Option[PullStreamClient]
+    pullClient: Option[PullStreamClient],
+    index: Int
   )(
     implicit timer: TimerScheduler[PullCommand],
     stashBuffer: StashBuffer[PullCommand]
@@ -107,7 +109,7 @@ object StreamPuller {
           timer.startSingleTimer(PullStartTimeOut, PullStartTimeOut, 5.seconds)
           audienceScene.foreach(_.startPackageLoss())
           hostScene.foreach(_.startPackageLoss())
-          init(liveId, pullInfo, parent, mediaPlayer, audienceScene, hostScene, Some(msg.pullClient))
+          init(liveId, pullInfo, parent, mediaPlayer, audienceScene, hostScene, Some(msg.pullClient), index)
 
         case PullStreamReady =>
           log.info(s"StreamPuller-$liveId ready for pull.")
@@ -136,9 +138,8 @@ object StreamPuller {
           val inputStream = Channels.newInputStream(source)
           audienceScene.foreach(_.autoReset())
           hostScene.foreach(_.resetBack())
-          val time = msg.liveIds.length
-          val playId = if(time == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
-          println("okokokokokoko"+ time + playId)
+          val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
+          println("okokokokokoko"+ index + playId)
 //          val playId = Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId)
           mediaPlayer.setTimeGetter(playId, pullClient.get.getServerTimestamp)
           val videoPlayer = ctx.spawn(VideoPlayer.create(playId, audienceScene, None, None), s"videoPlayer$playId")
