@@ -95,3 +95,15 @@ protocol/.jvm
 webrtcMessage/.js
 webrtcMessage/.jvm
 
+distributor/.DS_Store
+processor/.DS_Store
+processor/src/.DS_Store
+processor/src/main/.DS_Store
+processor/src/main/resources/.DS_Store
+processor/src/main/resources/img/.DS_Store
+processor/src/test/.DS_Store
+roomManager/src/.DS_Store
+roomManager/src/main/.DS_Store
+roomManager/src/main/resources/.DS_Store
+roomManager/src/main/resources/img/.DS_Store
+

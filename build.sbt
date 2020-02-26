@@ -4,7 +4,7 @@ val scalaV = "2.12.10"
 
 val projectName = "VideoMeeting"
 
-val projectVersion = "20.02.23"
+val projectVersion = "20.02.26"
 
 def commonSettings = Seq(
   version := projectVersion,
