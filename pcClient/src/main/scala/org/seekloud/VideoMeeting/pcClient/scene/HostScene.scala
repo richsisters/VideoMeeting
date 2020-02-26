@@ -143,10 +143,6 @@ class HostScene(stage: Stage) {
 
   private val timeline = new Timeline()
 
-  def stopPackageLoss(): Unit = {
-    timeline.stop()
-  }
-
   var isLive = false
   var isFullScreen = false
   var roomInfoMap = Map.empty[Long, List[String]]

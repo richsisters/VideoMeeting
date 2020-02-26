@@ -275,10 +275,6 @@ object RmManager {
           liveManager ! LiveManager.DevicesOn(audienceScene.gc) //参会者进入房间后首先画自己的流
 
           if (msg.roomInfo.rtmp.nonEmpty) {
-//            audienceScene.liveId4Live = Some(msg.roomInfo.rtmp.get)
-//            val info = PullInfo(msg.roomInfo.roomId, audienceScene.gc)
-           //liveManager ! LiveManager.PullStream(msg.roomInfo.rtmp.get, pullInfo = info, audienceScene = Some(audienceScene))
-
             ctx.self ! AudienceWsEstablish
 
             Boot.addToPlatform {
@@ -406,10 +402,8 @@ object RmManager {
           liveManager ! LiveManager.StopPush
           liveManager ! LiveManager.DeviceOff
           Boot.addToPlatform {
-            hostScene.stopPackageLoss()
             homeController.foreach(_.showScene())
           }
-          hostScene.stopPackageLoss()
           System.gc()
           switchBehavior(ctx, "idle", idle(stageCtx, liveManager, mediaPlayer, homeController))
 
@@ -460,10 +454,6 @@ object RmManager {
           mediaPlayer.stop(playId, hostScene.resetBack)
           liveManager ! LiveManager.StopPullAll
           liveManager ! LiveManager.StopPush
-          Boot.addToPlatform {
-            hostScene.stopPackageLoss()
-          }
-          hostScene.stopPackageLoss()
           System.gc()
           hostBehavior(stageCtx, homeController, hostScene, hostController, liveManager, mediaPlayer, sender, hostStatus = HostStatus.LIVE)
 
