@@ -271,7 +271,7 @@ object RmManager {
         case msg: GoToWatch =>
           val audienceScene = new AudienceScene(msg.roomInfo.toAlbum)
           val audienceController = new AudienceController(stageCtx, audienceScene, ctx.self)
-          liveManager ! LiveManager.DevicesOn(audienceScene.gc, isJoin = true) //参会者进入房间后首先画自己的流
+          liveManager ! LiveManager.DevicesOn(audienceScene.gc) //参会者进入房间后首先画自己的流
 
           if (msg.roomInfo.rtmp.nonEmpty) {
 //            audienceScene.liveId4Live = Some(msg.roomInfo.rtmp.get)
@@ -464,6 +464,8 @@ object RmManager {
 
         case msg: JoinBegin =>
           log.debug(s"======== ${msg.audienceInfo.userName} join begin")
+          val info = PullInfo(roomInfo.get.roomId,hostScene.gc)
+          liveManager ! LiveManager.PullStream(msg.audienceInfo.liveId, pullInfo = info)
           if(hostStatus == HostStatus.LIVE)
             hostBehavior(stageCtx, homeController, hostScene, hostController, liveManager, mediaPlayer, sender, HostStatus.CONNECT)
           else
