@@ -295,7 +295,7 @@ object RoomActor {
       case JoinReq(userId4Audience, `roomId`, clientType) =>
         UserInfoDao.searchById(userId4Audience).map { r =>
           if (r.nonEmpty) {
-            dispatchTo(List((userId, false)), AudienceJoin(userId4Audience, r.get.userName, clientType))
+            dispatchTo(List((roomInfo.userId, false)), AudienceJoin(userId4Audience, r.get.userName, clientType))
           } else {
             log.debug(s"${ctx.self.path} 连线请求失败，用户id错误id=$userId4Audience in roomId=$roomId")
             dispatchTo(List((userId4Audience, false)), JoinAccountError)

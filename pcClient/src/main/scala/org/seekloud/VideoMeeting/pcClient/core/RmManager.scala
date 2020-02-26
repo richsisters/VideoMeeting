@@ -429,7 +429,7 @@ object RmManager {
 
         case StopLive =>
           liveManager ! LiveManager.StopPush
-          sender.foreach(_ ! HostStopPushStream(roomInfo.get.roomId))
+         // sender.foreach(_ ! AuthProtocol.HostCloseRoom(roomInfo.get.roomId))
           hostController.isLive = false
           Behaviors.same
 
@@ -462,7 +462,7 @@ object RmManager {
               hostScene.connectionStateText.setText(s"目前状态：无连接~")
               hostScene.startBtn.setSelected(false)
             }
-            sender.foreach(_ ! HostShutJoin(roomInfo.get.roomId))
+           // sender.foreach(_ ! HostShutJoin(roomInfo.get.roomId))
           }
           liveManager ! LiveManager.SwitchMediaMode(isJoin = false, hostScene.resetBack)
           val playId = Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT, roomInfo.get.roomId)
