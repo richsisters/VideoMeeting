@@ -440,13 +440,12 @@ object RmManager {
           sender.foreach(_ ! JoinAccept(roomInfo.get.roomId, msg.userId, ClientType.PC, msg.accept))
           Behaviors.same
 
-//        case msg: HostStartMeetingRecord =>
-//          log.debug(s"videoMeeting ${msg.roomId} begin.")
+        case HostStartMeetingRecord =>
 //          hostScene.resetBack()
 //          liveManager ! LiveManager.SwitchMediaMode(isJoin = true, reset = hostScene.resetBack)
-//          assert(roomInfo.nonEmpty)
-//          sender.foreach(_ ! StartMeetingRecord)
-//          Behaviors.same
+          assert(roomInfo.nonEmpty)
+          sender.foreach(_ ! StartMeetingRecord)
+          Behaviors.same
 
         case HostFinishMeeting =>
           log.debug(s"videoMeeting ${roomInfo.get.roomId} stop.")
