@@ -30,6 +30,8 @@ object RoomActor {
 
   final case class ChildDead[U](name: String, childRef: ActorRef[U]) extends Command with RoomManager.Command
 
+  final case object Stop extends Command
+
   //private final case object DelayUpdateRtmpKey
 
   private final case class SwitchBehavior(
@@ -191,12 +193,22 @@ object RoomActor {
         case ActorProtocol.HostCloseRoom(roomId) =>
           dispatchTo(subscribe)(subscribe.filter(r => r._1 != (roomInfo.userId, false)).keys.toList, HostCloseRoom())
           if(roomState){
-            log.debug(s"room-$roomId need close room...")
-            ProcessorClient.closeRoom(roomId)
-            val attendList = liveInfoMap.keys.toList
-            roomManager ! RoomManager.DelaySeekRecord(roomInfo, roomId, attendList, startTime)
+            log.debug(s"room-$roomId need close room, send msg to processor...")
+            val pcRes = ProcessorClient.closeRoom(roomId)
+            pcRes.map{
+              case Right(rsp) =>
+                val attendList = liveInfoMap.keys.toList
+                roomManager ! RoomManager.DelaySeekRecord(roomInfo, roomId, attendList, startTime)
+                ctx.self ! Stop
+
+              case Left(e) =>
+                log.error(s"close room error, $e")
+                ctx.self ! Stop
+            }
+            switchBehavior(ctx, "busy", busy(), InitTime, TimeOut("busy"))
+          } else{
+            Behaviors.stopped
           }
-          Behaviors.stopped
 
         case x =>
           log.debug(s"${ctx.self.path} recv an unknown msg $x")
@@ -215,6 +227,9 @@ object RoomActor {
       msg match {
         case SwitchBehavior(name, b, durationOpt, timeOut) =>
           switchBehavior(ctx, name, b, durationOpt, timeOut)
+
+        case Stop =>
+          Behaviors.stopped
 
         case TimeOut(m) =>
           log.debug(s"${ctx.self.path} is time out when busy, msg=$m")
