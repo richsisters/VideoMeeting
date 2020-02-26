@@ -282,7 +282,7 @@ object RoomActor {
                     liveInfoMap.put(userId4Audience, rsp.liveInfo)
                     val audienceInfo = AudienceInfo(userId4Audience, userInfoOpt.get.userName, userInfoOpt.get.headImg, rsp.liveInfo.liveId)
                     log.debug("向除该用户以外的参会者群发该用户信息....")
-                    dispatch(AudienceJoinRsp(Some(audienceInfo)))
+                    dispatchTo(subscribers.filter(_._1._1 != userId4Audience).keys.toList, AudienceJoinRsp(Some(audienceInfo)))
                     log.debug("向该用户发送JoinRsp...")
                     dispatchTo(List((userId4Audience, false)), JoinRsp(roomInfo.rtmp, Some(rsp.liveInfo), liveInfoMap.map(_._2.liveId).toList))
                   } else {
