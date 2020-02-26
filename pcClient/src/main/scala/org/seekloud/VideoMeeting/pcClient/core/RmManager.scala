@@ -271,7 +271,7 @@ object RmManager {
         case msg: GoToWatch =>
           val audienceScene = new AudienceScene(msg.roomInfo.toAlbum)
           val audienceController = new AudienceController(stageCtx, audienceScene, ctx.self)
-          liveManager ! LiveManager.DevicesOn(audienceScene.gc, isJoin = true) //参会者进入房间后首先画自己的流
+          liveManager ! LiveManager.DevicesOn(audienceScene.gc) //参会者进入房间后首先画自己的流
 
           if (msg.roomInfo.rtmp.nonEmpty) {
 //            audienceScene.liveId4Live = Some(msg.roomInfo.rtmp.get)
@@ -655,10 +655,10 @@ object RmManager {
           log.info(s"Start join.")
           liveManager ! LiveManager.PushStream(msg.audienceLiveInfo.liveId, msg.audienceLiveInfo.liveCode)
           audienceScene.audienceStatus = AudienceStatus.CONNECT
-//         / audienceScene.autoReset()
+          audienceScene.autoReset()
           val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = audienceScene.getRoomInfo.roomId)
           mediaPlayer.stop(playId, audienceScene.autoReset)
-//          timer.startSingleTimer(PullDelay, PullStream4Others(msg.hostLiveId :: msg.attendLiveId), 1.seconds)
+          timer.startSingleTimer(PullDelay, PullStream4Others(msg.hostLiveId :: msg.attendLiveId), 1.seconds)
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, audienceStatus)
 
         case msg: PullStream4Others =>
