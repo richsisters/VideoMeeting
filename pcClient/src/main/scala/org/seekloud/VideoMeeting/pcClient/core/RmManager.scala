@@ -664,8 +664,7 @@ object RmManager {
           audienceScene.autoReset()
           val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = audienceScene.getRoomInfo.roomId)
           mediaPlayer.stop(playId, audienceScene.autoReset)
-          println("-----------------"+ msg.hostLiveId + "========="+ msg.attendLiveId)
-          timer.startSingleTimer(PullDelay, PullStream4Others(List(msg.hostLiveId)), 1.seconds)
+          timer.startSingleTimer(PullDelay, PullStream4Others(msg.hostLiveId :: msg.attendLiveId.filter(_ != msg.audienceLiveInfo.liveId)), 1.seconds)
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, audienceStatus)
 
         case msg: PullStream4Others =>
