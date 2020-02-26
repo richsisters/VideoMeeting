@@ -175,7 +175,7 @@ object StreamPuller {
 
         case StopPull =>
           log.info(s"StreamPuller-$liveId stopped in init.")
-          parent ! LiveManager.PullerStopped
+          parent ! LiveManager.PullerStopped(liveId)
           Behaviors.stopped
 
         case x =>
@@ -236,12 +236,12 @@ object StreamPuller {
 
         case CloseSuccess =>
           log.info(s"StreamPuller-$liveId stopped.")
-          parent ! LiveManager.PullerStopped
+          parent ! LiveManager.PullerStopped(liveId)
           Behaviors.stopped
 
         case msg: StreamStop =>
           log.info(s"Pull stream-${msg.liveId} thread has been closed.")
-          parent ! LiveManager.PullerStopped
+          parent ! LiveManager.PullerStopped(liveId)
           Boot.addToPlatform {
             WarningDialog.initWarningDialog("播放中的流已被关闭!")
             hostScene.foreach(h => h.listener.stopMeeting())
@@ -288,7 +288,7 @@ object StreamPuller {
 
         case CloseSuccess =>
           log.info(s"StreamPuller-$liveId stopped.")
-          parent ! LiveManager.PullerStopped
+          parent ! LiveManager.PullerStopped(liveId)
           Behaviors.stopped
 
         case x =>

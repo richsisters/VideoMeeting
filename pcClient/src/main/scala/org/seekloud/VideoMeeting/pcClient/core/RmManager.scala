@@ -401,7 +401,7 @@ object RmManager {
           else
             Ids.getPlayId(audienceStatus = AudienceStatus.LIVE, roomId = roomInfo.get.roomId)
           mediaPlayer.stop(playId, hostScene.resetBack)
-          liveManager ! LiveManager.StopPull
+          liveManager ! LiveManager.StopPullAll
           liveManager ! LiveManager.StopPush
           liveManager ! LiveManager.DeviceOff
           Boot.addToPlatform {
@@ -457,7 +457,7 @@ object RmManager {
           else
             Ids.getPlayId(audienceStatus = AudienceStatus.LIVE, roomId = roomInfo.get.roomId)
           mediaPlayer.stop(playId, hostScene.resetBack)
-          liveManager ! LiveManager.StopPull
+          liveManager ! LiveManager.StopPullAll
           liveManager ! LiveManager.StopPush
           Boot.addToPlatform {
             hostScene.stopPackageLoss()
@@ -591,13 +591,13 @@ object RmManager {
 
           audienceStatus match {
             case AudienceStatus.LIVE =>
-              liveManager ! LiveManager.StopPull
+              liveManager ! LiveManager.StopPullAll
               val playId = Ids.getPlayId(audienceStatus, roomId = audienceScene.getRoomInfo.roomId)
               mediaPlayer.stop(playId, audienceScene.autoReset)
             case AudienceStatus.CONNECT =>
               assert(userInfo.nonEmpty)
               val userId = userInfo.get.userId
-              liveManager ! LiveManager.StopPull
+              liveManager ! LiveManager.StopPullAll
               val playId = Ids.getPlayId(audienceStatus, roomId = audienceScene.getRoomInfo.roomId)
               mediaPlayer.stop(playId, audienceScene.autoReset)
               liveManager ! LiveManager.StopPush
@@ -637,7 +637,7 @@ object RmManager {
               mediaPlayer.stop(playId, audienceScene.autoReset)
               mediaPlayer.needImage(msg.needImage)
               mediaPlayer.needSound(msg.needSound)
-              liveManager ! LiveManager.StopPull
+              liveManager ! LiveManager.StopPullAll
 
             case _ =>
               log.info("audienceState is record!!!")
@@ -697,7 +697,7 @@ object RmManager {
             mediaPlayer.stop(playId, audienceScene.autoReset)
 
             /*断开连线，停止推拉*/
-            liveManager ! LiveManager.StopPull
+            liveManager ! LiveManager.StopPullAll
             liveManager ! LiveManager.StopPush
             liveManager ! LiveManager.DeviceOff
 
