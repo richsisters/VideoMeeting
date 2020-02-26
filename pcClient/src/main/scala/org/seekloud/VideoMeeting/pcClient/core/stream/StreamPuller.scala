@@ -107,8 +107,6 @@ object StreamPuller {
           log.info(s"StreamPuller-$liveId init rtpClient.")
           msg.pullClient.pullStreamStart()
           timer.startSingleTimer(PullStartTimeOut, PullStartTimeOut, 5.seconds)
-          audienceScene.foreach(_.startPackageLoss())
-          hostScene.foreach(_.startPackageLoss())
           init(liveId, pullInfo, parent, mediaPlayer, audienceScene, hostScene, Some(msg.pullClient), index)
 
         case PullStreamReady =>
@@ -146,18 +144,6 @@ object StreamPuller {
           mediaPlayer.start(playId, videoPlayer, Right(inputStream), Some(pullInfo.gc), None)
 
           stashBuffer.unstashAll(ctx, pulling(liveId, parent, pullClient.get, mediaPlayer, sink, audienceScene, hostScene))
-
-        case GetLossAndBand =>
-          pullClient.foreach{ p =>
-            val info = {
-              p.getPackageLoss().map(i => i._1 -> PackageLossInfo(i._2.lossScale60, i._2.lossScale10, i._2.lossScale2))
-            }
-
-            val bandInfo = p.getBandWidth().map(i => i._1 -> BandWidthInfo(i._2.bandWidth60s, i._2.bandWidth10s, i._2.bandWidth2s))
-            audienceScene.foreach(_.drawPackageLoss(info, bandInfo))
-            hostScene.foreach(_.drawPackageLoss(info, bandInfo))
-          }
-          Behaviors.same
 
         case PullStreamPacketLoss =>
           log.info(s"StreamPuller-$liveId PullStreamPacketLoss.")
@@ -221,13 +207,6 @@ object StreamPuller {
             ctx.self ! SwitchBehavior("pulling", pulling(liveId, parent, pullClient, mediaPlayer, mediaSink, audienceScene, hostScene))
           }
           busy(liveId, parent, pullClient)
-
-        case GetLossAndBand =>
-          val info = pullClient.getPackageLoss().map(i => i._1 -> PackageLossInfo(i._2.lossScale60, i._2.lossScale10, i._2.lossScale2))
-          val bandInfo = pullClient.getBandWidth().map(i => i._1 -> BandWidthInfo(i._2.bandWidth60s, i._2.bandWidth10s, i._2.bandWidth2s))
-          audienceScene.foreach(_.drawPackageLoss(info, bandInfo))
-          hostScene.foreach(_.drawPackageLoss(info, bandInfo))
-          Behaviors.same
 
         case StopPull =>
           log.info(s"StreamPuller-$liveId is stopping.")

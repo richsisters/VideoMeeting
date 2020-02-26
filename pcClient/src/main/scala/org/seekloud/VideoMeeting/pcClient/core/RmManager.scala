@@ -126,7 +126,6 @@ object RmManager {
 
 
   /*观众*/
-  final case object GetPackageLoss extends RmCommand
 
   final case class ChangeOption4Audience(needImage: Boolean = true, needSound: Boolean = true) extends RmCommand
 
@@ -481,10 +480,6 @@ object RmManager {
           log.info(s"rmManager stopped in host.")
           Behaviors.stopped
 
-        case GetPackageLoss =>
-          liveManager ! LiveManager.GetPackageLoss
-          Behaviors.same
-
         case ForceExit(userId4Member, userName4Member) =>
           log.debug("send forceexit to roomManager...")
           sender.foreach(_ ! AuthProtocol.ForceExit(userId4Member, userName4Member))
@@ -714,10 +709,6 @@ object RmManager {
           }
 
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, audienceStatus = AudienceStatus.LIVE)
-
-        case GetPackageLoss =>
-          liveManager ! LiveManager.GetPackageLoss
-          Behaviors.same
 
         case StopSelf =>
           log.info(s"rmManager stopped in audience.")

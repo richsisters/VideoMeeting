@@ -115,10 +115,6 @@ class AudienceController(
         audienceScene.imgView.setLayoutY(0)
         audienceScene.imgView.setWidth(context.getStageWidth)
         audienceScene.imgView.setHeight(context.getStageHeight)
-        audienceScene.statisticsCanvas.setLayoutX(0)
-        audienceScene.statisticsCanvas.setLayoutY(0)
-        audienceScene.statisticsCanvas.setWidth(context.getStageWidth)
-        audienceScene.statisticsCanvas.setHeight(context.getStageHeight)
         audienceScene.gc.drawImage(audienceScene.backImg, 0, 0, context.getStageWidth, context.getStageHeight)
         audienceScene.isFullScreen = true
       }
@@ -128,8 +124,6 @@ class AudienceController(
       if (audienceScene.isFullScreen) {
         audienceScene.imgView.setWidth(Constants.DefaultPlayer.width)
         audienceScene.imgView.setHeight(Constants.DefaultPlayer.height)
-        audienceScene.statisticsCanvas.setWidth(Constants.DefaultPlayer.width)
-        audienceScene.statisticsCanvas.setHeight(Constants.DefaultPlayer.height)
         audienceScene.addAllElement()
         context.getStage.setFullScreen(false)
         audienceScene.isFullScreen = false
@@ -138,10 +132,6 @@ class AudienceController(
 
     override def changeOption(needImage: Boolean, needSound: Boolean): Unit = {
       rmManager ! RmManager.ChangeOption4Audience(needImage, needSound)
-    }
-
-    override def ask4Loss(): Unit = {
-      rmManager ! RmManager.GetPackageLoss
     }
 
     override def continuePlayRec(recordInfo: RecordInfo): Unit = {

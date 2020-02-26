@@ -42,8 +42,6 @@ object LiveManager {
 
   sealed trait LiveCommand
 
-  final case object GetPackageLoss extends LiveCommand
-
   private case class ChildDead[U](name: String, childRef: ActorRef[U]) extends LiveCommand
 
   final case class DevicesOn(gc: GraphicsContext, isJoin: Boolean = false, callBackFunc: Option[() => Unit] = None) extends LiveCommand
@@ -175,12 +173,6 @@ object LiveManager {
             timer.startSingleTimer(PULL_RETRY_TIMER_KEY, msg, 100.millis)
             Behaviors.same
           }
-
-        case GetPackageLoss =>
-          streamPuller.foreach { s =>
-            s._2 ! StreamPuller.GetLossAndBand
-          }
-          Behaviors.same
 
         case msg: StopPull =>
           log.info(s"LiveManager stop puller")

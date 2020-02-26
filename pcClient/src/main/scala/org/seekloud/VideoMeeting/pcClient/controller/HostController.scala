@@ -77,8 +77,6 @@ class HostController(
 
         hostScene.liveImage.setWidth(context.getStageWidth)
         hostScene.liveImage.setHeight(context.getStageHeight)
-        hostScene.statisticsCanvas.setWidth(context.getStageWidth)
-        hostScene.statisticsCanvas.setHeight(context.getStageHeight)
         hostScene.gc.drawImage(hostScene.backImg, 0, 0, context.getStageWidth, context.getStageWidth)
 
         hostScene.isFullScreen = true
@@ -89,8 +87,6 @@ class HostController(
       if (hostScene.isFullScreen) {
         hostScene.liveImage.setWidth(Constants.DefaultPlayer.width)
         hostScene.liveImage.setHeight(Constants.DefaultPlayer.height)
-        hostScene.statisticsCanvas.setWidth(Constants.DefaultPlayer.width)
-        hostScene.statisticsCanvas.setHeight(Constants.DefaultPlayer.height)
         hostScene.gc.drawImage(hostScene.backImg, 0, 0, Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
 
         hostScene.addAllElement()
@@ -102,10 +98,6 @@ class HostController(
 
     override def changeOption(bit: Option[Int] = None, re: Option[String] = None, frameRate: Option[Int] = None, needImage: Boolean = true, needSound: Boolean = true): Unit = {
       rmManager ! RmManager.ChangeOption(bit, re, frameRate, needImage, needSound)
-    }
-
-    override def ask4Loss(): Unit = {
-      rmManager ! RmManager.GetPackageLoss
     }
 
     override def gotoInviteDialog(): Unit = {

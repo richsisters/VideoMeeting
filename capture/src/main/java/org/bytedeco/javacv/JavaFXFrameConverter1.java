@@ -126,4 +126,3 @@ public abstract class JavaFXFrameConverter1 extends FrameConverter<Image> {
     }
 
 }
-

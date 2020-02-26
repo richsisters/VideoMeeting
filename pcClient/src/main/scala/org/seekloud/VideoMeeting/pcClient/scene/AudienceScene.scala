@@ -63,8 +63,6 @@ object AudienceScene {
 
     def changeOption(needImage: Boolean = true, needSound: Boolean = true)
 
-    def ask4Loss()
-
     def pausePlayRec(recordInfo: RecordInfo)
 
     def continuePlayRec(recordInfo: RecordInfo)
@@ -84,16 +82,6 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
   private val timeline = new Timeline()
 
   val audAttendList: ObservableList[AttendList] = FXCollections.observableArrayList()
-
-  def startPackageLoss(): Unit = {
-    log.info("start to get package loss.")
-    timeline.setCycleCount(Animation.INDEFINITE)
-    val keyFrame = new KeyFrame(Duration.millis(2000), { _ =>
-      listener.ask4Loss()
-    })
-    timeline.getKeyFrames.add(keyFrame)
-    timeline.play()
-  }
 
   override def finalize(): Unit = {
     //    println("release")
@@ -158,8 +146,8 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
   val imgView = new Canvas(Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
   val gc: GraphicsContext = imgView.getGraphicsContext2D
 
-  val statisticsCanvas = new Canvas(Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
-  val ctx: GraphicsContext = statisticsCanvas.getGraphicsContext2D
+//  val statisticsCanvas = new Canvas(Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
+//  val ctx: GraphicsContext = statisticsCanvas.getGraphicsContext2D
 
   val backImg = new Image("img/background.jpg")
   gc.drawImage(backImg, 0, 0, gc.getCanvas.getWidth, gc.getCanvas.getHeight)
@@ -382,7 +370,7 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
     }
 
     val livePane = new StackPane()
-    livePane.getChildren.addAll(imgView, statisticsCanvas)
+    livePane.getChildren.addAll(imgView)
     livePane.setAlignment(Pos.BOTTOM_RIGHT)
     livePane.addEventHandler(MouseEvent.MOUSE_ENTERED, (_: MouseEvent) => {
       livePane.setAlignment(Pos.BOTTOM_RIGHT)
@@ -428,28 +416,11 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
 
   def removeAllElement(): Unit = {
     group.getChildren.clear()
-    fullScreenImage.getChildren.addAll(imgView, statisticsCanvas)
+    fullScreenImage.getChildren.addAll(imgView)
     fullScreenImage.setLayoutX(0)
     fullScreenImage.setLayoutY(0)
     group.getChildren.add(fullScreenImage)
   }
 
-  def drawPackageLoss(info: mutable.Map[String, PackageLossInfo], bandInfo: Map[String, BandWidthInfo]): Unit = {
-    ctx.save()
-    //    println(s"draw loss, ${ctx.getCanvas.getWidth}, ${ctx.getCanvas.getHeight}")
-    ctx.setFont(new Font("Comic Sans Ms", if(!isFullScreen) 10 else 20))
-    ctx.setFill(Color.WHITE)
-    val loss: Double = if (info.values.headOption.nonEmpty) info.values.head.lossScale2 else 0
-    val band: Double = if (bandInfo.values.headOption.nonEmpty) bandInfo.values.head.bandWidth2s else 0
-    val  CPUMemInfo= NetUsage.getCPUMemInfo
-    ctx.clearRect(0, 0, ctx.getCanvas.getWidth, ctx.getCanvas.getHeight)
-    CPUMemInfo.foreach { i =>
-      val (memPer, memByte, proName) = (i.memPer, i.memByte, i.proName)
-      ctx.fillText(f"内存占比：$memPer%.2f" + " % " + f"内存：$memByte" , statisticsCanvas.getWidth - 210, 15)
-    }
-    ctx.fillText(f"丢包率：$loss%.3f" + " %  " + f"带宽：$band%.2f" + " bit/s", 0, 15)
-    //    info.values.headOption.foreach(i => ctx.fillText(f"丢包率：${i.lossScale2}%.2f" + " %", Constants.DefaultPlayer.width / 5 * 4, 20))
-    ctx.restore()
-  }
 
 }

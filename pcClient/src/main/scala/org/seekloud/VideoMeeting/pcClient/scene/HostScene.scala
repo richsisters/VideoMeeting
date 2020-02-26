@@ -112,8 +112,6 @@ object HostScene {
 
     def changeOption(bit: Option[Int] = None, re: Option[String] = None, frameRate: Option[Int] = None, needImage: Boolean = true, needSound: Boolean = true)
 
-    def ask4Loss()
-
     def gotoInviteDialog()
 
     def exitMember(userId: Long, userName:String)
@@ -144,16 +142,6 @@ class HostScene(stage: Stage) {
   }
 
   private val timeline = new Timeline()
-
-  def startPackageLoss(): Unit = {
-    log.info("start to get package loss.")
-    timeline.setCycleCount(Animation.INDEFINITE)
-    val keyFrame = new KeyFrame(Duration.millis(2000), { _ =>
-      listener.ask4Loss()
-    })
-    timeline.getKeyFrames.add(keyFrame)
-    timeline.play()
-  }
 
   def stopPackageLoss(): Unit = {
     timeline.stop()
@@ -259,8 +247,8 @@ class HostScene(stage: Stage) {
   val connectionBg = new Image("img/connectionBg.jpg")
   gc.drawImage(backImg, 0, 0, Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
 
-  val statisticsCanvas = new Canvas(Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
-  val ctx: GraphicsContext = statisticsCanvas.getGraphicsContext2D
+//  val statisticsCanvas = new Canvas(Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
+//  val ctx: GraphicsContext = statisticsCanvas.getGraphicsContext2D
 
   val waitPulling = new Image("img/waitPulling.gif")
 
@@ -663,7 +651,7 @@ class HostScene(stage: Stage) {
     def createLivePane = {
       val livePane = new StackPane()
       livePane.setAlignment(Pos.BOTTOM_RIGHT)
-      livePane.getChildren.addAll(liveImage, statisticsCanvas)
+      livePane.getChildren.addAll(liveImage)
 
 
       livePane.addEventHandler(MouseEvent.MOUSE_ENTERED, (_: MouseEvent) => {
@@ -699,7 +687,7 @@ class HostScene(stage: Stage) {
 
   def removeAllElement(): Unit = {
     group.getChildren.clear()
-    fullScreenImage.getChildren.addAll(liveImage, statisticsCanvas)
+    fullScreenImage.getChildren.addAll(liveImage)
     fullScreenImage.setLayoutX(0)
     fullScreenImage.setLayoutY(0)
     group.getChildren.add(fullScreenImage)
@@ -710,22 +698,5 @@ class HostScene(stage: Stage) {
     listener.startLive()
     liveBar.resetStartLiveTime(System.currentTimeMillis())
     isLive = true
-  }
-
-  def drawPackageLoss(info: mutable.Map[String, PackageLossInfo], bandInfo: Map[String, BandWidthInfo]): Unit = {
-    ctx.save()
-    ctx.setFont(new Font("Comic Sans Ms", if(!isFullScreen) 10 else 20))
-    ctx.setFill(Color.WHITE)
-    val loss: Double = if (info.values.headOption.nonEmpty) info.values.head.lossScale2 else 0
-    val band: Double = if (bandInfo.values.headOption.nonEmpty) bandInfo.values.head.bandWidth2s else 0
-    val  CPUMemInfo= NetUsage.getCPUMemInfo
-    ctx.clearRect(0, 0, ctx.getCanvas.getWidth, ctx.getCanvas.getHeight)
-    CPUMemInfo.foreach { i =>
-      val (memPer, memByte, proName) = (i.memPer, i.memByte, i.proName)
-      ctx.fillText(f"内存占比：$memPer%.2f" + " % " + f"内存：$memByte" , statisticsCanvas.getWidth - 210, 15)
-    }
-    ctx.fillText(f"丢包率：$loss%.3f" + " %  " + f"带宽：$band%.2f" + " bit/s", 0, 15)
-    //    info.values.headOption.foreach(i => ctx.fillText(f"丢包率：${i.lossScale2}%.2f" + " %", Constants.DefaultPlayer.width / 5 * 4, 20))
-    ctx.restore()
   }
 }
