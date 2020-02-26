@@ -14,11 +14,14 @@ import akka.util.Timeout
 import org.seekloud.VideoMeeting.processor.http.HttpService
 import akka.actor.typed.scaladsl.adapter._
 import akka.dispatch.MessageDispatcher
-import org.seekloud.VideoMeeting.processor.core_new.{StreamPullActor, RoomManager}
+import org.seekloud.VideoMeeting.processor.core_new.{RoomManager, StreamPullActor}
 import org.seekloud.VideoMeeting.rtpClient.Protocol.Command
+
 import scala.collection.mutable
 import scala.language.postfixOps
 import org.seekloud.VideoMeeting.processor.utils.CpuUtils
+
+import scala.util.{Failure, Success}
 /**
   * User: yuwei
   * Date: 7/15/2019
@@ -50,10 +53,17 @@ object Boot extends HttpService {
 
 	def main(args: Array[String]) {
 
+    val httpsBinding = Http().bindAndHandle(routes, httpInterface, httpPort)
 
-    Http().bindAndHandle(routes, httpInterface, httpPort)
-    log.info(s"Listen to the $httpInterface:$httpPort")
-    log.info("Done.")
+    httpsBinding.onComplete {
+      case Success(b) ⇒
+        val localAddress = b.localAddress
+        println(s"Server is listening on https://${localAddress.getHostName}:${localAddress.getPort}")
+      case Failure(e) ⇒
+        println(s"httpsBinding failed with ${e.getMessage}")
+        system.terminate()
+        System.exit(-1)
+    }
 
   }
 
