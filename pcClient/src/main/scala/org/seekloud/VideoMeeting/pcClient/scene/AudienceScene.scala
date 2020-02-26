@@ -166,12 +166,17 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
   val connectionBg = new Image("img/connectionBg.jpg")
 
   def resetBack(): Unit = {
-    gc.drawImage(connectionBg, 0, 0, gc.getCanvas.getWidth, gc.getCanvas.getHeight)
     val sWidth = gc.getCanvas.getWidth
     val sHeight = gc.getCanvas.getHeight
-    gc.setFont(Font.font(emojiFont, 25))
+    gc.drawImage(connectionBg, 0, 0, sWidth, sHeight)
+    gc.drawImage(waitPulling, 0, 0, sWidth / 2, sHeight / 2)
+    gc.drawImage(waitPulling, 0, sHeight / 2, sWidth / 2, sHeight / 2)
+    gc.drawImage(waitPulling, sWidth / 2, 0, sWidth / 2, sHeight / 2)
+    gc.drawImage(waitPulling, sWidth / 2, sHeight / 2, sWidth / 2, sHeight / 2)
+    gc.setFont(Font.font(25))
     gc.setFill(Color.BLACK)
-    gc.fillText(s"等待会议开启～", sWidth / 2 - 40, sHeight / 2)
+    //gc.fillText(s"录像中", liveImage.getWidth / 2 - 40, liveImage.getHeight / 8)
+   // gc.fillText(s"等待会议开启～", sWidth / 2 - 40, sHeight / 2)
   }
 
   def loadingBack(): Unit = {

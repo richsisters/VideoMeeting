@@ -616,6 +616,7 @@ object RmManager {
         case msg: JoinRoomReq =>
           assert(userInfo.nonEmpty)
           val userId = userInfo.get.userId
+          liveManager ! LiveManager.SwitchMediaMode(isJoin = true, audienceScene.resetBack)
           sender.foreach(_ ! JoinReq(userId, msg.roomId, ClientType.PC))
           Behaviors.same
 
@@ -655,10 +656,10 @@ object RmManager {
           log.info(s"Start join.")
           liveManager ! LiveManager.PushStream(msg.audienceLiveInfo.liveId, msg.audienceLiveInfo.liveCode)
           audienceScene.audienceStatus = AudienceStatus.CONNECT
-          audienceScene.autoReset()
+//         / audienceScene.autoReset()
           val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = audienceScene.getRoomInfo.roomId)
           mediaPlayer.stop(playId, audienceScene.autoReset)
-          timer.startSingleTimer(PullDelay, PullStream4Others(msg.hostLiveId :: msg.attendLiveId), 1.seconds)
+//          timer.startSingleTimer(PullDelay, PullStream4Others(msg.hostLiveId :: msg.attendLiveId), 1.seconds)
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, audienceStatus)
 
         case msg: PullStream4Others =>
