@@ -1,8 +1,0 @@
-[0m[[0m[33mwarn[0m] [0m[0m/Users/chenzhishuai/IdeaProjects/VideoMeeting/capture/src/main/scala/org/seekloud/VideoMeeting/capture/sdk/DeviceUtil.scala:302:14: patterns after a variable pattern cannot match (SLS 8.1.1)[0m
-[0m[[0m[33mwarn[0m] [0m[0m        case x@_ =>[0m
-[0m[[0m[33mwarn[0m] [0m[0m             ^[0m
-[0m[[0m[33mwarn[0m] [0m[0m/Users/chenzhishuai/IdeaProjects/VideoMeeting/capture/src/main/scala/org/seekloud/VideoMeeting/capture/sdk/DeviceUtil.scala:305:16: unreachable code due to variable pattern 'x' on line 302[0m
-[0m[[0m[33mwarn[0m] [0m[0m        case _ =>[0m
-[0m[[0m[33mwarn[0m] [0m[0m               ^[0m
-[0m[[0m[33mwarn[0m] [0m[0mthere was one deprecation warning (since 2.11.0); re-run with -deprecation for details[0m
-[0m[[0m[33mwarn[0m] [0m[0mthree warnings found[0m
