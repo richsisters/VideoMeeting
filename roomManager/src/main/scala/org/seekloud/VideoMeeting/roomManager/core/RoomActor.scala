@@ -267,7 +267,7 @@ object RoomActor {
                     liveInfoMap.put(userId4Audience, rsp.liveInfo)
                     val audienceInfo = AudienceInfo(userId4Audience, userInfoOpt.get.userName, userInfoOpt.get.headImg, rsp.liveInfo.liveId)
                     log.debug("向除该用户以外的参会者群发该用户信息....")
-                    dispatchTo(subscribers.filter(_._1._1 != userId4Audience).keys.toList, AudienceJoinRsp(Some(audienceInfo)))
+                    dispatch(AudienceJoinRsp(Some(audienceInfo)))
                     log.debug("向该用户发送JoinRsp...")
                     dispatchTo(List((userId4Audience, false)), JoinRsp(roomInfo.rtmp, Some(rsp.liveInfo), liveInfoMap.map(_._2.liveId).toList))
                   } else {
@@ -359,8 +359,25 @@ object RoomActor {
         Behaviors.same
 
       case StartMeetingRecord =>
-        ProcessorClient.newConnect(roomId, roomInfo.rtmp.getOrElse(""), liveInfoMap.values.map(_.liveId).toList, startTime)
-        idle(roomInfo, liveInfoMap, subscribers, startTime, true)
+        val pcRes = ProcessorClient.newConnect(roomId, roomInfo.rtmp.getOrElse(""), liveInfoMap.values.map(_.liveId).toList, startTime)
+        pcRes.map{
+          case Right(rsp) =>
+            if(rsp.errCode == 0){
+              ctx.self ! SwitchBehavior("idle", idle(roomInfo, liveInfoMap, subscribers, startTime, true))
+            } else{
+              log.debug(s"send msg to processor error, ${rsp.msg}")
+              ctx.self ! SwitchBehavior("idle", idle(roomInfo, liveInfoMap, subscribers, startTime, false))
+              dispatchTo(List((userId, false)), StartMeetingRsp("开启录像失败，processor暂未准备好"))
+            }
+
+          case Left(e) =>
+            log.debug(s"send msg to processor error, $e")
+            ctx.self ! SwitchBehavior("idle", idle(roomInfo, liveInfoMap, subscribers, startTime, false))
+            dispatchTo(List((userId, false)), StartMeetingRsp("开启录像失败，解析问题"))
+
+        }
+        switchBehavior(ctx, "busy", busy(), InitTime, TimeOut("busy"))
+
 
       case PingPackage =>
         Behaviors.same

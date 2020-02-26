@@ -97,6 +97,8 @@ object AuthProtocol {
 
   case object StartMeetingRecord extends WsMsgHost //开始会议录像
 
+  case class StartMeetingRsp(msg: String) extends WsMsgRm2Host
+
   /*邀请好友*/
   case class Invite(
                      email: String,

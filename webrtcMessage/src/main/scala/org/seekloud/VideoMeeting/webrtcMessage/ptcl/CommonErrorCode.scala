@@ -41,7 +41,7 @@ object CommonErrorCode{
 
   def sessionErrorRsp(msg: String) = ErrorRsp(1001320, msg)
 
-  def checkUserAutheiaityErrorRsp(msg: String) = ErrorRsp(1001404, msg)
+  def checkUserAuVideoMeetingityErrorRsp(msg: String) = ErrorRsp(1001404, msg)
 
   def dbErrorRsp(msg:String) = ErrorRsp(10001012,msg)
 
