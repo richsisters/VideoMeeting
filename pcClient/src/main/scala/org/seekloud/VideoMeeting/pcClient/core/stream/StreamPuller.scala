@@ -136,7 +136,10 @@ object StreamPuller {
           val inputStream = Channels.newInputStream(source)
           audienceScene.foreach(_.autoReset())
           hostScene.foreach(_.resetBack())
-          val playId = Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId)
+          val time = msg.liveIds.length
+          val playId = if(time == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
+          println("okokokokokoko"+ time + playId)
+//          val playId = Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId)
           mediaPlayer.setTimeGetter(playId, pullClient.get.getServerTimestamp)
           val videoPlayer = ctx.spawn(VideoPlayer.create(playId, audienceScene, None, None), s"videoPlayer$playId")
           mediaPlayer.start(playId, videoPlayer, Right(inputStream), Some(pullInfo.gc), None)

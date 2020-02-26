@@ -196,9 +196,16 @@ object ImageActor {
       val sH = gc.getCanvas.getHeight
       val w = img.getWidth
       val h = img.getHeight
-      if (id.contains("-")) { //连线状态
+      if (id.contains("--")) { //三人连线状态
+//        if (w / sW > h / sH) {
+          gc.drawImage(img, 0, sH / 2, sW / 2, (h * sW / w) / 2)
+//        } else {
+//          gc.drawImage(img, (sW - w * sH / h) / 2 + sW / 2, 0, (w * sH / h) / 2, sH / 2)
+//        }
+
+      }else if (id.contains("-")) { //连线状态
         if (w / sW > h / sH) {
-          gc.drawImage(img, sW / 2, 0, sW / 2, (h * sW / w) / 2)
+          gc.drawImage(img, sW / 2, 0, sW / 2, sH / 2)
         } else {
           gc.drawImage(img, (sW - w * sH / h) / 2 + sW / 2, 0, (w * sH / h) / 2, sH / 2)
         }

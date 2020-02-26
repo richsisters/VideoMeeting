@@ -64,7 +64,7 @@ object Constants {
   object AudienceStatus {
     val LIVE = 0
     val CONNECT = 1
-    val RECORD = 2
+    val CONNECT2Third = 2
   }
 
   object WindowStatus{
