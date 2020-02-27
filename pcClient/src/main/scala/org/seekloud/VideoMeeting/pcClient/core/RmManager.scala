@@ -21,7 +21,6 @@ import org.seekloud.VideoMeeting.pcClient.Boot.{executor, materializer, schedule
 import org.seekloud.VideoMeeting.pcClient.common.Constants.{AudienceStatus, HostStatus}
 import org.seekloud.VideoMeeting.pcClient.common._
 import org.seekloud.VideoMeeting.pcClient.component.WarningDialog
-import org.seekloud.VideoMeeting.pcClient.core.RmManager.PullStream4Others
 import org.seekloud.VideoMeeting.pcClient.core.stream.LiveManager.PullInfo
 import org.seekloud.VideoMeeting.pcClient.core.stream.LiveManager
 import org.seekloud.VideoMeeting.pcClient.scene.{AudienceScene, HomeScene, HostScene, RoomScene}
