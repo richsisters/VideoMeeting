@@ -652,7 +652,7 @@ object RmManager {
           val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = audienceScene.getRoomInfo.roomId)
           mediaPlayer.stop(playId, audienceScene.autoReset)
           timer.startSingleTimer(PullDelay, PullStream4Others(msg.hostLiveId :: msg.attendLiveId.filter(_ != msg.audienceLiveInfo.liveId)), 1.seconds)
-          audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, audienceStatus)
+          audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, AudienceStatus.CONNECT)
 
         case msg: PullStream4Others =>
           timer.cancel(PullDelay)
@@ -696,7 +696,7 @@ object RmManager {
             audienceScene.audienceStatus = AudienceStatus.LIVE
 
             /*停止播放rtp混流*/
-            val playId = Ids.getPlayId(AudienceStatus.CONNECT, roomId = audienceScene.getRoomInfo.roomId)
+            val playId = Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = audienceScene.getRoomInfo.roomId)
             mediaPlayer.stop(playId, audienceScene.autoReset)
 
             /*断开连线，停止推拉*/
@@ -705,11 +705,11 @@ object RmManager {
             liveManager ! LiveManager.DeviceOff
 
             /*恢复主播播放*/
-            val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
-            liveManager ! LiveManager.PullStream(audienceScene.liveId4Live.get, pullInfo = info)
+//            val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
+//            liveManager ! LiveManager.PullStream(audienceScene.liveId4Live.get, pullInfo = info)
           }
 
-          audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, audienceStatus = AudienceStatus.LIVE)
+          audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, AudienceStatus.LIVE)
 
         case StopSelf =>
           log.info(s"rmManager stopped in audience.")
