@@ -151,6 +151,8 @@ object RmManager {
 
   final case class ContinuePlayRec(recordInfo: RecordInfo) extends RmCommand //继续播放录像
 
+  final case class AudienceExit(liveId: String) extends RmCommand
+
   final case object MeetingFinished extends RmCommand
 
   private object ASK4STATE_RETRY_TIMER_KEY
@@ -440,6 +442,14 @@ object RmManager {
           sender.foreach(_ ! StartMeetingRecord)
           Behaviors.same
 
+        case msg: AudienceExit =>
+          log.info(s"${ctx.self} receive a msg ${msg}")
+          liveManager ! LiveManager.StopPullAll(msg.liveId)
+          val playId = Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT, roomId = roomInfo.get.roomId)
+          //val playId = Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT2Third, roomId = roomInfo.get.roomId)
+          mediaPlayer.stop(playId, hostScene.resetLoading)
+          Behaviors.same
+
         case HostFinishMeeting => //主持人结束会议，房间内所有流都停止
           log.debug(s"videoMeeting ${roomInfo.get.roomId} stop.")
           timer.cancel(HeartBeat)
@@ -667,6 +677,15 @@ object RmManager {
           liveManager ! LiveManager.PullStream(msg.liveId, pullInfo = info, audienceScene = Some(audienceScene))
           Behaviors.same
 
+        case msg: AudienceExit =>
+          log.info(s"${ctx.self} receive a msg $msg")
+         // val playId = Ids.getPlayId(AudienceStatus.CONNECT, roomId = audienceScene.getRoomInfo.roomId) //fixme 判断需要停掉的player的位置
+          val playId = Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = audienceScene.getRoomInfo.roomId)
+          mediaPlayer.stop(playId, audienceScene.loadingBack)
+          liveManager ! LiveManager.StopPull(msg.liveId)
+          Behaviors.same
+
+
         case MeetingFinished =>
           timer.cancel(HeartBeat)
           timer.cancel(PingTimeOut)
@@ -703,9 +722,6 @@ object RmManager {
             liveManager ! LiveManager.StopPush
             liveManager ! LiveManager.DeviceOff
 
-            /*恢复主播播放*/
-//            val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
-//            liveManager ! LiveManager.PullStream(audienceScene.liveId4Live.get, pullInfo = info)
           }
 
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, AudienceStatus.LIVE)
