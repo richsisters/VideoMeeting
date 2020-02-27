@@ -670,8 +670,6 @@ object RmManager {
 
         case msg: OtherAudienceJoin =>
           log.info(s"${ctx.self} receive a msg $msg")
-          val playId = Ids.getPlayId(AudienceStatus.CONNECT, roomId = audienceScene.getRoomInfo.roomId)
-          mediaPlayer.stop(playId, audienceScene.autoReset)
           val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
           liveManager ! LiveManager.PullStream(msg.liveId, pullInfo = info, audienceScene = Some(audienceScene))
           Behaviors.same
