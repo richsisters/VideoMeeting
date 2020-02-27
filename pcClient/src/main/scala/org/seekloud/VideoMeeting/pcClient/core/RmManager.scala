@@ -458,10 +458,6 @@ object RmManager {
 
         case msg: JoinBegin =>
           log.debug(s"======== ${msg.audienceInfo.userName} join begin")
-          if(hostStatus == HostStatus.CONNECT){
-            val playId = Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT, roomId = roomInfo.get.roomId)
-            mediaPlayer.stop(playId, hostScene.resetBack)
-          }
           val info = PullInfo(roomInfo.get.roomId,hostScene.gc)
           liveManager ! LiveManager.PullStream(msg.audienceInfo.liveId, pullInfo = info)
           if(hostStatus == HostStatus.LIVE)
