@@ -156,8 +156,11 @@ class AudienceController(
 
 
         case msg: JoinRsp =>
+          assert(RmManager.userInfo.nonEmpty)
           if (msg.errCode == 0) {
             rmManager ! RmManager.StartJoin(msg.hostLiveId.get, msg.joinInfo.get, msg.attendInfo)
+            audienceScene.updateAttendList(RmManager.userInfo.get.userId, RmManager.userInfo.get.userName, true)
+
           } else{
             WarningDialog.initWarningDialog(msg.msg)
             audienceScene.hasReqJoin = false
