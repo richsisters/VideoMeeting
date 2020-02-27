@@ -655,8 +655,9 @@ object RmManager {
           val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = audienceScene.getRoomInfo.roomId)
           mediaPlayer.stop(playId, audienceScene.autoReset)
           timer.startSingleTimer(PullDelay, RmManager.PullStream4Host(msg.hostLiveId), 1.seconds)
-          if(msg.attendLiveId.nonEmpty){ //后加入的用户先拉取主持人的流，再拉取另外参会者的流
-            timer.startSingleTimer(PullDelay, RmManager.OtherAudienceJoin(msg.attendLiveId.filter(_ != msg.audienceLiveInfo.liveId).head), 2.seconds)
+          val otherLiveId = msg.attendLiveId.filter(_ != msg.audienceLiveInfo.liveId)
+          if(otherLiveId.nonEmpty){ //后加入的用户先拉取主持人的流，再拉取另外参会者的流
+            timer.startSingleTimer(PullDelay, RmManager.OtherAudienceJoin(otherLiveId.head), 2.seconds)
           }
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, audienceStatus = AudienceStatus.CONNECT)
 
