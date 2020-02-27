@@ -133,8 +133,6 @@ object RmManager {
 
   final case object AudienceWsEstablish extends RmCommand
 
-//  final case class SendComment(comment: Comment) extends RmCommand
-
   final case class JoinRoomReq(roomId: Long) extends RmCommand
 
   final case class StartJoin(hostLiveId: String, audienceLiveInfo: LiveInfo, attendLiveId: List[String]) extends RmCommand //开始和主播连线
@@ -152,6 +150,8 @@ object RmManager {
   final case class PausePlayRec(recordInfo: RecordInfo) extends RmCommand  //暂停播放录像
 
   final case class ContinuePlayRec(recordInfo: RecordInfo) extends RmCommand //继续播放录像
+
+  final case object MeetingFinished extends RmCommand
 
   private object ASK4STATE_RETRY_TIMER_KEY
 
@@ -436,8 +436,6 @@ object RmManager {
           Behaviors.same
 
         case HostStartMeetingRecord =>
-//          hostScene.resetBack()
-//          liveManager ! LiveManager.SwitchMediaMode(isJoin = true, reset = hostScene.resetBack)
           assert(roomInfo.nonEmpty)
           sender.foreach(_ ! StartMeetingRecord)
           Behaviors.same
@@ -447,11 +445,12 @@ object RmManager {
           timer.cancel(HeartBeat)
           timer.cancel(PingTimeOut)
           sender.foreach(_ ! CompleteMsgClient)
-          val playId = if(hostStatus == HostStatus.CONNECT)
-            Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT, roomId = roomInfo.get.roomId)
-          else
-            Ids.getPlayId(audienceStatus = AudienceStatus.LIVE, roomId = roomInfo.get.roomId)
-          mediaPlayer.stop(playId, hostScene.resetBack)
+          liveManager ! LiveManager.SwitchMediaMode(isJoin = false, hostScene.resetBack)
+          //          val playId = if(hostStatus == HostStatus.CONNECT)
+          //            Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT, roomId = roomInfo.get.roomId)
+          //          else
+          //            Ids.getPlayId(audienceStatus = AudienceStatus.LIVE, roomId = roomInfo.get.roomId)
+          //          mediaPlayer.stop(playId, hostScene.resetBack)
           liveManager ! LiveManager.StopPullAll
           liveManager ! LiveManager.StopPush
           System.gc()
@@ -668,9 +667,20 @@ object RmManager {
           liveManager ! LiveManager.PullStream(msg.liveId, pullInfo = info, audienceScene = Some(audienceScene))
           Behaviors.same
 
+        case MeetingFinished =>
+          timer.cancel(HeartBeat)
+          timer.cancel(PingTimeOut)
+          sender.foreach(_ ! CompleteMsgClient)
+          liveManager ! LiveManager.SwitchMediaMode(isJoin = false, audienceScene.resetBack)
+          liveManager ! LiveManager.StopPullAll
+          liveManager ! LiveManager.StopPush
+          System.gc()
+
+          Behavior.same
 
         case msg: ExitJoin =>
           log.debug("disconnection with host.")
+          liveManager ! LiveManager.SwitchMediaMode(isJoin = false, audienceScene.resetBack)
           if (audienceStatus == AudienceStatus.CONNECT) {
             sender.foreach(_ ! AudienceShutJoin(msg.roomId, msg.userId))
             ctx.self ! StopJoinAndWatch

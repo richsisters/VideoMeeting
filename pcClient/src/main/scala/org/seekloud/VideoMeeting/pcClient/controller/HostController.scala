@@ -126,11 +126,9 @@ class HostController(
     data match {
 
       case msg: HeatBeat =>
-//        log.debug(s"heartbeat: ${msg.ts}")
         rmManager ! HeartBeat
 
       case msg: StartLiveRsp =>
-//        log.debug(s"get StartLiveRsp: $msg")
         if (msg.errCode == 0) {
           rmManager ! RmManager.StartLive(msg.liveInfo.get.liveId, msg.liveInfo.get.liveCode)
         } else {
@@ -148,7 +146,6 @@ class HostController(
         //将该条信息展示在host页面(TableView)
         log.debug(s"Audience-${msg.userName} send join req.")
         Boot.addToPlatform {
-          println("okokoko" + msg.userName)
           hostScene.updateAudienceList(msg.userId, msg.userName)
         }
 
@@ -174,6 +171,11 @@ class HostController(
       case HostStopPushStream2Client =>
         Boot.addToPlatform {
           WarningDialog.initWarningDialog("会议结束，已通知所有参会者。")
+        }
+
+      case msg: StartMeetingRsp =>
+        Boot.addToPlatform{
+          WarningDialog.initWarningDialog(s"${msg.msg}")
         }
 
       case BanOnAnchor =>

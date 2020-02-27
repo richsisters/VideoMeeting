@@ -197,6 +197,7 @@ class AudienceController(
           Boot.addToPlatform {
             WarningDialog.initWarningDialog("主持人结束会议")
           }
+          rmManager ! RmManager.MeetingFinished
 
         case HostStopPushStream2Client =>
           Boot.addToPlatform({

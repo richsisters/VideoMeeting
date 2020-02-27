@@ -195,8 +195,8 @@ class HostScene(stage: Stage) {
   endButton.setOnAction{
     _ =>
       listener.stopMeeting()
+      connectionStateText.setText("会议已结束")
       WarningDialog.initWarningDialog("您结束了本次会议~")
-
   }
 
   val startBox = new HBox()
