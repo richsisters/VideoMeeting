@@ -3,7 +3,7 @@ package org.seekloud.VideoMeeting.pcClient.core
 import java.io.File
 
 import akka.Done
-import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor.typed.{ActorRef, Behavior, scaladsl}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes
@@ -77,7 +77,7 @@ object RmManager {
 
   final case class PullFromProcessor(newId:String) extends RmCommand
 
-  final case class PullStream4Others(liveId: List[String]) extends RmCommand
+  final case class PullStream4Host(liveId: String) extends RmCommand
 
   final case object BackToHome extends RmCommand
 
@@ -458,6 +458,10 @@ object RmManager {
 
         case msg: JoinBegin =>
           log.debug(s"======== ${msg.audienceInfo.userName} join begin")
+          if(hostStatus == HostStatus.CONNECT){
+            val playId = Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT, roomId = roomInfo.get.roomId)
+            mediaPlayer.stop(playId, hostScene.resetBack)
+          }
           val info = PullInfo(roomInfo.get.roomId,hostScene.gc)
           liveManager ! LiveManager.PullStream(msg.audienceInfo.liveId, pullInfo = info)
           if(hostStatus == HostStatus.LIVE)
@@ -650,19 +654,23 @@ object RmManager {
           audienceScene.autoReset()
           val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = audienceScene.getRoomInfo.roomId)
           mediaPlayer.stop(playId, audienceScene.autoReset)
-          timer.startSingleTimer(PullDelay, PullStream4Others(msg.hostLiveId :: msg.attendLiveId.filter(_ != msg.audienceLiveInfo.liveId)), 1.seconds)
-          audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, audienceStatus)
-
-        case msg: PullStream4Others =>
-          timer.cancel(PullDelay)
-          msg.liveId.foreach{ l =>
-            val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
-            liveManager ! LiveManager.PullStream(l, pullInfo = info, audienceScene = Some(audienceScene))
+          timer.startSingleTimer(PullDelay, RmManager.PullStream4Host(msg.hostLiveId), 1.seconds)
+          if(msg.attendLiveId.nonEmpty){ //后加入的用户先拉取主持人的流，再拉取另外参会者的流
+            timer.startSingleTimer(PullDelay, RmManager.OtherAudienceJoin(msg.attendLiveId.filter(_ != msg.audienceLiveInfo.liveId).head), 2.seconds)
           }
-          Behaviors.same
+          audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, audienceStatus = AudienceStatus.CONNECT)
+
+        case msg: PullStream4Host =>
+          timer.cancel(PullDelay)
+          val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
+          liveManager ! LiveManager.PullStream(msg.liveId, pullInfo = info, audienceScene = Some(audienceScene))
+          audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, audienceStatus = AudienceStatus.CONNECT)
+
 
         case msg: OtherAudienceJoin =>
           log.info(s"${ctx.self} receive a msg $msg")
+          val playId = Ids.getPlayId(AudienceStatus.CONNECT, roomId = audienceScene.getRoomInfo.roomId)
+          mediaPlayer.stop(playId, audienceScene.autoReset)
           val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
           liveManager ! LiveManager.PullStream(msg.liveId, pullInfo = info, audienceScene = Some(audienceScene))
           Behaviors.same
