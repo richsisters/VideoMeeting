@@ -12,6 +12,7 @@ import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
 import javax.imageio.ImageIO
 import org.bytedeco.javacv.{FFmpegFrameRecorder, Java2DFrameConverter}
+import org.seekloud.VideoMeeting.capture.Boot
 import org.seekloud.VideoMeeting.capture.sdk.MediaCapture.executor
 import org.seekloud.VideoMeeting.capture.protocol.Messages
 import org.seekloud.VideoMeeting.capture.protocol.Messages.{EncodeException, EncoderType}
@@ -130,12 +131,10 @@ object EncodeActor {
                   val ih = latestImage.frame.imageHeight
                   val bImg = imageConverter.convert(latestImage.frame)
                   try{
-                    val imgFile = new File("/Users/wang/IdeaProjects/VideoMeeting/capture/src/main/resources/img/noSound.png")
-                    if(imgFile.exists()){
-                      val noSoundImg = ImageIO.read(imgFile)
-                      bImg.getGraphics.drawImage(noSoundImg, iw * 7/8, ih * 7/8, iw/8, ih/8, null)
-                      encoder.record(imageConverter.convert(bImg))
-                    }
+                    val imgInput = Boot.getClass.getResourceAsStream("/img/noSound.png")
+                    val noSoundImg = ImageIO.read(imgInput)
+                    bImg.getGraphics.drawImage(noSoundImg, iw * 7/8, ih * 7/8, iw/8, ih/8, null)
+                    encoder.record(imageConverter.convert(bImg))
                   }catch {
                     case e:Exception =>
                       log.debug(s"file not found...$e")
@@ -153,11 +152,10 @@ object EncodeActor {
           } else{
             try{
               encoder.setTimestamp((frameNumber * (1000.0 / encoder.getFrameRate) * 1000).toLong)
-              val imgFile = new File("/Users/wang/IdeaProjects/VideoMeeting/capture/src/main/resources/img/noImage.png")
-              if(imgFile.exists()){
-                val noImageImg = ImageIO.read(imgFile)
-                encoder.record(imageConverter.convert(noImageImg))
-              }
+              val imgInput = Boot.getClass.getResourceAsStream("/img/noImage.png")
+              val noImageImg = ImageIO.read(imgInput)
+              encoder.record(imageConverter.convert(noImageImg))
+
             }catch {
               case e:Exception =>
                 log.debug(s"file not found...$e")
