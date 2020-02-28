@@ -165,8 +165,6 @@ object AuthProtocol {
                                     roomDec: String
                                   ) extends WsMsgRm2Audience
 
-  case object HostStopPushStream2Client extends WsMsgRm2Audience
-
   case class ForceExitRsp(userId: Long, userName: String, liveId: String) extends WsMsgRm2Audience//用户被主持人强制退出
 
   case class BanOnMemberRsp(userId: Long, image: Boolean, sound: Boolean) extends WsMsgRm2Audience//用户被主持人屏蔽声音或者图像
@@ -176,7 +174,7 @@ object AuthProtocol {
   /**
     * 所有用户
     **/
-  case class AudienceDisconnect(audienceLiveId: String) extends WsMsgRm //通知房间内所有用户，某参会者退出
+  case class AudienceDisconnect(userId: Long, audienceLiveId: String) extends WsMsgRm //通知房间内所有用户，某参会者退出
 
   case class AudienceJoinRsp(
                               joinInfo: Option[AudienceInfo] = None, //参会者者信息

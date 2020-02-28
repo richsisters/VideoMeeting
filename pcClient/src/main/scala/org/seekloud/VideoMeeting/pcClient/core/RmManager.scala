@@ -455,21 +455,17 @@ object RmManager {
           timer.cancel(HeartBeat)
           timer.cancel(PingTimeOut)
           sender.foreach(_ ! CompleteMsgClient)
-          liveManager ! LiveManager.SwitchMediaMode(isJoin = false, hostScene.resetBack)
-          //          val playId = if(hostStatus == HostStatus.CONNECT)
-          //            Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT, roomId = roomInfo.get.roomId)
-          //          else
-          //            Ids.getPlayId(audienceStatus = AudienceStatus.LIVE, roomId = roomInfo.get.roomId)
-          //          mediaPlayer.stop(playId, hostScene.resetBack)
+          liveManager ! LiveManager.SwitchMediaMode(isJoin = false, hostScene.resetLoading)
           liveManager ! LiveManager.StopPullAll
           liveManager ! LiveManager.StopPush
+          liveManager ! LiveManager.DeviceOff
           System.gc()
           hostBehavior(stageCtx, homeController, hostScene, hostController, liveManager, mediaPlayer, sender, hostStatus = HostStatus.LIVE)
 
         case msg: JoinBegin =>
           log.debug(s"======== ${msg.audienceInfo.userName} join begin")
           val info = PullInfo(roomInfo.get.roomId,hostScene.gc)
-          liveManager ! LiveManager.PullStream(msg.audienceInfo.liveId, pullInfo = info)
+          liveManager ! LiveManager.PullStream(msg.audienceInfo.liveId, pullInfo = info, hostScene = Some(hostScene))
           if(hostStatus == HostStatus.LIVE)
             hostBehavior(stageCtx, homeController, hostScene, hostController, liveManager, mediaPlayer, sender, HostStatus.CONNECT)
           else
@@ -680,9 +676,6 @@ object RmManager {
         case msg: AudienceExit =>
           log.info(s"${ctx.self} receive a msg $msg")
           println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-         // val playId = Ids.getPlayId(AudienceStatus.CONNECT, roomId = audienceScene.getRoomInfo.roomId) //fixme 判断需要停掉的player的位置
-//          val playId = Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = audienceScene.getRoomInfo.roomId)
-//          mediaPlayer.stop(playId, audienceScene.loadingBack)
           liveManager ! LiveManager.StopPull(msg.liveId)
           Behaviors.same
 
@@ -691,9 +684,10 @@ object RmManager {
           timer.cancel(HeartBeat)
           timer.cancel(PingTimeOut)
           sender.foreach(_ ! CompleteMsgClient)
-          liveManager ! LiveManager.SwitchMediaMode(isJoin = false, audienceScene.resetBack)
+          liveManager ! LiveManager.SwitchMediaMode(isJoin = false, audienceScene.loadingBack)
           liveManager ! LiveManager.StopPullAll
           liveManager ! LiveManager.StopPush
+          liveManager ! LiveManager.DeviceOff
           System.gc()
 
           Behavior.same
@@ -709,13 +703,12 @@ object RmManager {
 
         case StopJoinAndWatch =>
           assert(userInfo.nonEmpty)
-          println("+++++++++++++++++++++++")
           if (audienceStatus == AudienceStatus.CONNECT) {
 
             audienceScene.audienceStatus = AudienceStatus.LIVE
 
             /*停止播放rtp混流*/
-            val playId = Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = audienceScene.getRoomInfo.roomId)
+            val playId = Ids.getPlayId(AudienceStatus.CONNECT, roomId = audienceScene.getRoomInfo.roomId)
             mediaPlayer.stop(playId, audienceScene.autoReset)
 
             /*断开连线，停止推拉*/

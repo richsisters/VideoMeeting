@@ -158,7 +158,11 @@ object StreamPuller {
         case StopPull =>
           log.info(s"StreamPuller-$liveId stopped in init.")
           val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
-          mediaPlayer.stop(playId, audienceScene.get.resetBack)
+          if(audienceScene.nonEmpty){
+            mediaPlayer.stop(playId, audienceScene.get.resetBack)
+          } else if(hostScene.nonEmpty){
+            mediaPlayer.stop(playId, hostScene.get.resetBack)
+          }
           parent ! LiveManager.PullerStopped(liveId)
           Behaviors.stopped
 
@@ -208,7 +212,11 @@ object StreamPuller {
           log.info(s"StreamPuller-$liveId is stopping while pulling.")
           val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
           println("1111111111111111111111" + playId)
-          mediaPlayer.stop(playId, audienceScene.get.resetBack)
+          if(audienceScene.nonEmpty){
+            mediaPlayer.stop(playId, audienceScene.get.resetBack)
+          } else if(hostScene.nonEmpty){
+            mediaPlayer.stop(playId, hostScene.get.resetBack)
+          }
           try pullClient.close()
           catch {
             case  e: Exception =>
@@ -224,11 +232,6 @@ object StreamPuller {
         case msg: StreamStop =>
           log.info(s"Pull stream-${msg.liveId} thread has been closed.")
           parent ! LiveManager.PullerStopped(liveId)
-          Boot.addToPlatform {
-            WarningDialog.initWarningDialog("播放中的流已被关闭!")
-            hostScene.foreach(h => h.listener.stopMeeting())
-//            audienceScene.foreach(a => a.listener.quitJoin(a.getRoomInfo.roomId))
-          }
           Behaviors.stopped
 
         case PullStream =>
@@ -267,7 +270,11 @@ object StreamPuller {
         case StopPull =>
           log.info(s"StreamPuller-$liveId is stopping while busy.")
           val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
-          mediaPlayer.stop(playId, audienceScene.get.resetBack)
+          if(audienceScene.nonEmpty){
+            mediaPlayer.stop(playId, audienceScene.get.resetBack)
+          } else if(hostScene.nonEmpty){
+            mediaPlayer.stop(playId, hostScene.get.resetBack)
+          }
           try pullClient.close()
           catch {
             case  e: Exception =>
