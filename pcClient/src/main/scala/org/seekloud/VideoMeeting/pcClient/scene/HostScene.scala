@@ -244,13 +244,13 @@ class HostScene(stage: Stage) {
   def resetBack(): Unit = {
     val sWidth = gc.getCanvas.getWidth
     val sHeight = gc.getCanvas.getHeight
+    gc.setFill(Color.WHITE)
+    gc.fillRect(0 ,0, sWidth, sHeight)
     gc.drawImage(waitPulling, 0, 0, sWidth / 2, sHeight / 2)
     gc.drawImage(wait1, 0, sHeight / 2, sWidth / 2, sHeight / 2)
     gc.drawImage(wait2, sWidth / 2, 0, sWidth / 2, sHeight / 2)
     gc.drawImage(wait3, sWidth / 2, sHeight / 2, sWidth / 2, sHeight / 2)
     gc.setFont(Font.font(25))
-    gc.setFill(Color.BLACK)
-//    gc.fillText(s"录像中", liveImage.getWidth / 2 - 40, liveImage.getHeight / 8)
   }
 
 
