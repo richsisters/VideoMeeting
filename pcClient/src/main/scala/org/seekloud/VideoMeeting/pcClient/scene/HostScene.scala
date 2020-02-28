@@ -28,8 +28,6 @@ import javafx.util.Duration
 import org.seekloud.VideoMeeting.capture.sdk.DeviceUtil
 import org.seekloud.VideoMeeting.capture.sdk.DeviceUtil.VideoOption
 import org.seekloud.VideoMeeting.pcClient.component._
-import org.seekloud.VideoMeeting.pcClient.core.stream.StreamPuller.{BandWidthInfo, PackageLossInfo}
-import org.seekloud.VideoMeeting.pcClient.utils.{NetUsage, TimeUtil}
 
 import scala.collection.mutable
 
@@ -261,7 +259,7 @@ class HostScene(stage: Stage) {
     gc.drawImage(wait3, sWidth / 2, sHeight / 2, sWidth / 2, sHeight / 2)
     gc.setFont(Font.font(25))
     gc.setFill(Color.BLACK)
-    gc.fillText(s"录像中", liveImage.getWidth / 2 - 40, liveImage.getHeight / 8)
+//    gc.fillText(s"录像中", liveImage.getWidth / 2 - 40, liveImage.getHeight / 8)
   }
 
 

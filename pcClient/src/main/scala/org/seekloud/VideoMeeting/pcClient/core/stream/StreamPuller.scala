@@ -30,15 +30,9 @@ object StreamPuller {
 
   type PullCommand = Protocol.Command
 
-  case class PackageLossInfo(lossScale60: Double, lossScale10: Double, lossScale2: Double)
-
-  case class BandWidthInfo(bandWidth60s: Double, bandWidth10s: Double, bandWidth2s: Double)
-
   final case class InitRtpClient(pullClient: PullStreamClient) extends PullCommand
 
   final case object PullStartTimeOut extends PullCommand
-
-  final case object GetLossAndBand extends PullCommand
 
   final case object PullStream extends PullCommand
 
@@ -137,8 +131,6 @@ object StreamPuller {
           audienceScene.foreach(_.autoReset())
           hostScene.foreach(_.resetBack())
           val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
-          println("okokokokokoko"+ index + playId)
-//          val playId = Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId)
           mediaPlayer.setTimeGetter(playId, pullClient.get.getServerTimestamp)
           val videoPlayer = ctx.spawn(VideoPlayer.create(playId, audienceScene, None, None), s"videoPlayer$playId")
           mediaPlayer.start(playId, videoPlayer, Right(inputStream), Some(pullInfo.gc), None)
