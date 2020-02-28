@@ -30,15 +30,9 @@ object StreamPuller {
 
   type PullCommand = Protocol.Command
 
-  case class PackageLossInfo(lossScale60: Double, lossScale10: Double, lossScale2: Double)
-
-  case class BandWidthInfo(bandWidth60s: Double, bandWidth10s: Double, bandWidth2s: Double)
-
   final case class InitRtpClient(pullClient: PullStreamClient) extends PullCommand
 
   final case object PullStartTimeOut extends PullCommand
-
-  final case object GetLossAndBand extends PullCommand
 
   final case object PullStream extends PullCommand
 
