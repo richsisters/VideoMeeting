@@ -695,7 +695,7 @@ object CaptureManager {
   ) = {
     val childName = s"EncodeActor-$encodeType"
     ctx.child(childName).getOrElse {
-      val actor = ctx.spawn(EncodeActor.create(replyTo, encodeType, encoder, imageCache, false, false, debug, needTimeMark), childName, blockingDispatcher)
+      val actor = ctx.spawn(EncodeActor.create(replyTo, encodeType, encoder, imageCache, needImage, needSound, debug, needTimeMark), childName, blockingDispatcher)
       ctx.watchWith(actor, ChildDead(childName, actor))
       actor
     }.unsafeUpcast[EncodeActor.Command]
