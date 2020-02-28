@@ -71,6 +71,8 @@ object LiveManager {
 
   final case class PullerStopped(liveId: String) extends LiveCommand
 
+  final case class HostBan4Live(image: Boolean, sound: Boolean) extends LiveCommand with CaptureActor.CaptureCommand
+
   private object PUSH_RETRY_TIMER_KEY
 
   private object PULL_RETRY_TIMER_KEY
@@ -117,6 +119,10 @@ object LiveManager {
           Behaviors.same
 
         case msg: ChangeMediaOption =>
+          captureActor.foreach(_ ! msg)
+          Behaviors.same
+
+        case msg: HostBan4Live =>
           captureActor.foreach(_ ! msg)
           Behaviors.same
 

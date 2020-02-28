@@ -13,7 +13,7 @@ import org.seekloud.VideoMeeting.capture.protocol.Messages
 import org.seekloud.VideoMeeting.capture.protocol.Messages._
 import org.seekloud.VideoMeeting.capture.sdk.{DeviceUtil, MediaCapture}
 import org.seekloud.VideoMeeting.pcClient.Boot
-import org.seekloud.VideoMeeting.pcClient.core.stream.LiveManager.ChangeMediaOption
+import org.seekloud.VideoMeeting.pcClient.core.stream.LiveManager.{ChangeMediaOption, HostBan4Live}
 import org.slf4j.LoggerFactory
 
 import concurrent.duration._
@@ -181,6 +181,10 @@ object CaptureActor {
             drawActor.foreach(_ ! ReSet(msg.reset, offOrOn))
           }
           idle(frameRate, gc, isJoin, callBackFunc, Some(msg.reset), mediaCapture, reqActor, loopExecutor, imageLoop, drawActor)
+
+        case msg: HostBan4Live =>
+          reqActor.foreach(_ ! HostBan4Manager(msg.image, msg.sound))
+          Behaviors.same
 
         case StopCapture =>
           log.info(s"Media capture is stopping...")

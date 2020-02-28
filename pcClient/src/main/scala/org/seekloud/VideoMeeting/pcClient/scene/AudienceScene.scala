@@ -19,6 +19,7 @@ import javafx.scene.paint.Color
 import javafx.scene.text.{Font, Text}
 import javafx.util
 import javafx.util.Duration
+import org.seekloud.VideoMeeting.pcClient.Boot
 import org.seekloud.VideoMeeting.pcClient.common.Constants.AudienceStatus
 import org.seekloud.VideoMeeting.pcClient.component._
 import org.seekloud.VideoMeeting.pcClient.core.RmManager
@@ -115,7 +116,9 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
         if(imageToggleBtn.isSelected) Tooltip.install(imageToggleBtn, new Tooltip("点击关闭画面"))
         else  Tooltip.install(imageToggleBtn, new Tooltip("点击开启画面"))
       } else {
-        WarningDialog.initWarningDialog("会议中无法更改设置哦~")
+        Boot.addToPlatform{
+          WarningDialog.initWarningDialog("会议中无法更改设置哦~")
+        }
       }
   }
 
@@ -126,7 +129,9 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
         if(soundToggleBtn.isSelected) Tooltip.install(soundToggleBtn, new Tooltip("点击关闭声音"))
         else  Tooltip.install(soundToggleBtn, new Tooltip("点击开启声音"))
       } else {
-        WarningDialog.initWarningDialog("会议中无法更改设置哦~")
+        Boot.addToPlatform{
+          WarningDialog.initWarningDialog("会议中无法更改设置哦~")
+        }
       }
   }
 
@@ -182,9 +187,6 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
   scene.getStylesheets.add(
     this.getClass.getClassLoader.getResource("css/common.css").toExternalForm
     )
-  scene.setOnKeyPressed { e =>
-    if (e.getCode == javafx.scene.input.KeyCode.ESCAPE) listener.exitFullScreen(isRecord)
-  }
 
   def getScene: Scene = this.scene
 

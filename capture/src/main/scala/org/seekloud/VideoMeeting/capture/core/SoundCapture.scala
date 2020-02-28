@@ -68,7 +68,7 @@ object SoundCapture {
     audioBytes: Array[Byte],
     audioExecutor: Option[ScheduledThreadPoolExecutor] = None,
     audioLoop: Option[ScheduledFuture[_]] = None,
-    askFlag: Boolean = false,
+    askFlag: Boolean = false
   ): Behavior[Command] =
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
@@ -113,7 +113,6 @@ object SoundCapture {
 
         case AskSamples =>
           working(replyTo, line, encoders, frameRate, sampleRate, channels, sampleSize, audioBytes, audioExecutor, audioLoop, askFlag = true)
-
 
         case StopSample =>
           log.info(s"Media microphone stopped.")

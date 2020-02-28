@@ -338,6 +338,10 @@ object CaptureManager {
           encodeActorMap.remove(EncoderType.STREAM)
           Behaviors.same
 
+        case msg: HostBan4Manager =>
+          encodeActorMap.get(EncoderType.STREAM).foreach(_ ! EncodeActor.HostBan4Encode(msg.image, msg.sound))
+          Behaviors.same
+
         case msg: RecordToBiliBili =>
           log.info(s"Start record to bilibili")
           val streamEncoder = if (grabber.nonEmpty && line.isEmpty) { // image only
@@ -691,7 +695,7 @@ object CaptureManager {
   ) = {
     val childName = s"EncodeActor-$encodeType"
     ctx.child(childName).getOrElse {
-      val actor = ctx.spawn(EncodeActor.create(replyTo, encodeType, encoder, imageCache, needImage, needSound, debug, needTimeMark), childName, blockingDispatcher)
+      val actor = ctx.spawn(EncodeActor.create(replyTo, encodeType, encoder, imageCache, false, false, debug, needTimeMark), childName, blockingDispatcher)
       ctx.watchWith(actor, ChildDead(childName, actor))
       actor
     }.unsafeUpcast[EncodeActor.Command]

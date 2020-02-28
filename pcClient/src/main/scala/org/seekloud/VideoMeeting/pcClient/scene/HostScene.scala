@@ -233,7 +233,6 @@ class HostScene(stage: Stage) {
   val liveImage = new Canvas(Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
   val gc: GraphicsContext = liveImage.getGraphicsContext2D
   val backImg = new Image("img/background.jpg")
-  val connectionBg = new Image("img/connectionBg.jpg")
   gc.drawImage(backImg, 0, 0, Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
 
 //  val statisticsCanvas = new Canvas(Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
@@ -244,14 +243,12 @@ class HostScene(stage: Stage) {
   def resetBack(): Unit = {
     val sWidth = gc.getCanvas.getWidth
     val sHeight = gc.getCanvas.getHeight
-    gc.drawImage(connectionBg, 0, 0, sWidth, sHeight)
     gc.drawImage(waitPulling, 0, 0, sWidth / 2, sHeight / 2)
     gc.drawImage(waitPulling, 0, sHeight / 2, sWidth / 2, sHeight / 2)
     gc.drawImage(waitPulling, sWidth / 2, 0, sWidth / 2, sHeight / 2)
     gc.drawImage(waitPulling, sWidth / 2, sHeight / 2, sWidth / 2, sHeight / 2)
     gc.setFont(Font.font(25))
     gc.setFill(Color.BLACK)
-    gc.fillText(s"录像中", liveImage.getWidth / 2 - 40, liveImage.getHeight / 8)
   }
 
 

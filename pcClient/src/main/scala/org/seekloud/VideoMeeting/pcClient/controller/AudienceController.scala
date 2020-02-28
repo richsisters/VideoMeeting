@@ -156,22 +156,30 @@ class AudienceController(
           val userId = RmManager.userInfo.get.userId
           if(msg.userId == userId){
             if(msg.image){
-              WarningDialog.initWarningDialog(s"主持人屏蔽你的的画面")
+              Boot.addToPlatform{
+                WarningDialog.initWarningDialog(s"主持人屏蔽你的的画面")
+              }
               audienceScene.imageToggleBtn.setDisable(true)
               audienceScene.imageToggleBtn.setSelected(false)
             }
             if(msg.sound){
-              WarningDialog.initWarningDialog(s"主持人屏蔽你的画面")
+              Boot.addToPlatform{
+                WarningDialog.initWarningDialog(s"主持人屏蔽你的画面")
+              }
               audienceScene.soundToggleBtn.setDisable(true)
               audienceScene.soundToggleBtn.setSelected(false)
             }
-            rmManager ! RmManager.ChangeOption4Audience(!msg.image, !msg.sound)
+            rmManager ! RmManager.HostBan4Rm(!msg.image, !msg.sound)
           } else{
             if(msg.image){
-              WarningDialog.initWarningDialog(s"主持人屏蔽用户${msg.userId}的画面")
+              Boot.addToPlatform{
+                WarningDialog.initWarningDialog(s"主持人屏蔽用户${msg.userId}的画面")
+              }
             }
             if(msg.sound){
-              WarningDialog.initWarningDialog(s"主持人屏蔽用户${msg.userId}的画面")
+              Boot.addToPlatform{
+                WarningDialog.initWarningDialog(s"主持人屏蔽用户${msg.userId}的画面")
+              }
             }
           }
 

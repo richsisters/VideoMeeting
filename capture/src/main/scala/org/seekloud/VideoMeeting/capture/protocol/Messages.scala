@@ -79,5 +79,6 @@ object Messages {
 
   final case object StopRecordToBiliBili extends ReqCommand
 
+  final case class HostBan4Manager(image: Boolean, sound: Boolean) extends ReqCommand
 
 }

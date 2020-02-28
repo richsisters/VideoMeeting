@@ -1,6 +1,8 @@
 package org.seekloud.VideoMeeting.capture.core
 
+import java.awt.Image
 import java.awt.image.BufferedImage
+import java.io.File
 import java.nio.ShortBuffer
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -8,6 +10,7 @@ import java.util.concurrent.{LinkedBlockingDeque, ScheduledFuture, ScheduledThre
 
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
+import javax.imageio.ImageIO
 import org.bytedeco.javacv.{FFmpegFrameRecorder, Java2DFrameConverter}
 import org.seekloud.VideoMeeting.capture.sdk.MediaCapture.executor
 import org.seekloud.VideoMeeting.capture.protocol.Messages
@@ -43,6 +46,7 @@ object EncodeActor {
 
   final case object StopEncode extends Command
 
+  final case class HostBan4Encode(image:Boolean, sound:Boolean) extends Command
 
   def create(
     replyTo: ActorRef[Messages.ReplyToCommand],
@@ -114,36 +118,56 @@ object EncodeActor {
           working(replyTo, encodeType, encoder, imageCache, imageConverter, needImage, needSound, Some(loop), Some(encodeLoopExecutor), frameNumber)
 
         case EncodeLoop =>
-          if (needImage) {
+          if(needImage) {
             try {
               val latestImage = imageCache.peek()
-              if (latestImage != null) {
+              if (latestImage != null){
                 encoder.setTimestamp((frameNumber * (1000.0 / encoder.getFrameRate) * 1000).toLong)
-                if (!needTimeMark) {
+                if(needSound) {
                   encoder.record(latestImage.frame)
-                } else {
+                }else {
                   val iw = latestImage.frame.imageWidth
                   val ih = latestImage.frame.imageHeight
                   val bImg = imageConverter.convert(latestImage.frame)
-                  val ts = if (CaptureManager.timeGetter != null) CaptureManager.timeGetter() else System.currentTimeMillis()
-                  val date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:S").format(ts)
-                  bImg.getGraphics.drawString(date, iw / 10, ih / 10)
-                  encoder.record(imageConverter.convert(bImg))
+                  try{
+                    val imgFile = new File("/Users/wang/IdeaProjects/VideoMeeting/capture/src/main/resources/img/noSound.png")
+                    if(imgFile.exists()){
+                      val noSoundImg = ImageIO.read(imgFile)
+                      bImg.getGraphics.drawImage(noSoundImg, iw * 7/8, ih * 7/8, iw/8, ih/8, null)
+                      encoder.record(imageConverter.convert(bImg))
+                    }
+                  }catch {
+                    case e:Exception =>
+                      log.debug(s"file not found...$e")
+                  }
                 }
               }
-            } catch {
+            }  catch {
               case ex: Exception =>
                 log.error(s"[$encodeType] encode image frame error: $ex")
                 if(ex.getMessage.startsWith("av_interleaved_write_frame() error")){
-                  replyTo ! EncodeException(ex)
-                  ctx.self ! StopEncode
+                replyTo ! EncodeException(ex)
+                ctx.self ! StopEncode
                 }
+            }
+          } else{
+            try{
+              encoder.setTimestamp((frameNumber * (1000.0 / encoder.getFrameRate) * 1000).toLong)
+              val imgFile = new File("/Users/wang/IdeaProjects/VideoMeeting/capture/src/main/resources/img/noImage.png")
+              if(imgFile.exists()){
+                val noImageImg = ImageIO.read(imgFile)
+                encoder.record(imageConverter.convert(noImageImg))
+              }
+            }catch {
+              case e:Exception =>
+                log.debug(s"file not found...$e")
             }
           }
           working(replyTo, encodeType, encoder, imageCache, imageConverter, needImage, needSound, encodeLoop, encodeExecutor, frameNumber + 1)
 
         case msg: EncodeSamples =>
-          if (encodeLoop.nonEmpty) {
+//          log.debug(s"need sample $needSound")
+          if (encodeLoop.nonEmpty && needSound) {
             try {
               encoder.recordSamples(msg.sampleRate, msg.channel, msg.samples)
             } catch {
@@ -152,6 +176,10 @@ object EncodeActor {
             }
           }
           Behaviors.same
+
+        case msg: HostBan4Encode =>
+          log.debug(s"host ban image=${msg.image}, sound=${msg.sound}")
+          working(replyTo, encodeType, encoder, imageCache, imageConverter, needImage = msg.image, needSound = msg.sound, encodeLoop, encodeExecutor, frameNumber)
 
         case StopEncode =>
           log.info(s"encoding stopping...")

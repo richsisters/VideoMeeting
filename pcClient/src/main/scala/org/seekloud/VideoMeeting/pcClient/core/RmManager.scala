@@ -152,6 +152,8 @@ object RmManager {
 
   final case object MeetingFinished extends RmCommand
 
+  final case class HostBan4Rm(image: Boolean, sound: Boolean) extends RmCommand
+
   private object ASK4STATE_RETRY_TIMER_KEY
 
 
@@ -451,7 +453,6 @@ object RmManager {
           //          mediaPlayer.stop(playId, hostScene.resetBack)
           liveManager ! LiveManager.StopPullAll
           liveManager ! LiveManager.StopPush
-          hostController.isLive = false
           System.gc()
           hostBehavior(stageCtx, homeController, hostScene, hostController, liveManager, mediaPlayer, sender, hostStatus = HostStatus.LIVE)
 
@@ -677,6 +678,11 @@ object RmManager {
           }
 
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, AudienceStatus.LIVE)
+
+        case msg: HostBan4Rm =>
+          log.debug(s"now the setting is image:${msg.image}, sound:${msg.sound}")
+          liveManager ! LiveManager.HostBan4Live(msg.image, msg.sound)
+          Behaviors.same
 
         case StopSelf =>
           log.info(s"rmManager stopped in audience.")
