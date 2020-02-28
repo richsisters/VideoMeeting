@@ -257,7 +257,7 @@ class HostScene(stage: Stage) {
   def resetLoading(): Unit = {
     val sWidth = gc.getCanvas.getWidth
     val sHeight = gc.getCanvas.getHeight
-    gc.drawImage(waitPulling, 0, 0, sWidth, sHeight)
+    gc.drawImage(backImg, 0, 0, sWidth, sHeight)
   }
 
   /*屏幕下方功能条*/

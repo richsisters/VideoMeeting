@@ -174,7 +174,7 @@ object RoomActor {
               log.debug(s"${ctx.self.path}用户离开房间roomId=$roomId,userId=$userId")
               subscribe.remove((userId, temporary))
               if(liveInfoMap.contains(userId)){
-                dispatch(subscribe)(AuthProtocol.AudienceDisconnect(liveInfoMap(userId).liveId))
+                dispatch(subscribe)(AuthProtocol.AudienceDisconnect(userId, liveInfoMap(userId).liveId))
               }
               }
             }
@@ -326,7 +326,7 @@ object RoomActor {
         log.debug(s"${ctx.self.path} 退出了会议...")
         if(liveInfoMap.contains(userId)){
           liveInfoMap.remove(userId)
-          dispatchTo(subscribers.filter(_._1._1 != userId).keys.toList, AuthProtocol.AudienceDisconnect(liveInfoMap(userId).liveId))
+          dispatchTo(subscribers.filter(_._1._1 != userId).keys.toList, AuthProtocol.AudienceDisconnect(userId, liveInfoMap(userId).liveId))
         }
         Behaviors.same
 

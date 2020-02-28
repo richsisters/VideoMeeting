@@ -143,11 +143,6 @@ class HostController(
           }
         }
 
-      case HostStopPushStream2Client =>
-        Boot.addToPlatform {
-          WarningDialog.initWarningDialog("会议结束，已通知所有参会者。")
-        }
-
       case msg: StartMeetingRsp =>
         Boot.addToPlatform{
           WarningDialog.initWarningDialog(s"${msg.msg}")
@@ -158,6 +153,13 @@ class HostController(
           WarningDialog.initWarningDialog("你的会议已被管理员禁止！")
         }
         rmManager ! RmManager.BackToHome
+
+      case msg: AudienceDisconnect =>
+        Boot.addToPlatform {
+          WarningDialog.initWarningDialog(s"用户${msg.userId}退出了会议室")
+        }
+        rmManager ! RmManager.AudienceExit(msg.audienceLiveId)
+
 
       case x =>
         log.warn(s"host recv unknown msg from rm: $x")

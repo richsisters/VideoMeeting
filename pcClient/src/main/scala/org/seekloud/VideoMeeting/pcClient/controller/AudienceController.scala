@@ -207,11 +207,6 @@ class AudienceController(
           audienceScene.isLive = false
           rmManager ! RmManager.MeetingFinished
 
-        case HostStopPushStream2Client =>
-          Boot.addToPlatform({
-            WarningDialog.initWarningDialog("主播已停止直播~")
-          })
-
         case msg: AudienceJoinRsp =>
           if (msg.errCode == 0) {
             //显示连线观众信息
@@ -229,6 +224,16 @@ class AudienceController(
               WarningDialog.initWarningDialog(s"参会者加入出错:${msg.msg}")
             }
           }
+
+        case msg: AudienceDisconnect =>
+          WarningDialog.initWarningDialog(s"用户${msg.userId}退出会议")
+          if(RmManager.userInfo.nonEmpty && msg.userId == RmManager.userInfo.get.userId){
+            rmManager ! RmManager.StopJoinAndWatch
+          } else if(RmManager.userInfo.nonEmpty && msg.userId != RmManager.userInfo.get.userId){
+            rmManager ! RmManager.AudienceExit(msg.audienceLiveId)
+          }
+         // audienceScene.updateAttendList(msg.userId, "", false)
+
 
         case x =>
           log.warn(s"audience recv unknown msg from rm: $x")
