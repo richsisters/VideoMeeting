@@ -134,13 +134,8 @@ object EncodeActor {
                   val iw = latestImage.frame.imageWidth
                   val ih = latestImage.frame.imageHeight
                   val bImg = imageConverter.convert(latestImage.frame)
-                  try{
-                    bImg.getGraphics.drawImage(noSoundImg, iw * 7/8, ih * 7/8, iw/8, ih/8, null)
-                    encoder.record(imageConverter.convert(bImg))
-                  }catch {
-                    case e:Exception =>
-                      log.debug(s"file not found...$e")
-                  }
+                  bImg.getGraphics.drawImage(noSoundImg, iw * 7/8, ih * 7/8, iw/8, ih/8, null)
+                  encoder.record(imageConverter.convert(bImg))
                 }
               }
             }  catch {
@@ -152,13 +147,8 @@ object EncodeActor {
                 }
             }
           } else{
-            try{
-              encoder.setTimestamp((frameNumber * (1000.0 / encoder.getFrameRate) * 1000).toLong)
-              encoder.record(imageConverter.convert(noImageImg))
-            }catch {
-              case e:Exception =>
-                log.debug(s"file not found...$e")
-            }
+            encoder.setTimestamp((frameNumber * (1000.0 / encoder.getFrameRate) * 1000).toLong)
+            encoder.record(imageConverter.convert(noImageImg))
           }
           working(replyTo, encodeType, encoder, imageCache, imageConverter, needImage, needSound, encodeLoop, encodeExecutor, frameNumber + 1)
 
