@@ -444,10 +444,10 @@ object RmManager {
 
         case msg: AudienceExit =>
           log.info(s"${ctx.self} receive a msg ${msg}")
-          liveManager ! LiveManager.StopPullAll(msg.liveId)
-          val playId = Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT, roomId = roomInfo.get.roomId)
-          //val playId = Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT2Third, roomId = roomInfo.get.roomId)
-          mediaPlayer.stop(playId, hostScene.resetLoading)
+          liveManager ! LiveManager.StopPull(msg.liveId)
+//          val playId = Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT, roomId = roomInfo.get.roomId)
+//          //val playId = Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT2Third, roomId = roomInfo.get.roomId)
+//          mediaPlayer.stop(playId, hostScene.resetLoading)
           Behaviors.same
 
         case HostFinishMeeting => //主持人结束会议，房间内所有流都停止
@@ -680,8 +680,8 @@ object RmManager {
         case msg: AudienceExit =>
           log.info(s"${ctx.self} receive a msg $msg")
          // val playId = Ids.getPlayId(AudienceStatus.CONNECT, roomId = audienceScene.getRoomInfo.roomId) //fixme 判断需要停掉的player的位置
-          val playId = Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = audienceScene.getRoomInfo.roomId)
-          mediaPlayer.stop(playId, audienceScene.loadingBack)
+//          val playId = Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = audienceScene.getRoomInfo.roomId)
+//          mediaPlayer.stop(playId, audienceScene.loadingBack)
           liveManager ! LiveManager.StopPull(msg.liveId)
           Behaviors.same
 

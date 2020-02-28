@@ -334,7 +334,7 @@ object RoomActor {
         if(liveInfoMap.contains(userId4Member)){
           log.debug(s"host force user-$userId4Member to leave")
           liveInfoMap.remove(userId4Member)
-          dispatch(subscribers)(ForceExitRsp(userId4Member, userName4Member, liveInfoMap(userId4Member).liveId))
+          dispatchTo(subscribers.keys.toList, ForceExitRsp(userId4Member, userName4Member, liveInfoMap(userId4Member).liveId))
           if(roomState){
             ProcessorClient.forceExit(roomId, liveInfoMap(userId4Member).liveId, System.currentTimeMillis())
           } else{

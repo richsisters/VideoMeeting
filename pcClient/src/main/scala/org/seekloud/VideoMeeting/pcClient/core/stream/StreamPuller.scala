@@ -165,6 +165,8 @@ object StreamPuller {
 
         case StopPull =>
           log.info(s"StreamPuller-$liveId stopped in init.")
+          val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
+          mediaPlayer.stop(playId, audienceScene.get.loadingBack)
           parent ! LiveManager.PullerStopped(liveId)
           Behaviors.stopped
 
