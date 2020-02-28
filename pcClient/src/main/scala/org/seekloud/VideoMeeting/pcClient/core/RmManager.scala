@@ -635,12 +635,14 @@ object RmManager {
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, AudienceStatus.CONNECT)
 
         case msg: PullStream4Host =>
+          log.info(s"${ctx.self} receive a ${msg}")
           timer.cancel(PullDelay4Host)
           val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
           liveManager ! LiveManager.PullStream(msg.liveId, pullInfo = info, audienceScene = Some(audienceScene))
           Behaviors.same
 
         case msg: PullStream4Others =>
+          log.info(s"${ctx.self} receive a ${msg}")
           timer.cancel(PullDelay4Audience)
           msg.liveId.foreach{ l =>
             val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
