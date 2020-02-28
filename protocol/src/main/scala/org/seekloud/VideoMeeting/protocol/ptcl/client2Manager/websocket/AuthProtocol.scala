@@ -158,7 +158,6 @@ object AuthProtocol {
   case class HostDisconnect(hostLiveId: String) extends WsMsgRm2Audience //房主断开连线通知 (之后rm断开ws连接)
 
   case object HostCloseRoom extends WsMsgRm2Audience //房主关闭房间通知房间所有用户
-  case class HostCloseRoom() extends WsMsgRm2Audience //房主关闭房间通知房间所有用户，class方便后台一些代码的处理
 
   case class UpdateRoomInfo2Client(
                                     roomName: String,

@@ -191,7 +191,7 @@ object RoomActor {
           idle(roomInfo, liveInfoMap, subscribe, startTime, false)
 
         case ActorProtocol.HostCloseRoom(roomId) =>
-          dispatchTo(subscribe)(subscribe.filter(r => r._1 != (roomInfo.userId, false)).keys.toList, HostCloseRoom())
+          dispatchTo(subscribe)(subscribe.filter(r => r._1 != (roomInfo.userId, false)).keys.toList, HostCloseRoom)
           if(roomState){
             log.debug(s"room-$roomId need close room, send msg to processor...")
             val pcRes = ProcessorClient.closeRoom(roomId)

@@ -383,21 +383,21 @@ class HostScene(stage: Stage) {
     banOnImage.setOnAction{_ =>
       if(banOnImage.isSelected){
         log.debug(s"屏蔽用户$userId 图像...")
-        listener.banMember(userId, true, false)
+        listener.banMember(userId, true, banOnSound.isSelected)
       } else{
         log.debug(s"开启用户$userId 图像...")
-        listener.cancelBan(userId, true, false)
+        listener.cancelBan(userId, true, !banOnSound.isSelected)
       }
     }
 
     banOnSound.setOnAction{_ =>
       if(banOnSound.isSelected){
         log.debug(s"屏蔽用户$userId 声音...")
-        listener.banMember(userId, false, true)
+        listener.banMember(userId, banOnImage.isSelected, true)
         Tooltip.install(banOnImage, new Tooltip("点击开启该用户声音"))
       } else{
         log.debug(s"开启用户$userId 声音...")
-        listener.cancelBan(userId, false, true)
+        listener.cancelBan(userId, !banOnSound.isSelected, true)
         Tooltip.install(banOnImage, new Tooltip("点击屏蔽该用户声音"))
       }
     }

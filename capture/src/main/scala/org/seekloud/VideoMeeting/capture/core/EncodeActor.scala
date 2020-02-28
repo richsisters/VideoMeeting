@@ -33,6 +33,10 @@ object EncodeActor {
   var debug: Boolean = true
   private var needTimeMark: Boolean = false
 
+  private val noSoundImg = ImageIO.read(Boot.getClass.getResourceAsStream("/img/noSound.png"))
+
+  private val noImageImg = ImageIO.read(Boot.getClass.getResourceAsStream("/img/noImage.png"))
+
   def debug(msg: String): Unit = {
     if (debug) log.debug(msg)
   }
@@ -131,8 +135,6 @@ object EncodeActor {
                   val ih = latestImage.frame.imageHeight
                   val bImg = imageConverter.convert(latestImage.frame)
                   try{
-                    val imgInput = Boot.getClass.getResourceAsStream("/img/noSound.png")
-                    val noSoundImg = ImageIO.read(imgInput)
                     bImg.getGraphics.drawImage(noSoundImg, iw * 7/8, ih * 7/8, iw/8, ih/8, null)
                     encoder.record(imageConverter.convert(bImg))
                   }catch {
@@ -152,10 +154,7 @@ object EncodeActor {
           } else{
             try{
               encoder.setTimestamp((frameNumber * (1000.0 / encoder.getFrameRate) * 1000).toLong)
-              val imgInput = Boot.getClass.getResourceAsStream("/img/noImage.png")
-              val noImageImg = ImageIO.read(imgInput)
               encoder.record(imageConverter.convert(noImageImg))
-
             }catch {
               case e:Exception =>
                 log.debug(s"file not found...$e")
@@ -164,7 +163,6 @@ object EncodeActor {
           working(replyTo, encodeType, encoder, imageCache, imageConverter, needImage, needSound, encodeLoop, encodeExecutor, frameNumber + 1)
 
         case msg: EncodeSamples =>
-//          log.debug(s"need sample $needSound")
           if (encodeLoop.nonEmpty && needSound) {
             try {
               encoder.recordSamples(msg.sampleRate, msg.channel, msg.samples)
