@@ -106,10 +106,6 @@ object HostScene {
 
     def gotoHomeScene()
 
-    def setFullScreen()
-
-    def exitFullScreen()
-
     def changeOption(bit: Option[Int] = None, re: Option[String] = None, frameRate: Option[Int] = None, needImage: Boolean = true, needSound: Boolean = true)
 
     def gotoInviteDialog()
@@ -137,14 +133,10 @@ class HostScene(stage: Stage) {
   scene.getStylesheets.add(
     this.getClass.getClassLoader.getResource("css/common.css").toExternalForm
     )
-  scene.setOnKeyPressed { e =>
-    if (e.getCode == javafx.scene.input.KeyCode.ESCAPE) listener.exitFullScreen()
-  }
 
   private val timeline = new Timeline()
 
   var isLive = false
-  var isFullScreen = false
   var roomInfoMap = Map.empty[Long, List[String]]
   val audObservableList: ObservableList[AudienceListInfo] = FXCollections.observableArrayList()
   val audAcceptList: ObservableList[AcceptList] = FXCollections.observableArrayList()
@@ -194,6 +186,7 @@ class HostScene(stage: Stage) {
   endButton.getStyleClass.add("hostScene-leftArea-start")
   endButton.setOnAction{
     _ =>
+      isLive = false
       listener.stopMeeting()
       connectionStateText.setText("会议已结束")
       WarningDialog.initWarningDialog("您结束了本次会议~")
@@ -270,7 +263,6 @@ class HostScene(stage: Stage) {
 
   /*屏幕下方功能条*/
   val liveBar = new LiveBar(Constants.WindowStatus.HOST, liveImage.getWidth, liveImage.getHeight * 0.1)
-  liveBar.fullScreenIcon.setOnAction(_ => listener.setFullScreen())
   val imageToggleBtn: ToggleButton = liveBar.imageToggleButton
   val soundToggleBtn: ToggleButton = liveBar.soundToggleButton
 
@@ -459,7 +451,9 @@ class HostScene(stage: Stage) {
     val backIcon = new ImageView("img/hideBtn.png")
     val backBtn = new Button("", backIcon)
     backBtn.getStyleClass.add("roomScene-backBtn")
-    backBtn.setOnAction(_ => listener.gotoHomeScene())
+    backBtn.setOnAction{_ =>
+      isLive = false
+      listener.gotoHomeScene()}
     Common.addButtonEffect(backBtn)
 
 

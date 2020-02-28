@@ -53,8 +53,6 @@ object LiveManager {
   final case class ChangeMediaOption(bit: Option[Int], re: Option[String], frameRate: Option[Int],
     needImage: Boolean = true, needSound: Boolean = true, reset: () => Unit) extends LiveCommand with CaptureActor.CaptureCommand
 
-  final case class RecordOption(recordOrNot: Boolean, path: Option[String] = None, reset: () => Unit)  extends LiveCommand with CaptureActor.CaptureCommand
-
   final case class PushStream(liveId: String, liveCode: String) extends LiveCommand
 
   final case object InitRtpFailed extends LiveCommand
@@ -119,10 +117,6 @@ object LiveManager {
           Behaviors.same
 
         case msg: ChangeMediaOption =>
-          captureActor.foreach(_ ! msg)
-          Behaviors.same
-
-        case msg: RecordOption =>
           captureActor.foreach(_ ! msg)
           Behaviors.same
 
@@ -198,7 +192,6 @@ object LiveManager {
 
         case msg:PullerStopped =>
           log.info(s"LiveManager got puller stopped.")
-          if(isRegular) parent ! RmManager.PullerStopped
           streamPuller.remove(msg.liveId)
           idle(parent, mediaPlayer, streamPuller, captureActor, streamPusher, isStart = false, isRegular = false)
 

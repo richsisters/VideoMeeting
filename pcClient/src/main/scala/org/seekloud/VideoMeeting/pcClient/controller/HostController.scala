@@ -26,8 +26,6 @@ class HostController(
 ) {
 
   private[this] val log = LoggerFactory.getLogger(this.getClass)
-//  var isConnecting = false
-  var isLive = false
 
   def showScene(): Unit = {
     Boot.addToPlatform(
@@ -67,33 +65,6 @@ class HostController(
 
     override def gotoHomeScene(): Unit = {
       rmManager ! RmManager.BackToHome
-    }
-
-    override def setFullScreen(): Unit = {
-      if (!hostScene.isFullScreen) {
-        hostScene.removeAllElement()
-
-        context.getStage.setFullScreen(true)
-
-        hostScene.liveImage.setWidth(context.getStageWidth)
-        hostScene.liveImage.setHeight(context.getStageHeight)
-        hostScene.gc.drawImage(hostScene.backImg, 0, 0, context.getStageWidth, context.getStageWidth)
-
-        hostScene.isFullScreen = true
-      }
-    }
-
-    override def exitFullScreen(): Unit = {
-      if (hostScene.isFullScreen) {
-        hostScene.liveImage.setWidth(Constants.DefaultPlayer.width)
-        hostScene.liveImage.setHeight(Constants.DefaultPlayer.height)
-        hostScene.gc.drawImage(hostScene.backImg, 0, 0, Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
-
-        hostScene.addAllElement()
-        context.getStage.setFullScreen(false)
-
-        hostScene.isFullScreen = false
-      }
     }
 
     override def changeOption(bit: Option[Int] = None, re: Option[String] = None, frameRate: Option[Int] = None, needImage: Boolean = true, needSound: Boolean = true): Unit = {

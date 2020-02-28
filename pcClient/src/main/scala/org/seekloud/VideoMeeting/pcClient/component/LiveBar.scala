@@ -80,9 +80,6 @@ class LiveBar(val windowStatus: Int, width: Double, height: Double) {
   imageToggleButton.setDisable(false)
   Tooltip.install(imageToggleButton, new Tooltip("点击关闭画面"))
 
-  val fullScreenIcon = new Button("", new ImageView("img/full-screen.png"))
-  fullScreenIcon.setPrefSize(32, 32)
-
 
   /**
     * barBox
@@ -96,7 +93,7 @@ class LiveBar(val windowStatus: Int, width: Double, height: Double) {
   val box2 = new HBox(5, soundToggleButton, imageToggleButton)
   box2.setPadding(new Insets(0,50,0,0))
 
-  val barBox: HBox = new HBox(liveBox, box2, fullScreenIcon)
+  val barBox: HBox = new HBox(liveBox, box2)
 
   HBox.setHgrow(barBox, Priority.ALWAYS)
 

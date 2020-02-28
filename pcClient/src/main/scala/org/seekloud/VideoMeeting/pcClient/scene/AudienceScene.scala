@@ -57,10 +57,6 @@ object AudienceScene {
 
     def gotoHomeScene()
 
-    def setFullScreen(isRecord: Boolean)
-
-    def exitFullScreen(isRecord: Boolean)
-
     def changeOption(needImage: Boolean = true, needSound: Boolean = true)
 
     def pausePlayRec(recordInfo: RecordInfo)
@@ -93,17 +89,12 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
   }
 
   private[this] val log = LoggerFactory.getLogger(this.getClass)
-  var watchUrl: Option[String] = None
-  var liveId4Connect:Option[String] = None
-  var liveId4Live: Option[String] = None
-  var commentPrefix = "effectType0"
 
-  var isFullScreen = false
   var hasReqJoin = false
+  var isLive = false
 
   var audienceStatus: Int = AudienceStatus.LIVE
 
-  var watchingLs = List.empty[UserDes]
   val fullScreenImage = new StackPane()
   var leftArea: VBox = _
   var rightArea: VBox = _
@@ -114,22 +105,29 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
 
   /*屏幕下方功能条*/
   val liveBar: LiveBar = new LiveBar(Constants.WindowStatus.AUDIENCE, width = Constants.DefaultPlayer.width, height = Constants.DefaultPlayer.height * 0.1)
-
-  liveBar.fullScreenIcon.setOnAction{ _ =>
-    if(!isFullScreen) listener.setFullScreen(isRecord)
-    else listener.exitFullScreen(isRecord)
-  }
   val imageToggleBtn: ToggleButton = liveBar.imageToggleButton
   val soundToggleBtn: ToggleButton = liveBar.soundToggleButton
 
   imageToggleBtn.setOnAction {
     _ =>
-      listener.changeOption(needImage = imageToggleBtn.isSelected, needSound = soundToggleBtn.isSelected)
+      if (!isLive) {
+        listener.changeOption(needImage = imageToggleBtn.isSelected, needSound = soundToggleBtn.isSelected)
+        if(imageToggleBtn.isSelected) Tooltip.install(imageToggleBtn, new Tooltip("点击关闭画面"))
+        else  Tooltip.install(imageToggleBtn, new Tooltip("点击开启画面"))
+      } else {
+        WarningDialog.initWarningDialog("会议中无法更改设置哦~")
+      }
   }
 
   soundToggleBtn.setOnAction {
     _ =>
-      listener.changeOption(needImage = imageToggleBtn.isSelected, needSound = soundToggleBtn.isSelected)
+      if (!isLive) {
+        listener.changeOption(needImage = imageToggleBtn.isSelected, needSound = soundToggleBtn.isSelected)
+        if(soundToggleBtn.isSelected) Tooltip.install(soundToggleBtn, new Tooltip("点击关闭声音"))
+        else  Tooltip.install(soundToggleBtn, new Tooltip("点击开启声音"))
+      } else {
+        WarningDialog.initWarningDialog("会议中无法更改设置哦~")
+      }
   }
 
   liveBar.resetStartLiveTime(System.currentTimeMillis())
@@ -312,6 +310,7 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
         if(!hasReqJoin) {
           listener.joinReq(album.roomId)
           hasReqJoin = true
+          isLive = true
         }
         else WarningDialog.initWarningDialog("已经发送过申请啦~")
       }
@@ -319,7 +318,9 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
 
       val exitBtn = new Button("退出会议", new ImageView("img/shutdown.png"))
       exitBtn.getStyleClass.add("audienceScene-leftArea-linkBtn")
-      exitBtn.setOnAction(_ => listener.quitJoin(album.roomId, album.userId))
+      exitBtn.setOnAction{_ =>
+        isLive = false
+        listener.quitJoin(album.roomId, album.userId)}
       Common.addButtonEffect(exitBtn)
 
       val buttonBox = new HBox(linkBtn, exitBtn)

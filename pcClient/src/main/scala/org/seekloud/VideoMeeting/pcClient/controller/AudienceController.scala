@@ -106,30 +106,6 @@ class AudienceController(
       rmManager ! RmManager.BackToHome
     }
 
-    override def setFullScreen(isRecord: Boolean): Unit = {
-      if (!audienceScene.isFullScreen) {
-        audienceScene.removeAllElement()
-        //        context.getStage.setFullScreenExitHint("s")
-        context.getStage.setFullScreen(true)
-        audienceScene.imgView.setLayoutX(0)
-        audienceScene.imgView.setLayoutY(0)
-        audienceScene.imgView.setWidth(context.getStageWidth)
-        audienceScene.imgView.setHeight(context.getStageHeight)
-        audienceScene.gc.drawImage(audienceScene.backImg, 0, 0, context.getStageWidth, context.getStageHeight)
-        audienceScene.isFullScreen = true
-      }
-    }
-
-    override def exitFullScreen(isRecord: Boolean): Unit = {
-      if (audienceScene.isFullScreen) {
-        audienceScene.imgView.setWidth(Constants.DefaultPlayer.width)
-        audienceScene.imgView.setHeight(Constants.DefaultPlayer.height)
-        audienceScene.addAllElement()
-        context.getStage.setFullScreen(false)
-        audienceScene.isFullScreen = false
-      }
-    }
-
     override def changeOption(needImage: Boolean, needSound: Boolean): Unit = {
       rmManager ! RmManager.ChangeOption4Audience(needImage, needSound)
     }
@@ -164,6 +140,7 @@ class AudienceController(
           } else{
             WarningDialog.initWarningDialog(msg.msg)
             audienceScene.hasReqJoin = false
+            audienceScene.isLive = false
           }
 
         case msg:ForceExitRsp =>
@@ -175,12 +152,28 @@ class AudienceController(
 
 
         case msg: BanOnMemberRsp =>
-          if(msg.image)
-            WarningDialog.initWarningDialog(s"主持人屏蔽用户${msg.userId}的画面")
-            audienceScene.imageToggleBtn.setDisable(true)
-          if(msg.sound)
-            WarningDialog.initWarningDialog(s"主持人屏蔽用户${msg.userId}的声音")
-            audienceScene.soundToggleBtn.setDisable(true)
+          assert(RmManager.userInfo.nonEmpty)
+          val userId = RmManager.userInfo.get.userId
+          if(msg.userId == userId){
+            if(msg.image){
+              WarningDialog.initWarningDialog(s"主持人屏蔽你的的画面")
+              audienceScene.imageToggleBtn.setDisable(true)
+              audienceScene.imageToggleBtn.setSelected(false)
+            }
+            if(msg.sound){
+              WarningDialog.initWarningDialog(s"主持人屏蔽你的画面")
+              audienceScene.soundToggleBtn.setDisable(true)
+              audienceScene.soundToggleBtn.setSelected(false)
+            }
+            rmManager ! RmManager.ChangeOption4Audience(!msg.image, !msg.sound)
+          } else{
+            if(msg.image){
+              WarningDialog.initWarningDialog(s"主持人屏蔽用户${msg.userId}的画面")
+            }
+            if(msg.sound){
+              WarningDialog.initWarningDialog(s"主持人屏蔽用户${msg.userId}的画面")
+            }
+          }
 
         case msg: CancelBanOnMemberRsp =>
           log.debug("got  cancel ban on member rsp!")
@@ -193,6 +186,7 @@ class AudienceController(
           Boot.addToPlatform {
             WarningDialog.initWarningDialog("主持人连接断开，互动功能已关闭！")
           }
+          audienceScene.isLive = false
           rmManager ! RmManager.StopJoinAndWatch
 
 
@@ -200,6 +194,7 @@ class AudienceController(
           Boot.addToPlatform {
             WarningDialog.initWarningDialog("主持人结束会议")
           }
+          audienceScene.isLive = false
           rmManager ! RmManager.MeetingFinished
 
         case HostStopPushStream2Client =>

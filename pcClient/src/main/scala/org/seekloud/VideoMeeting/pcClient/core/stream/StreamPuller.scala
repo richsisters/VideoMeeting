@@ -193,9 +193,9 @@ object StreamPuller {
         case msg: PullStreamData =>
           if (msg.data.nonEmpty) {
             try {
-//              log.debug(s"StreamPuller-$liveId pull-${msg.data.length}.")
+              log.debug(s"StreamPuller-$liveId pull-${msg.data.length}.")
               mediaSink.write(ByteBuffer.wrap(msg.data))
-              //              log.debug(s"StreamPuller-$liveId  write success.")
+              log.debug(s"StreamPuller-$liveId  write success.")
               ctx.self ! SwitchBehavior("pulling", pulling(liveId, parent, pullClient, mediaPlayer, mediaSink, audienceScene, hostScene))
             } catch {
               case ex: Exception =>

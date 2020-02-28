@@ -13,7 +13,7 @@ import org.seekloud.VideoMeeting.capture.protocol.Messages
 import org.seekloud.VideoMeeting.capture.protocol.Messages._
 import org.seekloud.VideoMeeting.capture.sdk.{DeviceUtil, MediaCapture}
 import org.seekloud.VideoMeeting.pcClient.Boot
-import org.seekloud.VideoMeeting.pcClient.core.stream.LiveManager.{ChangeMediaOption, RecordOption}
+import org.seekloud.VideoMeeting.pcClient.core.stream.LiveManager.ChangeMediaOption
 import org.slf4j.LoggerFactory
 
 import concurrent.duration._
@@ -179,14 +179,6 @@ object CaptureActor {
             log.debug(s"change media settings: ${m.mediaSettings}")
             val offOrOn = msg.needImage
             drawActor.foreach(_ ! ReSet(msg.reset, offOrOn))
-          }
-          idle(frameRate, gc, isJoin, callBackFunc, Some(msg.reset), mediaCapture, reqActor, loopExecutor, imageLoop, drawActor)
-
-        case msg: RecordOption =>
-          mediaCapture.foreach { m =>
-            m.stop()
-            msg.path.foreach(f => m.setOutputFile(new File(f)))
-            log.debug(s"change output path: ${m.getOutputFileName}")
           }
           idle(frameRate, gc, isJoin, callBackFunc, Some(msg.reset), mediaCapture, reqActor, loopExecutor, imageLoop, drawActor)
 

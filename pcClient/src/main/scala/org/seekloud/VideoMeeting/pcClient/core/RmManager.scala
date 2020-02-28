@@ -130,8 +130,6 @@ object RmManager {
 
   final case class ChangeOption4Audience(needImage: Boolean = true, needSound: Boolean = true) extends RmCommand
 
-  final case object PullerStopped extends RmCommand
-
   final case object AudienceWsEstablish extends RmCommand
 
   final case class JoinRoomReq(roomId: Long) extends RmCommand
@@ -416,7 +414,6 @@ object RmManager {
 
         case msg: StartLive =>
           log.info(s"${msg.liveId} start live.")
-          hostController.isLive = true
           ctx.self ! ChangeMode(Some(true), None, None)
           liveManager ! LiveManager.PushStream(msg.liveId, msg.liveCode)
           Behaviors.same
@@ -454,6 +451,7 @@ object RmManager {
           //          mediaPlayer.stop(playId, hostScene.resetBack)
           liveManager ! LiveManager.StopPullAll
           liveManager ! LiveManager.StopPush
+          hostController.isLive = false
           System.gc()
           hostBehavior(stageCtx, homeController, hostScene, hostController, liveManager, mediaPlayer, sender, hostStatus = HostStatus.LIVE)
 
@@ -613,35 +611,8 @@ object RmManager {
           Behaviors.same
 
         case msg: ChangeOption4Audience =>
-          audienceStatus match{
-            case AudienceStatus.CONNECT =>
-              log.debug(s"change option in connect image=${msg.needImage}, sound=${msg.needSound}")
-              liveManager ! LiveManager.ChangeMediaOption(None, None, None, msg.needImage, msg.needSound, () => audienceScene.loadingBack())
-              Behaviors.same
-
-            case AudienceStatus.LIVE =>
-              val playId = Ids.getPlayId(audienceStatus, roomId = audienceScene.getRoomInfo.roomId)
-              mediaPlayer.stop(playId, audienceScene.autoReset)
-              mediaPlayer.needImage(msg.needImage)
-              mediaPlayer.needSound(msg.needSound)
-              liveManager ! LiveManager.StopPullAll
-
-            case _ =>
-              log.info("audienceState is record!!!")
-          }
-
-          Behaviors.same
-
-        case PullerStopped =>
-          assert(userInfo.nonEmpty)
-          log.info(s"options were set, continue to play")
-          val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
-          if(audienceStatus == AudienceStatus.LIVE)
-            liveManager ! LiveManager.PullStream(audienceScene.liveId4Live.get, pullInfo = info)
-          else if(audienceStatus == AudienceStatus.CONNECT)
-            liveManager ! LiveManager.PullStream(audienceScene.liveId4Connect.get, pullInfo = info)
-          else
-            log.info("audiencestatus is unkonwn...")
+          log.debug(s"change option in connect image=${msg.needImage}, sound=${msg.needSound}")
+          liveManager ! LiveManager.ChangeMediaOption(None, None, None, msg.needImage, msg.needSound, () => audienceScene.loadingBack())
           Behaviors.same
 
         case msg: StartJoin =>
@@ -649,8 +620,8 @@ object RmManager {
           liveManager ! LiveManager.PushStream(msg.audienceLiveInfo.liveId, msg.audienceLiveInfo.liveCode)
           audienceScene.audienceStatus = AudienceStatus.CONNECT
           audienceScene.autoReset()
-          val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = audienceScene.getRoomInfo.roomId)
-          mediaPlayer.stop(playId, audienceScene.autoReset)
+//          val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = audienceScene.getRoomInfo.roomId)
+//          mediaPlayer.stop(playId, audienceScene.autoReset)
           timer.startSingleTimer(PullDelay, PullStream4Others(msg.hostLiveId :: msg.attendLiveId.filter(_ != msg.audienceLiveInfo.liveId)), 1.seconds)
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, AudienceStatus.CONNECT)
 
@@ -703,10 +674,6 @@ object RmManager {
             liveManager ! LiveManager.StopPullAll
             liveManager ! LiveManager.StopPush
             liveManager ! LiveManager.DeviceOff
-
-            /*恢复主播播放*/
-//            val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
-//            liveManager ! LiveManager.PullStream(audienceScene.liveId4Live.get, pullInfo = info)
           }
 
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, AudienceStatus.LIVE)
