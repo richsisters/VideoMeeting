@@ -151,8 +151,8 @@ object PlayerGrabber {
           println(mediaInfo)
           supervisor ! mediaInfo
 
-          val pQ = new java.util.concurrent.LinkedBlockingDeque[AddPicture]()
-          val sQ = new java.util.concurrent.LinkedBlockingDeque[AddSamples]()
+          val pQ = new java.util.concurrent.LinkedBlockingDeque[AddPicture](3)
+          val sQ = new java.util.concurrent.LinkedBlockingDeque[AddSamples](3)
 
           //创建worker
           val workActor = ctx.spawn(worker(id, ctx.self, grabber, pQ, sQ), "worker", MediaPlayer.blockingDispatcher)

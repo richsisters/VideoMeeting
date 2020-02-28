@@ -166,7 +166,7 @@ class AudienceController(
             }
             if(msg.sound){
               Boot.addToPlatform{
-                WarningDialog.initWarningDialog(s"主持人屏蔽你的画面")
+                WarningDialog.initWarningDialog(s"主持人屏蔽你的声音")
               }
               audienceScene.soundToggleBtn.setDisable(true)
               audienceScene.soundToggleBtn.setSelected(false)
@@ -180,17 +180,42 @@ class AudienceController(
             }
             if(msg.sound){
               Boot.addToPlatform{
-                WarningDialog.initWarningDialog(s"主持人屏蔽用户${msg.userId}的画面")
+                WarningDialog.initWarningDialog(s"主持人屏蔽用户${msg.userId}的声音")
               }
             }
           }
 
         case msg: CancelBanOnMemberRsp =>
-          log.debug("got  cancel ban on member rsp!")
-          if(msg.image)
-          audienceScene.imageToggleBtn.setDisable(false)
-          if(msg.sound)
-            audienceScene.soundToggleBtn.setDisable(false)
+          assert(RmManager.userInfo.nonEmpty)
+          val userId = RmManager.userInfo.get.userId
+          if(msg.userId == userId){
+            if(msg.image){
+              Boot.addToPlatform{
+                WarningDialog.initWarningDialog(s"主持人取消屏蔽你的的画面")
+              }
+              audienceScene.imageToggleBtn.setDisable(false)
+              audienceScene.imageToggleBtn.setSelected(true)
+            }
+            if(msg.sound){
+              Boot.addToPlatform{
+                WarningDialog.initWarningDialog(s"主持人取消屏蔽你的声音")
+              }
+              audienceScene.soundToggleBtn.setDisable(false)
+              audienceScene.soundToggleBtn.setSelected(true)
+            }
+            rmManager ! RmManager.HostBan4Rm(msg.image, msg.sound)
+          } else{
+            if(msg.image){
+              Boot.addToPlatform{
+                WarningDialog.initWarningDialog(s"主持人取消屏蔽用户${msg.userId}的画面")
+              }
+            }
+            if(msg.sound){
+              Boot.addToPlatform{
+                WarningDialog.initWarningDialog(s"主持人取消屏蔽用户${msg.userId}的声音")
+              }
+            }
+          }
 
         case HostDisconnect(hostLiveId) =>
           Boot.addToPlatform {
@@ -200,7 +225,7 @@ class AudienceController(
           rmManager ! RmManager.StopJoinAndWatch
 
 
-        case HostCloseRoom =>
+        case HostCloseRoom() =>
           Boot.addToPlatform {
             WarningDialog.initWarningDialog("主持人结束会议")
           }

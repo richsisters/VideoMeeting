@@ -169,7 +169,7 @@ object AuthProtocol {
 
   case class BanOnMemberRsp(userId: Long, image: Boolean, sound: Boolean) extends WsMsgRm2Audience//用户被主持人屏蔽声音或者图像
 
-  case class CancelBanOnMemberRsp(image: Boolean, sound: Boolean) extends WsMsgRm2Audience//用户被主持人取消屏蔽声音或者图像
+  case class CancelBanOnMemberRsp(userId: Long, image: Boolean, sound: Boolean) extends WsMsgRm2Audience//用户被主持人取消屏蔽声音或者图像
 
   /**
     * 所有用户

@@ -348,7 +348,7 @@ object RoomActor {
       case BanOnMember(userId4Member, image, sound) =>
         if(liveInfoMap.contains(userId4Member)){
           log.debug(s"user-$userId4Member can't ${if(image) "show up" else ""} ${if(sound) "and speak" else ""}")
-          dispatchTo(List((userId4Member, false)), BanOnMemberRsp(userId4Member, image, sound))
+          dispatchTo(subscribers.filter(_._1._1 != userId).values.toList, BanOnMemberRsp(userId4Member, image, sound))
           if(roomState){
             ProcessorClient.banOnClient(roomId, liveInfoMap(userId4Member).liveId, image, sound)
           } else{
@@ -362,7 +362,7 @@ object RoomActor {
       case CancelBan(userId4Member, image, sound) =>
         if(liveInfoMap.contains(userId4Member)){
           log.debug(s"user-$userId4Member begin to ${if(image) "show up" else ""} ${if(sound) "and speak" else ""}")
-          dispatchTo(List((userId4Member, false)), CancelBanOnMemberRsp(image, sound))
+          dispatchTo(subscribers.filter(_._1._1 != userId).values.toList, CancelBanOnMemberRsp(userId4Member, image, sound))
           if(roomState){
             ProcessorClient.cancelBan(roomId, liveInfoMap(userId4Member).liveId, image, sound)
           } else{
