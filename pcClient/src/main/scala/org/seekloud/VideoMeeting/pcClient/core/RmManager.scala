@@ -679,6 +679,7 @@ object RmManager {
 
         case msg: AudienceExit =>
           log.info(s"${ctx.self} receive a msg $msg")
+          println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
          // val playId = Ids.getPlayId(AudienceStatus.CONNECT, roomId = audienceScene.getRoomInfo.roomId) //fixme 判断需要停掉的player的位置
 //          val playId = Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = audienceScene.getRoomInfo.roomId)
 //          mediaPlayer.stop(playId, audienceScene.loadingBack)
@@ -708,7 +709,7 @@ object RmManager {
 
         case StopJoinAndWatch =>
           assert(userInfo.nonEmpty)
-
+          println("+++++++++++++++++++++++")
           if (audienceStatus == AudienceStatus.CONNECT) {
 
             audienceScene.audienceStatus = AudienceStatus.LIVE

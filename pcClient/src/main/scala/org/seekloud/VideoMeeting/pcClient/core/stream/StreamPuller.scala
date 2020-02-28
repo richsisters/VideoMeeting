@@ -135,7 +135,7 @@ object StreamPuller {
           val videoPlayer = ctx.spawn(VideoPlayer.create(playId, audienceScene, None, None), s"videoPlayer$playId")
           mediaPlayer.start(playId, videoPlayer, Right(inputStream), Some(pullInfo.gc), None)
 
-          stashBuffer.unstashAll(ctx, pulling(liveId, parent, pullClient.get, mediaPlayer, sink, audienceScene, hostScene))
+          stashBuffer.unstashAll(ctx, pulling(liveId, parent, pullClient.get, mediaPlayer, sink, audienceScene, hostScene,pullInfo, index))
 
         case PullStreamPacketLoss =>
           log.info(s"StreamPuller-$liveId PullStreamPacketLoss.")
@@ -158,7 +158,7 @@ object StreamPuller {
         case StopPull =>
           log.info(s"StreamPuller-$liveId stopped in init.")
           val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
-          mediaPlayer.stop(playId, audienceScene.get.loadingBack)
+          mediaPlayer.stop(playId, audienceScene.get.resetBack)
           parent ! LiveManager.PullerStopped(liveId)
           Behaviors.stopped
 
@@ -177,7 +177,9 @@ object StreamPuller {
     //    joinInfo: Option[JoinInfo],
     mediaSink: Pipe.SinkChannel,
     audienceScene: Option[AudienceScene],
-    hostScene: Option[HostScene]
+    hostScene: Option[HostScene],
+    pullInfo: PullInfo,
+    index: Int
   )(
     implicit timer: TimerScheduler[PullCommand],
     stashBuffer: StashBuffer[PullCommand]
@@ -190,7 +192,7 @@ object StreamPuller {
 //              log.debug(s"StreamPuller-$liveId pull-${msg.data.length}.")
               mediaSink.write(ByteBuffer.wrap(msg.data))
               //              log.debug(s"StreamPuller-$liveId  write success.")
-              ctx.self ! SwitchBehavior("pulling", pulling(liveId, parent, pullClient, mediaPlayer, mediaSink, audienceScene, hostScene))
+              ctx.self ! SwitchBehavior("pulling", pulling(liveId, parent, pullClient, mediaPlayer, mediaSink, audienceScene, hostScene, pullInfo, index))
             } catch {
               case ex: Exception =>
                 log.warn(s"sink write pulled data error: $ex. Stop StreamPuller-$liveId")
@@ -198,13 +200,16 @@ object StreamPuller {
             }
           } else {
             log.debug(s"StreamPuller-$liveId pull null.")
-            ctx.self ! SwitchBehavior("pulling", pulling(liveId, parent, pullClient, mediaPlayer, mediaSink, audienceScene, hostScene))
+            ctx.self ! SwitchBehavior("pulling", pulling(liveId, parent, pullClient, mediaPlayer, mediaSink, audienceScene, hostScene, pullInfo,index))
           }
-          busy(liveId, parent, pullClient)
+          busy(liveId, parent, pullClient, mediaPlayer, audienceScene, hostScene, pullInfo, index)
 
         case StopPull =>
-          log.info(s"StreamPuller-$liveId is stopping.")
+          log.info(s"StreamPuller-$liveId is stopping while pulling.")
           try pullClient.close()
+          val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
+          println("1111111111111111111111" + playId)
+          mediaPlayer.stop(playId, audienceScene.get.resetBack)
           catch {
             case  e: Exception =>
               log.info(s"StreamPuller-$liveId close error: $e")
@@ -239,7 +244,12 @@ object StreamPuller {
   private def busy(
     liveId: String,
     parent: ActorRef[LiveManager.LiveCommand],
-    pullClient: PullStreamClient
+    pullClient: PullStreamClient,
+    mediaPlayer: MediaPlayer,
+    audienceScene: Option[AudienceScene],
+    hostScene: Option[HostScene],
+    pullInfo: PullInfo,
+    index: Int
   )
     (
       implicit stashBuffer: StashBuffer[PullCommand],
@@ -255,7 +265,9 @@ object StreamPuller {
           Behaviors.stopped
 
         case StopPull =>
-          log.info(s"StreamPuller-$liveId is stopping.")
+          log.info(s"StreamPuller-$liveId is stopping while busy.")
+          val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
+          mediaPlayer.stop(playId, audienceScene.get.resetBack)
           try pullClient.close()
           catch {
             case  e: Exception =>
