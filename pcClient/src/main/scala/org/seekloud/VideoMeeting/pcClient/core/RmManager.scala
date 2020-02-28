@@ -79,6 +79,8 @@ object RmManager {
 
   final case class PullStream4Others(liveId: List[String]) extends RmCommand
 
+  final case class PullStream4Host(liveId: String) extends RmCommand
+
   final case object BackToHome extends RmCommand
 
   final case object HeartBeat extends RmCommand
@@ -89,7 +91,9 @@ object RmManager {
 
   final case object Logout extends RmCommand
 
-  final case object PullDelay extends RmCommand
+  final case object PullDelay4Host extends RmCommand
+
+  final case object PullDelay4Audience extends RmCommand
 
 
   /*主播*/
@@ -626,13 +630,18 @@ object RmManager {
           liveManager ! LiveManager.PushStream(msg.audienceLiveInfo.liveId, msg.audienceLiveInfo.liveCode)
           audienceScene.audienceStatus = AudienceStatus.CONNECT
           audienceScene.autoReset()
-//          val playId = Ids.getPlayId(AudienceStatus.LIVE, roomId = audienceScene.getRoomInfo.roomId)
-//          mediaPlayer.stop(playId, audienceScene.autoReset)
-          timer.startSingleTimer(PullDelay, PullStream4Others(msg.hostLiveId :: msg.attendLiveId.filter(_ != msg.audienceLiveInfo.liveId)), 1.seconds)
+          timer.startSingleTimer(PullDelay4Host, PullStream4Host(msg.hostLiveId), 1.seconds)
+          timer.startSingleTimer(PullDelay4Audience, PullStream4Others(msg.attendLiveId.filter(_ != msg.audienceLiveInfo.liveId)), 2.seconds)
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, AudienceStatus.CONNECT)
 
+        case msg: PullStream4Host =>
+          timer.cancel(PullDelay4Host)
+          val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
+          liveManager ! LiveManager.PullStream(msg.liveId, pullInfo = info, audienceScene = Some(audienceScene))
+          Behaviors.same
+
         case msg: PullStream4Others =>
-          timer.cancel(PullDelay)
+          timer.cancel(PullDelay4Audience)
           msg.liveId.foreach{ l =>
             val info = PullInfo(audienceScene.getRoomInfo.roomId, audienceScene.gc)
             liveManager ! LiveManager.PullStream(l, pullInfo = info, audienceScene = Some(audienceScene))
@@ -647,7 +656,6 @@ object RmManager {
 
         case msg: AudienceExit =>
           log.info(s"${ctx.self} receive a msg $msg")
-          println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
           liveManager ! LiveManager.StopPull(msg.liveId)
           Behaviors.same
 
