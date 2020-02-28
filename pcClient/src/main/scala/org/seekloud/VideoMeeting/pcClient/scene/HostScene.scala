@@ -356,6 +356,9 @@ class HostScene(stage: Stage) {
     val banOnSound = new ToggleButton("")
     banOnSound.getStyleClass.add("hostScene-bottomArea-tableBtn")
 
+    val speakBtn = new Button("", new ImageView("img/喇叭.png"))
+    speakBtn.getStyleClass.add("hostScene-middleArea-tableBtn")
+
     val btnList = List(exitBtn, banOnImage, banOnSound)
     val glow = new Glow()
     btnList.foreach{btn =>
@@ -576,24 +579,28 @@ class HostScene(stage: Stage) {
       val AcceptTable = new TableView[AcceptList]()
       AcceptTable.getStyleClass.add("table-view")
 
-      val userInfoCol = new TableColumn[AcceptList, String]("已加入成员")
-      userInfoCol.setPrefWidth(width * 0.1)
+      val userInfoCol = new TableColumn[AcceptList, String]("参会者")
+      userInfoCol.setPrefWidth(width * 0.08)
       userInfoCol.setCellValueFactory(new PropertyValueFactory[AcceptList, String]("userInfo"))
 
       val imageBtnCol = new TableColumn[AcceptList, Button]("图像")
       imageBtnCol.setCellValueFactory(new PropertyValueFactory[AcceptList, Button]("banOnImage"))
-      imageBtnCol.setPrefWidth(width * 0.05)
+      imageBtnCol.setPrefWidth(width * 0.04)
 
       val soundBtnCol = new TableColumn[AcceptList, Button]("声音")
       soundBtnCol.setCellValueFactory(new PropertyValueFactory[AcceptList, Button]("banOnSound"))
-      soundBtnCol.setPrefWidth(width * 0.05)
+      soundBtnCol.setPrefWidth(width * 0.04)
 
       val exitBtnCol = new TableColumn[AcceptList, Button]("退出")
       exitBtnCol.setCellValueFactory(new PropertyValueFactory[AcceptList, Button]("exitBtn"))
-      exitBtnCol.setPrefWidth(width * 0.05)
+      exitBtnCol.setPrefWidth(width * 0.04)
+
+      val speakBtnCol = new TableColumn[AcceptList, Button]("发言")
+      speakBtnCol.setCellValueFactory(new PropertyValueFactory[AcceptList, Button]("speakBtn"))
+      speakBtnCol.setPrefWidth(width * 0.04)
 
       AcceptTable.setItems(audAcceptList)
-      AcceptTable.getColumns.addAll(userInfoCol, imageBtnCol, soundBtnCol, exitBtnCol)
+      AcceptTable.getColumns.addAll(userInfoCol, imageBtnCol, soundBtnCol, exitBtnCol, speakBtnCol)
       AcceptTable.setPrefHeight(height * 0.3)
       AcceptTable
     }
