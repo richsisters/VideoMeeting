@@ -21,7 +21,6 @@ import org.seekloud.VideoMeeting.pcClient.Boot.{executor, materializer, schedule
 import org.seekloud.VideoMeeting.pcClient.common.Constants.{AudienceStatus, HostStatus}
 import org.seekloud.VideoMeeting.pcClient.common._
 import org.seekloud.VideoMeeting.pcClient.component.WarningDialog
-import org.seekloud.VideoMeeting.pcClient.core.RmManager.PullStream4Others
 import org.seekloud.VideoMeeting.pcClient.core.stream.LiveManager.PullInfo
 import org.seekloud.VideoMeeting.pcClient.core.stream.LiveManager
 import org.seekloud.VideoMeeting.pcClient.scene.{AudienceScene, HomeScene, HostScene, RoomScene}
@@ -149,6 +148,8 @@ object RmManager {
   final case class PausePlayRec(recordInfo: RecordInfo) extends RmCommand  //暂停播放录像
 
   final case class ContinuePlayRec(recordInfo: RecordInfo) extends RmCommand //继续播放录像
+
+  final case class AudienceExit(liveId: String) extends RmCommand
 
   final case object MeetingFinished extends RmCommand
 
@@ -440,6 +441,14 @@ object RmManager {
           sender.foreach(_ ! StartMeetingRecord)
           Behaviors.same
 
+        case msg: AudienceExit =>
+          log.info(s"${ctx.self} receive a msg ${msg}")
+          liveManager ! LiveManager.StopPull(msg.liveId)
+//          val playId = Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT, roomId = roomInfo.get.roomId)
+//          //val playId = Ids.getPlayId(audienceStatus = AudienceStatus.CONNECT2Third, roomId = roomInfo.get.roomId)
+//          mediaPlayer.stop(playId, hostScene.resetLoading)
+          Behaviors.same
+
         case HostFinishMeeting => //主持人结束会议，房间内所有流都停止
           log.debug(s"videoMeeting ${roomInfo.get.roomId} stop.")
           timer.cancel(HeartBeat)
@@ -640,6 +649,16 @@ object RmManager {
           liveManager ! LiveManager.PullStream(msg.liveId, pullInfo = info, audienceScene = Some(audienceScene))
           Behaviors.same
 
+        case msg: AudienceExit =>
+          log.info(s"${ctx.self} receive a msg $msg")
+          println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+         // val playId = Ids.getPlayId(AudienceStatus.CONNECT, roomId = audienceScene.getRoomInfo.roomId) //fixme 判断需要停掉的player的位置
+//          val playId = Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = audienceScene.getRoomInfo.roomId)
+//          mediaPlayer.stop(playId, audienceScene.loadingBack)
+          liveManager ! LiveManager.StopPull(msg.liveId)
+          Behaviors.same
+
+
         case MeetingFinished =>
           timer.cancel(HeartBeat)
           timer.cancel(PingTimeOut)
@@ -662,7 +681,7 @@ object RmManager {
 
         case StopJoinAndWatch =>
           assert(userInfo.nonEmpty)
-
+          println("+++++++++++++++++++++++")
           if (audienceStatus == AudienceStatus.CONNECT) {
 
             audienceScene.audienceStatus = AudienceStatus.LIVE
@@ -675,6 +694,7 @@ object RmManager {
             liveManager ! LiveManager.StopPullAll
             liveManager ! LiveManager.StopPush
             liveManager ! LiveManager.DeviceOff
+
           }
 
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, AudienceStatus.LIVE)

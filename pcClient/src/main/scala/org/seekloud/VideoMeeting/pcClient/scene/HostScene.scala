@@ -28,8 +28,6 @@ import javafx.util.Duration
 import org.seekloud.VideoMeeting.capture.sdk.DeviceUtil
 import org.seekloud.VideoMeeting.capture.sdk.DeviceUtil.VideoOption
 import org.seekloud.VideoMeeting.pcClient.component._
-import org.seekloud.VideoMeeting.pcClient.core.stream.StreamPuller.{BandWidthInfo, PackageLossInfo}
-import org.seekloud.VideoMeeting.pcClient.utils.{NetUsage, TimeUtil}
 
 import scala.collection.mutable
 
@@ -239,16 +237,20 @@ class HostScene(stage: Stage) {
 //  val ctx: GraphicsContext = statisticsCanvas.getGraphicsContext2D
 
   val waitPulling = new Image("img/waitPulling.gif")
+  val wait1 = new Image("img/wait1.png")
+  val wait2 = new Image("img/wait2.png")
+  val wait3 = new Image("img/wait3.png")
 
   def resetBack(): Unit = {
     val sWidth = gc.getCanvas.getWidth
     val sHeight = gc.getCanvas.getHeight
     gc.drawImage(waitPulling, 0, 0, sWidth / 2, sHeight / 2)
-    gc.drawImage(waitPulling, 0, sHeight / 2, sWidth / 2, sHeight / 2)
-    gc.drawImage(waitPulling, sWidth / 2, 0, sWidth / 2, sHeight / 2)
-    gc.drawImage(waitPulling, sWidth / 2, sHeight / 2, sWidth / 2, sHeight / 2)
+    gc.drawImage(wait1, 0, sHeight / 2, sWidth / 2, sHeight / 2)
+    gc.drawImage(wait2, sWidth / 2, 0, sWidth / 2, sHeight / 2)
+    gc.drawImage(wait3, sWidth / 2, sHeight / 2, sWidth / 2, sHeight / 2)
     gc.setFont(Font.font(25))
     gc.setFill(Color.BLACK)
+//    gc.fillText(s"录像中", liveImage.getWidth / 2 - 40, liveImage.getHeight / 8)
   }
 
 

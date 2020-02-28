@@ -113,6 +113,10 @@ class HostController(
           WarningDialog.initWarningDialog("邀请邮件已发送")
         }
 
+      case msg:ForceExitRsp =>
+        rmManager ! RmManager.AudienceExit(msg.liveId)
+
+
       case msg: AudienceJoin =>
         //将该条信息展示在host页面(TableView)
         log.debug(s"Audience-${msg.userName} send join req.")

@@ -22,9 +22,6 @@ import javafx.util.Duration
 import org.seekloud.VideoMeeting.pcClient.Boot
 import org.seekloud.VideoMeeting.pcClient.common.Constants.AudienceStatus
 import org.seekloud.VideoMeeting.pcClient.component._
-import org.seekloud.VideoMeeting.pcClient.core.RmManager
-import org.seekloud.VideoMeeting.pcClient.core.stream.StreamPuller.{BandWidthInfo, PackageLossInfo}
-import org.seekloud.VideoMeeting.pcClient.utils.{NetUsage, TimeUtil}
 import org.seekloud.VideoMeeting.protocol.ptcl.CommonInfo.{RecordInfo, RoomInfo, UserDes}
 import org.slf4j.LoggerFactory
 
@@ -100,9 +97,9 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
   var leftArea: VBox = _
   var rightArea: VBox = _
   val waitPulling = new Image("img/waitPulling.gif")
-
-  /*留言*/
-  val commentFiled = new TextField()
+  val wait1 = new Image("img/wait1.png")
+  val wait2 = new Image("img/wait2.png")
+  val wait3 = new Image("img/wait3.png")
 
   /*屏幕下方功能条*/
   val liveBar: LiveBar = new LiveBar(Constants.WindowStatus.AUDIENCE, width = Constants.DefaultPlayer.width, height = Constants.DefaultPlayer.height * 0.1)
@@ -140,17 +137,10 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
 
   val liveBarBox: VBox = liveBar.barVBox
 
-  /*emoji*/
-  val emoji = new Emoji(commentFiled, width * 0.6, height * 0.6)
-  val emojiFont: String = emoji.emojiFont
-
   /*liveImage view*/
 
   val imgView = new Canvas(Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
   val gc: GraphicsContext = imgView.getGraphicsContext2D
-
-//  val statisticsCanvas = new Canvas(Constants.DefaultPlayer.width, Constants.DefaultPlayer.height)
-//  val ctx: GraphicsContext = statisticsCanvas.getGraphicsContext2D
 
   val backImg = new Image("img/background.jpg")
   gc.drawImage(backImg, 0, 0, gc.getCanvas.getWidth, gc.getCanvas.getHeight)
@@ -161,9 +151,9 @@ class AudienceScene(album: AlbumInfo, isRecord: Boolean = false, recordUrl: Stri
     val sHeight = gc.getCanvas.getHeight
     gc.drawImage(connectionBg, 0, 0, sWidth, sHeight)
     gc.drawImage(waitPulling, 0, 0, sWidth / 2, sHeight / 2)
-    gc.drawImage(waitPulling, 0, sHeight / 2, sWidth / 2, sHeight / 2)
-    gc.drawImage(waitPulling, sWidth / 2, 0, sWidth / 2, sHeight / 2)
-    gc.drawImage(waitPulling, sWidth / 2, sHeight / 2, sWidth / 2, sHeight / 2)
+    gc.drawImage(wait1, 0, sHeight / 2, sWidth / 2, sHeight / 2)
+    gc.drawImage(wait2, sWidth / 2, 0, sWidth / 2, sHeight / 2)
+    gc.drawImage(wait3, sWidth / 2, sHeight / 2, sWidth / 2, sHeight / 2)
     gc.setFont(Font.font(25))
     gc.setFill(Color.BLACK)
     //gc.fillText(s"录像中", liveImage.getWidth / 2 - 40, liveImage.getHeight / 8)

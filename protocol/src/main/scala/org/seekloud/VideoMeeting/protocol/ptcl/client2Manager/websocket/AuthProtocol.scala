@@ -167,7 +167,7 @@ object AuthProtocol {
 
   case object HostStopPushStream2Client extends WsMsgRm2Audience
 
-  case class ForceExitRsp(userId: Long, userName: String) extends WsMsgRm2Audience//用户被主持人强制退出
+  case class ForceExitRsp(userId: Long, userName: String, liveId: String) extends WsMsgRm2Audience//用户被主持人强制退出
 
   case class BanOnMemberRsp(userId: Long, image: Boolean, sound: Boolean) extends WsMsgRm2Audience//用户被主持人屏蔽声音或者图像
 
