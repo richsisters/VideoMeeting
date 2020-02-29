@@ -128,6 +128,8 @@ object RmManager {
 
   final case class Speak(userId4Member: Long) extends RmCommand
 
+  final case class CancelSpeak(userId4Member: Long) extends RmCommand
+
 
   /*观众*/
 
@@ -492,6 +494,11 @@ object RmManager {
         case Speak(userId4Member) =>
           log.info(s"主持人指定用户$userId4Member 发言")
           sender.foreach(_ ! AuthProtocol.SpeakerRight(userId4Member))
+          Behavior.same
+
+        case CancelSpeak(userId4Member) =>
+          log.info(s"主持人取消用户$userId4Member 发言")
+          sender.foreach(_ ! AuthProtocol.CancelSpeakerRight(userId4Member))
           Behavior.same
 
         case x =>

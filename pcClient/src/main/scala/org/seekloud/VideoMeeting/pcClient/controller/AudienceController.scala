@@ -235,7 +235,14 @@ class AudienceController(
               rmManager ! RmManager.HostBan4Rm(true, false)
           }
 
-
+        case msg: CancelSpeakerRightRsp =>
+          Boot.addToPlatform{
+            WarningDialog.initWarningDialog(s"主持人取消用户${msg.userId}为发言人")
+          }
+          assert(RmManager.userInfo.nonEmpty)
+          audienceScene.soundToggleBtn.setDisable(false)
+          audienceScene.soundToggleBtn.setSelected(false)
+          rmManager ! RmManager.HostBan4Rm(true, true)
 
         case msg: HostCloseRoom =>
           Boot.addToPlatform {

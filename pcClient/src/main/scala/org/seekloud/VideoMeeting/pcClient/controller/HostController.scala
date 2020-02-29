@@ -94,6 +94,10 @@ class HostController(
     override def Designated2Speak(userId: Long): Unit = {
       rmManager ! RmManager.Speak(userId)
     }
+
+    override def cancelSpeak(userId: Long): Unit = {
+      rmManager ! RmManager.CancelSpeak(userId)
+    }
   })
 
 

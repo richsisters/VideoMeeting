@@ -120,6 +120,8 @@ object HostScene {
     def cancelBan(userId: Long, image: Boolean, sound:Boolean)
 
     def Designated2Speak(userId: Long)
+
+    def cancelSpeak(userId: Long)
   }
 
 }
@@ -411,7 +413,7 @@ class HostScene(stage: Stage) {
         listener.Designated2Speak(userId)
       }else{
         log.info(s"取消用户$userId 发言")
-//        listener.banMember(userId, banOnImage.isSelected, true)直接用屏蔽声音还是在写一个
+        listener.cancelSpeak(userId)
       }
     }
 

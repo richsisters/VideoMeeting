@@ -387,6 +387,20 @@ object RoomActor {
         }
         Behaviors.same
 
+      case CancelSpeakerRight(userId4Member) =>
+        if(liveInfoMap.contains(userId4Member)){
+          log.debug(s"host cancel user-$userId4Member to speak")
+          dispatchTo(subscribers.filter(_._1._1 != userId).keys.toList, CancelSpeakerRightRsp(userId4Member))
+          if(roomState){
+            //todo processor
+          } else{
+            log.debug(s"room-$roomId has not started record...")
+          }
+        } else{
+          log.debug(s"host cancel user-$userId4Member to speak, but there is no user!")
+        }
+        Behaviors.same
+
       case StartMeetingRecord =>
         val pcRes = ProcessorClient.newConnect(roomId, roomInfo.rtmp.getOrElse(""), liveInfoMap.values.map(_.liveId).toList, startTime)
         pcRes.map{
