@@ -139,19 +139,15 @@ object ImageActor {
         )
 
       case TryPlayImageTick =>
-        if (queue.size < 2) playerGrabber ! PlayerGrabber.AskPicture(Left(ctx.self))
-
-        //        debug(s"TryPlayTick: vt[$videoPlayedTime] - at[$audioPlayedTime] = ${videoPlayedTime - audioPlayedTime}, playedImages[$playedImages]")
-
-        if (needSound && hasAudio && ImagePlayedTime - audioPlayedTime > 50000) {
-          //skip picture play, do nothing.
-          Behaviors.same
-        } else {
-          if (needSound && hasAudio && (audioPlayedTime != Long.MaxValue) && audioPlayedTime - ImagePlayedTime > 50000) {
-//            debug(s"audioPlayedTime: $audioPlayedTime, imagePlayedTime: $ImagePlayedTime, diff: ${audioPlayedTime - ImagePlayedTime}")
-            ctx.self ! TryPlayImageTick
-          }
+        if (queue.length < 2) playerGrabber ! PlayerGrabber.AskPicture(Left(ctx.self))
+//        if (needSound && hasAudio && ImagePlayedTime - audioPlayedTime > 50000) {
+//          println(s"image play time over")
+//          Behaviors.same
+//        } else {
           if (queue.nonEmpty) {
+            if (needSound && hasAudio && (audioPlayedTime != Long.MaxValue) && audioPlayedTime - ImagePlayedTime > 50000) {
+              ctx.self ! TryPlayImageTick
+            }
             val (newQueue, newImagePlayedTime, playTimeInWallClock) = drawPicture(id, gc, queue, ImagePlayedTime)
             playing(
               id,
@@ -161,15 +157,13 @@ object ImageActor {
               playedImages + 1,
               playTimeInWallClock,
               newImagePlayedTime,
-              audioPlayedTime
-            )
+              audioPlayedTime)
           } else {
             playerGrabber ! PlayerGrabber.AskPicture(Left(ctx.self))
-            //            log.warn(s"no pic in the imageQueue of ImageActor-$id!!!")
             Behaviors.same
           }
 
-        }
+//        }
 
       case msg: PictureFinish =>
         log.info(s"ImageActor-$id got PictureFinish")

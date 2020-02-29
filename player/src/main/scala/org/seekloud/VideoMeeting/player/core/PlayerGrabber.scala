@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory
 import concurrent.duration._
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
+import scala.util.control.Breaks._
 
 /**
   * User: TangYaruo
@@ -91,7 +92,7 @@ object PlayerGrabber {
               supervisor: ActorRef[PlayerManager.SupervisorCmd],
               settings: MediaSettings,
               isDebug: Boolean = true,
-              needTimestamp: Boolean = true,
+              needTimestamp: Boolean = false,
               timeGetter: () => Long
             ): Behavior[MonitorCmd] =
     Behaviors.setup[MonitorCmd] { ctx =>
@@ -151,8 +152,8 @@ object PlayerGrabber {
           println(mediaInfo)
           supervisor ! mediaInfo
 
-          val pQ = new java.util.concurrent.LinkedBlockingDeque[AddPicture](3)
-          val sQ = new java.util.concurrent.LinkedBlockingDeque[AddSamples](3)
+          val pQ = new java.util.concurrent.LinkedBlockingDeque[AddPicture](10)
+          val sQ = new java.util.concurrent.LinkedBlockingDeque[AddSamples](10)
 
           //创建worker
           val workActor = ctx.spawn(worker(id, ctx.self, grabber, pQ, sQ), "worker", MediaPlayer.blockingDispatcher)
@@ -260,7 +261,7 @@ object PlayerGrabber {
           Behaviors.stopped
 
         case m: AskPicture =>
-          //          println(s"playerGrabber-$id get AskPicture,now queue size: ${pictureQueue.size()}")
+//          println(s"playerGrabber-$id get AskPicture,now queue size: ${pictureQueue.size()}")
           val pic = pictureQueue.poll()
           if (pic != null) {
             m.ref match {
@@ -426,16 +427,12 @@ object PlayerGrabber {
     def bufferSample(frame: Frame) = {
       if (frame != null) {
         if (frame.samples != null) {
-          //          log.debug(s"grabber-$id grab samples.")
-          var sampleData = AddSamples(frameSamples2ByteArray(frame.samples), frame.timestamp)
+          val sampleData = AddSamples(frameSamples2ByteArray(frame.samples), frame.timestamp)
           samplesQueue.offer(sampleData)
-          sampleData = null
-          //          if(samplesQueue.size() > 5) samplesQueue.clear()
         } else {
           log.warn("warning: no samples to buffer.")
         }
       }
-      //      println(s"PlayGrabber samplesQueue add new, now size: ${samplesQueue.size()}")
     }
 
     var picCount = 0
@@ -444,22 +441,13 @@ object PlayerGrabber {
     def bufferPicture(frame: Frame) = {
       if (frame != null) {
         if (frame.image != null) {
-          //          if (picCount % 100 == 0) {
-          //            log.debug(s"--------------- grab frameRate: ${grabber.getFrameRate}")
-          //          }
           picCount += 1
-          //          log.debug(s"grabber-$id grab bufferPicture")
-          //          val ts1 = System.currentTimeMillis()
           val img = imgConverter.convert(frame)
-          //          val ts2 = System.currentTimeMillis() -ts1
-          //          debug(s"$ts2..........$img")
-          //          println(s"img w :${img.getWidth}, h: ${img.getHeight}")
           pictureQueue.offer(AddPicture(img, frame.timestamp))
         } else {
           log.warn("warning: no picture to buffer.")
         }
       }
-      //      println(s"PlayGrabber pictureQueue add new, now size: ${pictureQueue.size()}")
     }
 
     var grabFinish = false
@@ -477,7 +465,7 @@ object PlayerGrabber {
             try {
               if (isWorking) {
                 if (!grabFinish) {
-                  if (hasVideo && pictureQueue.isEmpty && !grabFinish) {
+                  if (hasVideo) {
                     var frame = grabber.grab()
                     while (frame != null && frame.image == null) {
                       bufferSample(frame)
@@ -487,11 +475,13 @@ object PlayerGrabber {
                     bufferPicture(frame)
                   }
 
-                  if (hasAudio && samplesQueue.isEmpty && !grabFinish) {
+                  if (hasAudio) {
                     var frame = grabber.grab()
-                    while (frame != null && frame.samples == null) {
+                    var frameCont = 0
+                    while (frame != null && frame.samples == null && frameCont < 10) {
                       bufferPicture(frame)
                       frame = grabber.grab()
+                      frameCont += 1
                     }
                     grabFinish = frame == null
                     bufferSample(frame)

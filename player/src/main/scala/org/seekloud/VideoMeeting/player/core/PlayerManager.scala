@@ -7,7 +7,6 @@ import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer}
 import javafx.scene.canvas.GraphicsContext
 import org.seekloud.VideoMeeting.player.core.PlayerGrabber._
 import org.seekloud.VideoMeeting.player.core.ImageActor._
-import org.seekloud.VideoMeeting.player.core.RecordActor.StopRecord
 import org.seekloud.VideoMeeting.player.core.SoundActor._
 import org.seekloud.VideoMeeting.player.protocol.Messages
 import org.seekloud.VideoMeeting.player.protocol.Messages._
@@ -62,13 +61,6 @@ object PlayerManager {
 
   final case class GrabberFailInit(playId: String, replyTo: ActorRef[Messages.RTCommand], ex: Throwable) extends SupervisorCmd
 
-  final case class RecInitialed(playId: String, replyTo: ActorRef[Messages.RTCommand]) extends SupervisorCmd
-
-  final case class RecGrabberFailInit(playId: String, replyTo: ActorRef[Messages.RTCommand], ex: Throwable) extends SupervisorCmd
-
-  final case class RecorderFailInit(playId: String, replyTo: ActorRef[Messages.RTCommand], ex: Throwable) extends SupervisorCmd
-
-
   final case class StartPlay(
     playId: String,
     replyTo: ActorRef[Messages.RTCommand],
@@ -77,22 +69,11 @@ object PlayerManager {
     settings: MediaSettings
   ) extends SupervisorCmd
 
-  final case class PausePlay(
-    playId: String
-  ) extends SupervisorCmd
-
-  final case class ContinuePlay(
-    playId: String
-  ) extends SupervisorCmd
-
   final case class StopPlay(
     playId: String,
     reSetFunc: () => Unit
   ) extends SupervisorCmd
 
-  final case class StartRec(outFilePath: String) extends SupervisorCmd
-
-  final case class StopRec() extends SupervisorCmd
 
   final case class SetTimeGetter(playId: String, func: () => Long) extends SupervisorCmd
 
@@ -194,9 +175,6 @@ object PlayerManager {
           }
           Behaviors.same
 
-        case RecInitialed(playId, replyTo) =>
-          replyTo ! RecorderInitialed(playId)
-          Behaviors.same
 
         case GrabberFailInit(playId, replyTo, ex) =>
           // todo
@@ -207,38 +185,8 @@ object PlayerManager {
           }
           idle(mediaSettingsMap, gcMap, playerGrabberMap, imageActorMap, soundActorMap, replyToMap)
 
-        case PausePlay(playId) =>
-          if (gcMap.contains(playId)) { //自主播放
-//            if (playerGrabberMap.contains(playId)) playerGrabberMap(playId)._1 ! PlayerGrabber.PauseGrab
-            if (imageActorMap.contains(playId)) imageActorMap(playId) ! PausePlayImage
-            if (soundActorMap.contains(playId)) soundActorMap(playId) ! PausePlaySound
-          } else { //不自主播放
-            if (replyToMap.contains(playId)) {
-              replyToMap(playId) ! PauseAsk
-            }
-          }
-          //          playerGrabberMap(playId) ! PauseGrab
-          Behaviors.same
-
-        case ContinuePlay(playId) =>
-          if (gcMap.contains(playId)) { //自主播放
-//            if (playerGrabberMap.contains(playId)) playerGrabberMap(playId)._1 ! PlayerGrabber.ContinueGrab
-            if (imageActorMap.contains(playId)) imageActorMap(playId) ! ContinuePlayImage
-            if (soundActorMap.contains(playId)) soundActorMap(playId) ! ContinuePlaySound
-          } else { //不自主播放
-            if (replyToMap.contains(playId)) {
-              replyToMap(playId) ! ContinueAsk
-            }
-          }
-          //          playerGrabberMap(playId) ! ContinueGrab
-          Behaviors.same
-
         case StopPlay(playId, reSetFunc) =>
-          ctx.self ! StopRec() //停止录制
           if (mediaSettingsMap.contains(playId)) {
-            //            if(mediaSettingsMap(playId).outputFile.nonEmpty){       //正在录制
-            //              recordActorMap.get(playId).foreach(_ ! StopRecord)
-            //            }
             mediaSettingsMap.remove(playId)
           }
           if (gcMap.contains(playId)) {

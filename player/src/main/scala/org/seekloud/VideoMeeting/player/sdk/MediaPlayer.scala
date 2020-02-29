@@ -136,28 +136,6 @@ class MediaPlayer () {
 
   }
 
-  /**
-    * 暂停播放
-    *
-    * */
-  def pause(playId: String): Unit = {
-    if(playerManager != null){
-      playerManager ! PlayerManager.PausePlay(playId)
-    }
-
-  }
-
-  /**
-    * 继续播放
-    *
-    * */
-  def continue(playId: String): Unit = {
-    if(playerManager != null){
-      playerManager ! PlayerManager.ContinuePlay(playId)
-    }
-
-  }
-
 
   /**
     * 停止播放
@@ -177,7 +155,6 @@ class MediaPlayer () {
       playerManager ! PlayerManager.SetTimeGetter(playId, func)
     }
   }
-
 
 }
 

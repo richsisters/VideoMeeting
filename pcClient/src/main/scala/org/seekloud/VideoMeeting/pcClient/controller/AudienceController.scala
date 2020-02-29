@@ -158,16 +158,16 @@ class AudienceController(
           val userId = RmManager.userInfo.get.userId
           if(msg.userId == userId){
             if(msg.image){
-              Boot.addToPlatform{
-                WarningDialog.initWarningDialog(s"主持人屏蔽你的的画面")
-              }
+//              Boot.addToPlatform{
+//                WarningDialog.initWarningDialog(s"主持人屏蔽你的的画面")
+//              }
               audienceScene.imageToggleBtn.setDisable(true)
               audienceScene.imageToggleBtn.setSelected(false)
             }
             if(msg.sound){
-              Boot.addToPlatform{
-                WarningDialog.initWarningDialog(s"主持人屏蔽你的声音")
-              }
+//              Boot.addToPlatform{
+//                WarningDialog.initWarningDialog(s"主持人屏蔽你的声音")
+//              }
               audienceScene.soundToggleBtn.setDisable(true)
               audienceScene.soundToggleBtn.setSelected(false)
             }
@@ -225,7 +225,7 @@ class AudienceController(
           rmManager ! RmManager.StopJoinAndWatch
 
 
-        case HostCloseRoom =>
+        case msg: HostCloseRoom =>
           Boot.addToPlatform {
             WarningDialog.initWarningDialog("主持人结束会议")
           }

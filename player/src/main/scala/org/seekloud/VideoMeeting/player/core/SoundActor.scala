@@ -129,7 +129,6 @@ object SoundActor {
 
         if (samplesQueue.nonEmpty) {
           val available = sdl.available()
-          val played = sdl.getMicrosecondPosition
           val newPlayedSamples = available - lastAvailable + playedSamplesByte
 
           val playedTime = newPlayedSamples * 1000000 / bytePerSecond // in us
