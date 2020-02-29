@@ -144,10 +144,11 @@ class AudienceController(
           }
 
         case msg:ForceExitRsp =>
-          WarningDialog.initWarningDialog(s"主持人强制用户${msg.userId}退出会议")
           if(RmManager.userInfo.nonEmpty && msg.userId == RmManager.userInfo.get.userId){
+            WarningDialog.initWarningDialog(s"主持人强制您退出会议")
             rmManager ! RmManager.StopJoinAndWatch
           } else if(RmManager.userInfo.nonEmpty && msg.userId != RmManager.userInfo.get.userId){
+            WarningDialog.initWarningDialog(s"主持人强制用户${msg.userId}退出会议")
             rmManager ! RmManager.AudienceExit(msg.liveId)
           }
           audienceScene.updateAttendList(msg.userId, msg.userName, false)

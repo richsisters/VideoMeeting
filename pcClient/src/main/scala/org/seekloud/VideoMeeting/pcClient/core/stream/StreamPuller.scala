@@ -128,7 +128,7 @@ object StreamPuller {
           val source = mediaPipe.source()
           sink.configureBlocking(false)
           val inputStream = Channels.newInputStream(source)
-          audienceScene.foreach(_.autoReset())
+          audienceScene.foreach(_.resetBack())
           hostScene.foreach(_.resetBack())
           val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
           mediaPlayer.setTimeGetter(playId, pullClient.get.getServerTimestamp)
