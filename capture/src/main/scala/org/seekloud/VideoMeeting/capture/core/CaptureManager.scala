@@ -291,7 +291,6 @@ object CaptureManager {
     montageActor: ActorRef[MontageActor.Command],
     soundCaptureOpt: Option[ActorRef[SoundCapture.Command]] = None,
     encodeActorMap: mutable.HashMap[EncoderType.Value, ActorRef[EncodeActor.Command]],
-    outputStream: Option[OutputStream] = None,
     encoderNoSound: Boolean = false)(
     implicit stashBuffer: StashBuffer[Command],
     timer: TimerScheduler[Command]
@@ -333,17 +332,7 @@ object CaptureManager {
             new FFmpegFrameRecorder(msg.outputStream, grabber.get.getImageWidth, grabber.get.getImageHeight, mediaSettings.channels)
           }
           setEncoder(ctx, mediaSettings, streamEncoder, EncoderType.STREAM, imageCaptureOpt, soundCaptureOpt, encodeActorMap, replyTo)
-          idle(
-            replyTo,
-            mediaSettings,
-            grabber,
-            line,
-            imageCaptureOpt,
-            desktopCaptureOpt,
-            montageActor,
-            soundCaptureOpt,
-            encodeActorMap,
-            Some(msg.outputStream))
+          Behaviors.same
 
         case StopEncodeStream =>
           encodeActorMap.get(EncoderType.STREAM).foreach(_ ! EncodeActor.StopEncode)
@@ -378,7 +367,6 @@ object CaptureManager {
             montageActor,
             soundCaptureOpt,
             encodeActorMap,
-            outputStream,
             newEncoderNoSound
           )
 
