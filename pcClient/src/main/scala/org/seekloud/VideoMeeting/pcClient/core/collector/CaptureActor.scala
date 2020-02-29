@@ -183,7 +183,7 @@ object CaptureActor {
           idle(frameRate, gc, isJoin, callBackFunc, Some(msg.reset), mediaCapture, reqActor, loopExecutor, imageLoop, drawActor)
 
         case msg: HostBan4Live =>
-          reqActor.foreach(_ ! HostBan4Manager(msg.image, msg.sound))
+          reqActor.foreach(_ ! HostBan4Manager(msg.out, msg.image, msg.sound))
           Behaviors.same
 
         case StopCapture =>

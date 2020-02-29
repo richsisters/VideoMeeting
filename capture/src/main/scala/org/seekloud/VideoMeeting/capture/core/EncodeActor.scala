@@ -2,7 +2,7 @@ package org.seekloud.VideoMeeting.capture.core
 
 import java.awt.Image
 import java.awt.image.BufferedImage
-import java.io.File
+import java.io.{File, OutputStream}
 import java.nio.ShortBuffer
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -30,16 +30,12 @@ import scala.util.{Failure, Success}
 object EncodeActor {
 
   private val log = LoggerFactory.getLogger(this.getClass)
-  var debug: Boolean = true
-  private var needTimeMark: Boolean = false
 
   private val noSoundImg = ImageIO.read(Boot.getClass.getResourceAsStream("/img/noSound.png"))
 
   private val noImageImg = ImageIO.read(Boot.getClass.getResourceAsStream("/img/noImage.png"))
 
-  def debug(msg: String): Unit = {
-    if (debug) log.debug(msg)
-  }
+  private val imageConverter = new Java2DFrameConverter()
 
   sealed trait Command
 
@@ -53,20 +49,20 @@ object EncodeActor {
 
   final case class HostBan4Encode(image:Boolean, sound:Boolean) extends Command
 
+  final case class ChangeEncoder(encoder: FFmpegFrameRecorder, needImage:Boolean, needSound:Boolean) extends Command
+
+  final case object StartNewEncoder extends Command
+
   def create(
     replyTo: ActorRef[Messages.ReplyToCommand],
     encodeType: EncoderType.Value,
     encoder: FFmpegFrameRecorder,
     imageCache: LinkedBlockingDeque[Messages.LatestFrame],
     needImage: Boolean,
-    needSound: Boolean,
-    isDebug: Boolean,
-    needTimestamp: Boolean
+    needSound: Boolean
   ): Behavior[Command] =
     Behaviors.setup[Command] { ctx =>
       log.info(s"EncodeActor-$encodeType is starting...")
-      debug = isDebug
-      needTimeMark = needTimestamp
       Future {
         log.info(s"Encoder-$encodeType is starting...")
         encoder.startUnsafe()
@@ -87,18 +83,15 @@ object EncodeActor {
               log.info(s"fileEncoder start failed: $e")
               replyTo ! Messages.CannotRecordToBiliBili
           }
-
       }
-      working(replyTo, encodeType, encoder, imageCache, new Java2DFrameConverter(), needImage, needSound)
+      working(replyTo, encodeType, encoder, imageCache, needImage, needSound)
     }
-
 
   private def working(
     replyTo: ActorRef[Messages.ReplyToCommand],
     encodeType: EncoderType.Value,
     encoder: FFmpegFrameRecorder,
     imageCache: LinkedBlockingDeque[Messages.LatestFrame],
-    imageConverter: Java2DFrameConverter,
     needImage: Boolean,
     needSound: Boolean,
     encodeLoop: Option[ScheduledFuture[_]] = None,
@@ -107,8 +100,32 @@ object EncodeActor {
   ): Behavior[Command] =
     Behaviors.receive[Command] { (ctx, msg) =>
       msg match {
+        case StartNewEncoder =>
+          Future {
+            log.info(s"Encoder-$encodeType is starting...")
+            encoder.startUnsafe()
+            log.info(s"Encoder-$encodeType started.")
+          }.onComplete {
+            case Success(_) =>
+              ctx.self ! StartEncodeLoop
+            case Failure(e) =>
+              encodeType match {
+                case EncoderType.STREAM =>
+                  log.info(s"streamEncoder start failed: $e")
+                  replyTo ! Messages.StreamCannotBeEncoded
+                case EncoderType.FILE =>
+                  log.info(s"fileEncoder start failed: $e")
+                  replyTo ! Messages.CannotSaveToFile
+                  ctx.self ! StopEncode
+                case EncoderType.BILIBILI =>
+                  log.info(s"fileEncoder start failed: $e")
+                  replyTo ! Messages.CannotRecordToBiliBili
+              }
+          }
+          Behaviors.same
+
         case StartEncodeLoop =>
-          debug(s"frameRate: ${encoder.getFrameRate}, interval: ${1000 / encoder.getFrameRate}")
+          log.debug(s"frameRate: ${encoder.getFrameRate}, interval: ${1000 / encoder.getFrameRate}")
 
           val encodeLoopExecutor = new ScheduledThreadPoolExecutor(1)
           val loop = encodeLoopExecutor.scheduleAtFixedRate(
@@ -119,8 +136,7 @@ object EncodeActor {
             ((1000.0 / encoder.getFrameRate) * 1000).toLong,
             TimeUnit.MICROSECONDS
           )
-
-          working(replyTo, encodeType, encoder, imageCache, imageConverter, needImage, needSound, Some(loop), Some(encodeLoopExecutor), frameNumber)
+          working(replyTo, encodeType, encoder, imageCache, needImage, needSound, Some(loop), Some(encodeLoopExecutor), frameNumber)
 
         case EncodeLoop =>
           if(needImage) {
@@ -150,12 +166,12 @@ object EncodeActor {
             encoder.setTimestamp((frameNumber * (1000.0 / encoder.getFrameRate) * 1000).toLong)
             encoder.record(imageConverter.convert(noImageImg))
           }
-          working(replyTo, encodeType, encoder, imageCache, imageConverter, needImage, needSound, encodeLoop, encodeExecutor, frameNumber + 1)
+          working(replyTo, encodeType, encoder, imageCache, needImage, needSound, encodeLoop, encodeExecutor, frameNumber + 1)
 
         case msg: EncodeSamples =>
           if (encodeLoop.nonEmpty && needSound) {
             try {
-              encoder.recordSamples(msg.sampleRate, msg.channel, msg.samples)
+                encoder.recordSamples(msg.sampleRate, msg.channel, msg.samples)
             } catch {
               case ex: Exception =>
                 log.warn(s"Encoder-$encodeType encode samples error: $ex")
@@ -163,9 +179,23 @@ object EncodeActor {
           }
           Behaviors.same
 
-        case msg: HostBan4Encode =>
-          log.debug(s"host ban image=${msg.image}, sound=${msg.sound}")
-          working(replyTo, encodeType, encoder, imageCache, imageConverter, needImage = msg.image, needSound = msg.sound, encodeLoop, encodeExecutor, frameNumber)
+        case ChangeEncoder(newEncoder, newNeedImage, newNeedSound) =>
+          encodeLoop.foreach(_.cancel(false))
+          encodeExecutor.foreach(_.shutdown())
+          try {
+            encoder.releaseUnsafe()
+            log.info(s"release encode resources.")
+            ctx.self ! StartNewEncoder
+          } catch {
+            case ex: Exception =>
+              log.warn(s"release encode error: $ex")
+              ex.printStackTrace()
+          }
+          working(replyTo, encodeType, newEncoder, imageCache, newNeedImage, newNeedSound, None, None, 0)
+
+        case msg:HostBan4Encode =>
+          log.debug(s"change state, do not change encoder")
+          working(replyTo, encodeType, encoder, imageCache, msg.image, msg.sound, encodeLoop, encodeExecutor, frameNumber)
 
         case StopEncode =>
           log.info(s"encoding stopping...")

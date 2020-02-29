@@ -704,7 +704,7 @@ object RmManager {
 
         case msg: HostBan4Rm =>
           log.debug(s"now the setting is image:${msg.image}, sound:${msg.sound}")
-          liveManager ! LiveManager.HostBan4Live(msg.image, msg.sound)
+          liveManager ! LiveManager.HostBan4Live(None, msg.image, msg.sound)
           Behaviors.same
 
         case StopSelf =>

@@ -72,7 +72,7 @@ object ImageActor {
         (1000 / frameRate) millis //interval between two frames
       )
       //      hasTimer = true
-      playing(id, gc, playerGrabber, immutable.Queue[AddPicture](), 0, 0L, 0L, 0L)
+      playing(id, gc, playerGrabber, immutable.Queue[AddPicture](), 0, 0L, 0L)
     }
   }
 
@@ -83,7 +83,6 @@ object ImageActor {
     playerGrabber: ActorRef[PlayerGrabber.MonitorCmd],
     queue: immutable.Queue[AddPicture],
     playedImages: Int,
-    lastPlayTimeInWallClock: Long,
     ImagePlayedTime: Long,
     audioPlayedTime: Long
   )(
@@ -111,7 +110,6 @@ object ImageActor {
         Behaviors.same
 
       case m: AddPicture =>
-        //        debug(s"PicturePlayActor got $m")
         val newQueue = queue.enqueue(m)
         playing(
           id,
@@ -119,21 +117,17 @@ object ImageActor {
           playerGrabber,
           newQueue,
           playedImages,
-          lastPlayTimeInWallClock,
           ImagePlayedTime,
           audioPlayedTime
         )
 
       case AudioPlayedTimeUpdated(apt) =>
-
-        //        debug(s"--------------- audioTime[$apt] - videoTime[$videoPlayedTime] = ${apt - videoPlayedTime}")
         playing(
           id,
           gc,
           playerGrabber,
           queue,
           playedImages,
-          lastPlayTimeInWallClock,
           ImagePlayedTime,
           apt
         )
@@ -144,26 +138,25 @@ object ImageActor {
 //          println(s"image play time over")
 //          Behaviors.same
 //        } else {
-          if (queue.nonEmpty) {
-            if (needSound && hasAudio && (audioPlayedTime != Long.MaxValue) && audioPlayedTime - ImagePlayedTime > 50000) {
+        if (queue.nonEmpty) {
+          val (add, newQueue) = queue.dequeue
+          if (needSound && hasAudio && (audioPlayedTime != Long.MaxValue) && audioPlayedTime - ImagePlayedTime > 50000) {
               ctx.self ! TryPlayImageTick
-            }
-            val (newQueue, newImagePlayedTime, playTimeInWallClock) = drawPicture(id, gc, queue, ImagePlayedTime)
-            playing(
-              id,
-              gc,
-              playerGrabber,
-              newQueue,
-              playedImages + 1,
-              playTimeInWallClock,
-              newImagePlayedTime,
-              audioPlayedTime)
+          }
+          drawPicture(id, gc, add.img)
+          val newImagePlayedTime = getPlayedTime(add.timestamp, ImagePlayedTime)
+          playing(
+            id,
+            gc,
+            playerGrabber,
+            newQueue,
+            playedImages + 1,
+            newImagePlayedTime,
+            audioPlayedTime)
           } else {
             playerGrabber ! PlayerGrabber.AskPicture(Left(ctx.self))
             Behaviors.same
           }
-
-//        }
 
       case msg: PictureFinish =>
         log.info(s"ImageActor-$id got PictureFinish")
@@ -181,10 +174,8 @@ object ImageActor {
   }
 
 
-  private def drawPicture(id: String, gc: GraphicsContext, queue: immutable.Queue[AddPicture], imagePlayedTime: Long) = {
+  private def drawPicture(id: String, gc: GraphicsContext, img:Image) = {
     //draw picture
-    val (AddPicture(img, pictureTs), newQueue) = queue.dequeue
-    val playTimeInWallClock = System.currentTimeMillis() //实际播放时间
     Platform.runLater { () =>
       val sW = gc.getCanvas.getWidth
       val sH = gc.getCanvas.getHeight
@@ -211,21 +202,15 @@ object ImageActor {
           gc.drawImage(img, (sW - w * sH / h) / 2, 0, w * sH / h, sH)
         }
       }
-
     }
-    val newImagePlayedTime = //时间戳
-      if (hasPictureTs) {
-        pictureTs
-      } else {
-        imagePlayedTime + (1000000 / frameRate)
-      }
-    (newQueue, newImagePlayedTime, playTimeInWallClock)
   }
 
-  //  private def drawWaiting(gc: GraphicsContext): Unit = {
-  //    val sWidth = gc.getCanvas.getWidth
-  //    val sHeight = gc.getCanvas.getHeight
-  //    gc.drawImage(waiting, sWidth/2 +25, sHeight/2 + 25, 50, 50)
-  //  }
+  private def getPlayedTime(picTs:Long, imagePlayedTime: Long) = {
+    if (hasPictureTs) {
+      picTs
+    } else {
+      imagePlayedTime + (1000000 / frameRate)
+    }
+  }
 
 }

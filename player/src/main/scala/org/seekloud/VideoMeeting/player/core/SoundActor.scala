@@ -62,7 +62,7 @@ object SoundActor {
         (1000 * nbSamples / sampleRate) millisecond
       )
       val bytesPerSecond = ((audioFormat.getSampleSizeInBits + 7) / 8 * audioFormat.getChannels * audioFormat.getSampleRate).toInt
-      working(id, sdl, nbSamples, sampleRate, playerGrabber, immutable.Queue[Array[Byte]](), 0L, sdl.available(), imageActor, bytesPerSecond)
+      working(id, sdl, nbSamples, sampleRate, playerGrabber, immutable.Queue[Array[Byte]](), 0L, imageActor, bytesPerSecond)
     }
   }
 
@@ -74,7 +74,6 @@ object SoundActor {
     playerGrabber: ActorRef[PlayerGrabber.MonitorCmd],
     samplesQueue: immutable.Queue[Array[Byte]],
     playedSamplesByte: Long,
-    lastAvailable: Int,
     imageActorOpt: Option[ActorRef[ImageActor.ImageCmd]],
     bytePerSecond: Int
   )(
@@ -100,7 +99,6 @@ object SoundActor {
         Behaviors.same
 
       case AddSamples(samples, ts) =>
-        //TODO first sample is not begin at 0 timestamp.
         val newPlayedSamplesByte =
           if (playedSamplesByte == 0 && ts > 0) {
             ts * bytePerSecond / 1000000
@@ -117,7 +115,6 @@ object SoundActor {
           playerGrabber,
           newQueue,
           newPlayedSamplesByte,
-          lastAvailable,
           imageActorOpt,
           bytePerSecond
         )
@@ -125,15 +122,10 @@ object SoundActor {
       case TryPlaySoundTick =>
         //        debug(s"AudioPlayer-$id got PlayBufferedSample")
         //FIXME available is a sync func
-        if (samplesQueue.size < 3) playerGrabber ! PlayerGrabber.AskSamples(Left(ctx.self))
+        if (samplesQueue.size < 2) playerGrabber ! PlayerGrabber.AskSamples(Left(ctx.self))
 
         if (samplesQueue.nonEmpty) {
           val available = sdl.available()
-          val newPlayedSamples = available - lastAvailable + playedSamplesByte
-
-          val playedTime = newPlayedSamples * 1000000 / bytePerSecond // in us
-          imageActorOpt.foreach(_ ! ImageActor.AudioPlayedTimeUpdated(playedTime))
-
           val (newQueue, newAvailable) =
             if (available > samplesQueue.head.length) {
               val (head, queue) = samplesQueue.dequeue
@@ -143,6 +135,10 @@ object SoundActor {
             } else {
               (samplesQueue, available)
             }
+          val newPlayedSamples = available - newAvailable + playedSamplesByte
+          val playedTime = newPlayedSamples * 1000000 / bytePerSecond // in us
+          imageActorOpt.foreach(_ ! ImageActor.AudioPlayedTimeUpdated(playedTime))
+
           working(
             id,
             sdl,
@@ -151,7 +147,6 @@ object SoundActor {
             playerGrabber,
             newQueue,
             newPlayedSamples,
-            newAvailable,
             imageActorOpt,
             bytePerSecond
           )

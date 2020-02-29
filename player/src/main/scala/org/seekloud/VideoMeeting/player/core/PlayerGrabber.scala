@@ -431,17 +431,15 @@ object PlayerGrabber {
           samplesQueue.offer(sampleData)
         } else {
           log.warn("warning: no samples to buffer.")
+          pictureQueue.clear()
         }
       }
     }
-
-    var picCount = 0
 
     @inline
     def bufferPicture(frame: Frame) = {
       if (frame != null) {
         if (frame.image != null) {
-          picCount += 1
           val img = imgConverter.convert(frame)
           pictureQueue.offer(AddPicture(img, frame.timestamp))
         } else {
@@ -484,7 +482,7 @@ object PlayerGrabber {
                       frameCont += 1
                     }
                     grabFinish = frame == null
-                    bufferSample(frame)
+                    if(frameCont < 10) bufferSample(frame)
                   }
                   ctx.self ! StartGrab
                 } else {

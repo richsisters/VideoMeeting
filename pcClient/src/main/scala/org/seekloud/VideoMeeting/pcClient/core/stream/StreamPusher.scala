@@ -39,6 +39,8 @@ object StreamPusher {
 
   final case object StopSelf extends PushCommand
 
+  final case class NewOutPut(Image:Boolean, sound:Boolean) extends PushCommand
+
   private object PUSH_STREAM_TIMER_KEY
   def create(
     liveId: String,
@@ -149,6 +151,14 @@ object StreamPusher {
           }
           ctx.self ! PushStream
           Behaviors.same
+
+        case msg:NewOutPut =>
+          log.debug(s"need new out put....")
+          val mediaPipe = Pipe.open() //client -> sink -> source -> server
+          val sink = mediaPipe.sink()
+          val source = mediaPipe.source()
+          parent ! LiveManager.HostBan4Live(Some(Channels.newOutputStream(sink)), msg.Image, msg.sound)
+          pushing(liveId, liveCode, parent, pushClient, captureActor, source, dataBuff)
 
         case msg: PushStreamError =>
           log.info(s"StreamPusher-$liveId push ${msg.liveId} error: ${msg.msg}")

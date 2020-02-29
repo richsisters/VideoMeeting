@@ -100,7 +100,6 @@ object SoundCapture {
                 ByteBuffer.wrap(audioBytes).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer.get(samples)
               case _ => //invalid
             }
-
             val sp = ShortBuffer.wrap(samples, 0, nSamplesRead)
             if (askFlag) replyTo ! Messages.SoundRsp(LatestSound(sp, System.currentTimeMillis()))
             encoders.foreach(_._2 ! EncodeActor.EncodeSamples(sampleRate.toInt, channels, sp))

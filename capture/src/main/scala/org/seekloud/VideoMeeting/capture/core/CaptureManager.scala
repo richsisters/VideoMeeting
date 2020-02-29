@@ -290,7 +290,9 @@ object CaptureManager {
     desktopCaptureOpt: Option[ActorRef[DesktopCapture.Command]] = None,
     montageActor: ActorRef[MontageActor.Command],
     soundCaptureOpt: Option[ActorRef[SoundCapture.Command]] = None,
-    encodeActorMap: mutable.HashMap[EncoderType.Value, ActorRef[EncodeActor.Command]])(
+    encodeActorMap: mutable.HashMap[EncoderType.Value, ActorRef[EncodeActor.Command]],
+    outputStream: Option[OutputStream] = None,
+    encoderNoSound: Boolean = false)(
     implicit stashBuffer: StashBuffer[Command],
     timer: TimerScheduler[Command]
   ): Behavior[Command] = {
@@ -331,7 +333,17 @@ object CaptureManager {
             new FFmpegFrameRecorder(msg.outputStream, grabber.get.getImageWidth, grabber.get.getImageHeight, mediaSettings.channels)
           }
           setEncoder(ctx, mediaSettings, streamEncoder, EncoderType.STREAM, imageCaptureOpt, soundCaptureOpt, encodeActorMap, replyTo)
-          Behaviors.same
+          idle(
+            replyTo,
+            mediaSettings,
+            grabber,
+            line,
+            imageCaptureOpt,
+            desktopCaptureOpt,
+            montageActor,
+            soundCaptureOpt,
+            encodeActorMap,
+            Some(msg.outputStream))
 
         case StopEncodeStream =>
           encodeActorMap.get(EncoderType.STREAM).foreach(_ ! EncodeActor.StopEncode)
@@ -339,8 +351,36 @@ object CaptureManager {
           Behaviors.same
 
         case msg: HostBan4Manager =>
-          encodeActorMap.get(EncoderType.STREAM).foreach(_ ! EncodeActor.HostBan4Encode(msg.image, msg.sound))
-          Behaviors.same
+          val newEncoderNoSound = if(!msg.sound && !encoderNoSound){
+            log.debug(s"nonononono sound")
+            val newStreamEncoder = new FFmpegFrameRecorder(msg.outputStream.get, grabber.get.getImageWidth, grabber.get.getImageHeight)
+            setEncoder(newStreamEncoder, mediaSettings, msg.sound)
+            encodeActorMap.get(EncoderType.STREAM).foreach(_ ! EncodeActor.ChangeEncoder(newStreamEncoder, msg.image, msg.sound))
+            true
+          }else if(msg.sound && encoderNoSound){
+            log.debug("neeed sound")
+            val newStreamEncoder = new FFmpegFrameRecorder(msg.outputStream.get, grabber.get.getImageWidth, grabber.get.getImageHeight, mediaSettings.channels)
+            setEncoder(newStreamEncoder, mediaSettings, msg.sound)
+            encodeActorMap.get(EncoderType.STREAM).foreach(_ ! EncodeActor.ChangeEncoder(newStreamEncoder, msg.image, msg.sound))
+            false
+          } else{
+            log.debug("neeed or noneed image")
+            encodeActorMap.get(EncoderType.STREAM).foreach(_ ! EncodeActor.HostBan4Encode(msg.image, msg.sound))
+            encoderNoSound
+          }
+          idle(
+            replyTo,
+            mediaSettings,
+            grabber,
+            line,
+            imageCaptureOpt,
+            desktopCaptureOpt,
+            montageActor,
+            soundCaptureOpt,
+            encodeActorMap,
+            outputStream,
+            newEncoderNoSound
+          )
 
         case msg: RecordToBiliBili =>
           log.info(s"Start record to bilibili")
@@ -571,6 +611,30 @@ object CaptureManager {
     }
   }
 
+  def setEncoder(encoder:FFmpegFrameRecorder, mediaSettings: MediaSettings, sound:Boolean) = {
+    encoder.setFormat("mpegts")
+
+    /*video*/
+    encoder.setVideoOption("tune", "zerolatency")
+    encoder.setVideoOption("preset", "ultrafast")
+    encoder.setVideoOption("crf", "25")
+    //    encoder.setVideoOption("keyint", "1")
+    encoder.setVideoBitrate(mediaSettings.outputBitrate)
+    encoder.setVideoCodec(mediaSettings.videoCodec)
+    encoder.setFrameRate(mediaSettings.frameRate)
+
+    /*audio*/
+    if(sound){
+      encoder.setAudioOption("crf", "0")
+      encoder.setAudioQuality(0)
+      encoder.setAudioBitrate(192000)
+      encoder.setSampleRate(mediaSettings.sampleRate.toInt)
+      encoder.setAudioChannels(mediaSettings.channels)
+      encoder.setAudioCodec(mediaSettings.audioCodec)
+    }
+
+  }
+
   def setEncoder(
     ctx: ActorContext[Command],
     mediaSettings: MediaSettings,
@@ -688,14 +752,13 @@ object CaptureManager {
     encodeType: EncoderType.Value,
     encoder: FFmpegFrameRecorder,
     imageCache: LinkedBlockingDeque[LatestFrame],
-    //    soundCache: LinkedBlockingDeque[LatestSound],
     needImage: Boolean,
     needSound: Boolean,
     debug: Boolean
   ) = {
     val childName = s"EncodeActor-$encodeType"
     ctx.child(childName).getOrElse {
-      val actor = ctx.spawn(EncodeActor.create(replyTo, encodeType, encoder, imageCache, needImage, needSound, debug, needTimeMark), childName, blockingDispatcher)
+      val actor = ctx.spawn(EncodeActor.create(replyTo, encodeType, encoder, imageCache, needImage, needSound), childName, blockingDispatcher)
       ctx.watchWith(actor, ChildDead(childName, actor))
       actor
     }.unsafeUpcast[EncodeActor.Command]

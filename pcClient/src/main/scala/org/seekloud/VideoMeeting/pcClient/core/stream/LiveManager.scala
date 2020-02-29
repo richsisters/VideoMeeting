@@ -1,5 +1,7 @@
 package org.seekloud.VideoMeeting.pcClient.core.stream
 
+import java.io.OutputStream
+
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
 import akka.actor.typed.{ActorRef, Behavior, DispatcherSelector}
 import akka.actor.typed.scaladsl.AskPattern._
@@ -70,7 +72,7 @@ object LiveManager {
 
   final case class PullerStopped(liveId: String) extends LiveCommand
 
-  final case class HostBan4Live(image: Boolean, sound: Boolean) extends LiveCommand with CaptureActor.CaptureCommand
+  final case class HostBan4Live(out: Option[OutputStream], image: Boolean, sound: Boolean) extends LiveCommand with CaptureActor.CaptureCommand
 
   private object PUSH_RETRY_TIMER_KEY
 
@@ -95,7 +97,8 @@ object LiveManager {
     streamPusher: Option[ActorRef[StreamPusher.PushCommand]] = None,
     mediaCapture: Option[MediaCapture] = None,
     isStart: Boolean,
-    isRegular: Boolean
+    isRegular: Boolean,
+    beforeSound: Boolean = true
   )(
     implicit stashBuffer: StashBuffer[LiveCommand],
     timer: TimerScheduler[LiveCommand]
@@ -107,7 +110,7 @@ object LiveManager {
           val mediaCapture = MediaCapture(captureActor, debug = AppSettings.captureDebug, needTimestamp = AppSettings.needTimestamp)
           captureActor ! CaptureActor.GetMediaCapture(mediaCapture)
           mediaCapture.start()
-          idle(parent, mediaPlayer, streamPuller, Some(captureActor), streamPusher, Some(mediaCapture), isStart = isStart, isRegular = isRegular)
+          idle(parent, mediaPlayer, streamPuller, Some(captureActor), streamPusher, Some(mediaCapture), isStart, isRegular, beforeSound)
 
         case DeviceOff =>
           captureActor.foreach(_ ! CaptureActor.StopCapture)
@@ -122,8 +125,12 @@ object LiveManager {
           Behaviors.same
 
         case msg: HostBan4Live =>
-          captureActor.foreach(_ ! msg)
-          Behaviors.same
+          if(msg.out.isEmpty && msg.sound != beforeSound){
+            streamPusher.foreach(_ ! StreamPusher.NewOutPut(msg.image, msg.sound))
+          }else{
+            captureActor.foreach(_ ! msg)
+          }
+          idle(parent, mediaPlayer, streamPuller, captureActor, streamPusher, isStart = isStart, isRegular = isRegular, beforeSound = msg.sound)
 
         case msg: PushStream =>
           log.debug(s"prepare push stream.")
@@ -136,7 +143,7 @@ object LiveManager {
             val rtpClient = new PushStreamClient(AppSettings.host, NetUtil.getFreePort, pushChannel.serverPushAddr, pusher,AppSettings.rtpServerDst)
             mediaCapture.foreach(_.setTimeGetter(rtpClient.getServerTimestamp))
             pusher ! StreamPusher.InitRtpClient(rtpClient)
-            idle(parent, mediaPlayer, streamPuller, captureActor, Some(pusher), isStart = isStart, isRegular = isRegular)
+            idle(parent, mediaPlayer, streamPuller, captureActor, Some(pusher), isStart = isStart, isRegular = isRegular, beforeSound = beforeSound)
           } else {
             log.info(s"waiting for old pusher stop.")
             ctx.self ! StopPush
@@ -165,7 +172,7 @@ object LiveManager {
             val rtpClient = new PullStreamClient(AppSettings.host, NetUtil.getFreePort, pullChannel.serverPullAddr, puller, AppSettings.rtpServerDst)
             puller ! StreamPuller.InitRtpClient(rtpClient)
             streamPuller.put(msg.liveId, puller)
-            idle(parent, mediaPlayer, streamPuller, captureActor, streamPusher, isStart = true, isRegular = isRegular)
+            idle(parent, mediaPlayer, streamPuller, captureActor, streamPusher, isStart = true, isRegular = isRegular, beforeSound = beforeSound)
           } else {
             log.info(s"waiting for old puller-${msg.liveId} stop.")
             ctx.self ! StopPull(msg.liveId)
@@ -193,16 +200,16 @@ object LiveManager {
 
         case PusherStopped =>
           log.info(s"LiveManager got pusher stopped.")
-          idle(parent, mediaPlayer, streamPuller, captureActor, None, isStart = isStart, isRegular = isRegular)
+          idle(parent, mediaPlayer, streamPuller, captureActor, None, isStart = isStart, isRegular = isRegular, beforeSound = beforeSound)
 
         case msg:PullerStopped =>
           log.info(s"LiveManager got puller stopped.")
           streamPuller.remove(msg.liveId)
-          idle(parent, mediaPlayer, streamPuller, captureActor, streamPusher, isStart = false, isRegular = false)
+          idle(parent, mediaPlayer, streamPuller, captureActor, streamPusher, isStart = false, isRegular = false, beforeSound = beforeSound)
 
         case Ask4State(reply) =>
           reply ! isStart
-          idle(parent, mediaPlayer,streamPuller, captureActor, streamPusher, isStart = isStart, isRegular = true)
+          idle(parent, mediaPlayer,streamPuller, captureActor, streamPusher, isStart = isStart, isRegular = true, beforeSound = beforeSound)
 
         case ChildDead(child, childRef) =>
           log.debug(s"LiveManager unWatch child-$child")
