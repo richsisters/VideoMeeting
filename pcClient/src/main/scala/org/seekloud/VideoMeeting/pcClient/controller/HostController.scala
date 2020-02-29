@@ -90,6 +90,10 @@ class HostController(
     override def cancelBan(userId: Long, image: Boolean, sound: Boolean): Unit = {
       rmManager ! RmManager.CancelBan(userId, image, sound)
     }
+
+    override def Designated2Speak(userId: Long): Unit = {
+      rmManager ! RmManager.Speak(userId)
+    }
   })
 
 

@@ -126,7 +126,7 @@ object RmManager {
 
   final case class CancelBan(userId4Member: Long, image: Boolean, sound: Boolean) extends RmCommand
 
-  final case class SpeakerRight(userId4Member: Long) extends RmCommand
+  final case class Speak(userId4Member: Long) extends RmCommand
 
 
   /*观众*/
@@ -492,6 +492,11 @@ object RmManager {
           log.debug(s"send cancelBan-${image}-${sound} to roomManager...")
           sender.foreach(_ ! AuthProtocol.CancelBan(userId4Member, image, sound))
           Behaviors.same
+
+        case Speak(userId4Member) =>
+          log.info(s"主持人指定用户$userId4Member 发言")
+          sender.foreach(_ ! AuthProtocol.SpeakerRight(userId4Member))
+          Behavior.same
 
         case x =>
           log.warn(s"unknown msg in host: $x")
