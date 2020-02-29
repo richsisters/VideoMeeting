@@ -211,11 +211,10 @@ object StreamPuller {
         case StopPull =>
           log.info(s"StreamPuller-$liveId is stopping while pulling.")
           val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
-          println("1111111111111111111111" + playId)
-          if(audienceScene.nonEmpty){
-            mediaPlayer.stop(playId, audienceScene.get.resetBack)
-          } else if(hostScene.nonEmpty){
+          if(hostScene.nonEmpty){
             mediaPlayer.stop(playId, hostScene.get.resetBack)
+          } else if(audienceScene.nonEmpty){
+            mediaPlayer.stop(playId, audienceScene.get.resetBack)
           }
           try pullClient.close()
           catch {

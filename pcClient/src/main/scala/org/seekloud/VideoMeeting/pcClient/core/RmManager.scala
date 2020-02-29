@@ -475,7 +475,7 @@ object RmManager {
           Behaviors.stopped
 
         case ForceExit(userId4Member, userName4Member) =>
-          log.debug("send forceexit to roomManager...")
+          log.debug("send force exit to roomManager...")
           sender.foreach(_ ! AuthProtocol.ForceExit(userId4Member, userName4Member))
           Behaviors.same
 
@@ -659,6 +659,9 @@ object RmManager {
 
         case msg: AudienceExit =>
           log.info(s"${ctx.self} receive a msg $msg")
+          val playId = Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = audienceScene.getRoomInfo.roomId)
+          liveManager ! LiveManager.SwitchMediaMode(isJoin = true, audienceScene.resetBack)
+          mediaPlayer.stop(playId, audienceScene.resetBack)
           liveManager ! LiveManager.StopPull(msg.liveId)
           Behaviors.same
 
@@ -688,13 +691,18 @@ object RmManager {
           assert(userInfo.nonEmpty)
           timer.cancel(HeartBeat)
           timer.cancel(PingTimeOut)
-          sender.foreach(_ ! CompleteMsgClient)
-
           /*断开连线，停止推拉*/
+          val playId = Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = audienceScene.getRoomInfo.roomId)
+          mediaPlayer.stop(playId, audienceScene.resetBack)
+
+          val playId1 = Ids.getPlayId(AudienceStatus.CONNECT, roomId = audienceScene.getRoomInfo.roomId)
+          mediaPlayer.stop(playId1, audienceScene.resetBack)
+
           liveManager ! LiveManager.SwitchMediaMode(isJoin = false, audienceScene.loadingBack)
           liveManager ! LiveManager.StopPullAll
           liveManager ! LiveManager.StopPush
           liveManager ! LiveManager.DeviceOff
+          sender.foreach(_ ! CompleteMsgClient)
 
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, AudienceStatus.LIVE)
 
