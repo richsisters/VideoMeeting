@@ -62,7 +62,8 @@ object HostScene {
                          userInfo: StringProperty,
                          banOnImage: ObjectProperty[ToggleButton],
                          banOnSound: ObjectProperty[ToggleButton],
-                         exitBtn: ObjectProperty[Button]
+                         exitBtn: ObjectProperty[Button],
+                         speakBtn: ObjectProperty[ToggleButton]
                        ){
     def getUserInfo: String = userInfo.get()
 
@@ -79,6 +80,10 @@ object HostScene {
     def getBanOnSound: ToggleButton = banOnSound.get()
 
     def setBanOnSound(btn: ToggleButton): Unit = banOnSound.set(btn)
+
+    def getSpeakBtn: ToggleButton = speakBtn.get()
+
+    def setSpeakBtn(btn: ToggleButton): Unit = speakBtn.set(btn)
   }
 
   trait HostSceneListener {
@@ -113,6 +118,8 @@ object HostScene {
     def banMember(userId: Long, image: Boolean, sound:Boolean)
 
     def cancelBan(userId: Long, image: Boolean, sound:Boolean)
+
+    def Designated2Speak(userId: Long)
   }
 
 }
@@ -161,18 +168,10 @@ class HostScene(stage: Stage) {
 
   startBtn.setOnAction {
     _ =>
-//      if(startBtn.isSelected && isLive){
+
       listener.startMeetingRecord()
       connectionStateText.setText("录像中")
-//        startBtn.setText("结束会议")
-//      }else{
-//        listener.stopMeeting()
-//        liveBar.soundToggleButton.setDisable(false)
-//        liveBar.imageToggleButton.setDisable(false)
-//        liveBar.endTimer()
-//        isLive = false
-//        startBtn.setText("开始会议")
-//      }
+
   }
 
 
@@ -356,10 +355,10 @@ class HostScene(stage: Stage) {
     val banOnSound = new ToggleButton("")
     banOnSound.getStyleClass.add("hostScene-bottomArea-tableBtn")
 
-    val speakBtn = new Button("", new ImageView("img/喇叭.png"))
-    speakBtn.getStyleClass.add("hostScene-middleArea-tableBtn")
+    val speakBtn = new ToggleButton("")
+    speakBtn.getStyleClass.add("hostScene-speak-tableBtn")
 
-    val btnList = List(exitBtn, banOnImage, banOnSound)
+    val btnList = List(exitBtn, banOnImage, banOnSound, speakBtn)
     val glow = new Glow()
     btnList.foreach{btn =>
       btn.addEventHandler(MouseEvent.MOUSE_ENTERED, (_: MouseEvent) => {
@@ -374,7 +373,8 @@ class HostScene(stage: Stage) {
       new SimpleStringProperty(s"$userName($userId)"),
       new SimpleObjectProperty[ToggleButton](banOnImage),
       new SimpleObjectProperty[ToggleButton](banOnSound),
-      new SimpleObjectProperty[Button](exitBtn)
+      new SimpleObjectProperty[Button](exitBtn),
+      new SimpleObjectProperty[ToggleButton](speakBtn)
     )
 
     exitBtn.setOnAction{event =>
@@ -402,6 +402,16 @@ class HostScene(stage: Stage) {
         log.debug(s"开启用户$userId 声音...")
         listener.cancelBan(userId, !banOnSound.isSelected, true)
         Tooltip.install(banOnImage, new Tooltip("点击屏蔽该用户声音"))
+      }
+    }
+
+    speakBtn.setOnAction{_ =>
+      if(speakBtn.isSelected){
+        log.info(s"指定用户$userId 发言")
+        listener.Designated2Speak(userId)
+      }else{
+        log.info(s"取消用户$userId 发言")
+//        listener.banMember(userId, banOnImage.isSelected, true)直接用屏蔽声音还是在写一个
       }
     }
 

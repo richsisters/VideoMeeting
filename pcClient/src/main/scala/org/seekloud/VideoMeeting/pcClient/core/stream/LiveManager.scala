@@ -192,9 +192,11 @@ object LiveManager {
 
         case StopPullAll => // 停止房间内的所有拉流信息
           log.info(s"LiveManager stop puller4All")
-          streamPuller.foreach { puller =>
-            log.info(s"stopping puller-${puller._1}")
-            puller._2 ! StreamPuller.StopPull
+          if(streamPuller.nonEmpty){
+            streamPuller.foreach { puller =>
+              log.info(s"stopping puller-${puller._1}")
+              puller._2 ! StreamPuller.StopPull
+            }
           }
           Behaviors.same
 

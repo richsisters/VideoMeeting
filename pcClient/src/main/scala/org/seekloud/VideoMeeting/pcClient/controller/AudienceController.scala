@@ -144,10 +144,11 @@ class AudienceController(
           }
 
         case msg:ForceExitRsp =>
-          WarningDialog.initWarningDialog(s"主持人强制用户${msg.userId}退出会议")
           if(RmManager.userInfo.nonEmpty && msg.userId == RmManager.userInfo.get.userId){
+            WarningDialog.initWarningDialog(s"主持人强制您退出会议")
             rmManager ! RmManager.StopJoinAndWatch
           } else if(RmManager.userInfo.nonEmpty && msg.userId != RmManager.userInfo.get.userId){
+            WarningDialog.initWarningDialog(s"主持人强制用户${msg.userId}退出会议")
             rmManager ! RmManager.AudienceExit(msg.liveId)
           }
           audienceScene.updateAttendList(msg.userId, msg.userName, false)
@@ -217,12 +218,23 @@ class AudienceController(
             }
           }
 
-        case HostDisconnect(hostLiveId) =>
-          Boot.addToPlatform {
-            WarningDialog.initWarningDialog("主持人连接断开，互动功能已关闭！")
+        case msg: SpeakerRightRsp=>
+          assert(RmManager.userInfo.nonEmpty)
+          val userId = RmManager.userInfo.get.userId
+          if(msg.userId == userId){
+            Boot.addToPlatform{
+              WarningDialog.initWarningDialog(s"主持人指定你为发言人")
+            }
+
+          } else{
+              Boot.addToPlatform{
+                WarningDialog.initWarningDialog(s"主持人指定用户${msg.userId}为发言人")
+              }
+              audienceScene.soundToggleBtn.setDisable(true)
+              audienceScene.soundToggleBtn.setSelected(false)
+              rmManager ! RmManager.HostBan4Rm(true, false)
           }
-          audienceScene.isLive = false
-          rmManager ! RmManager.StopJoinAndWatch
+
 
 
         case msg: HostCloseRoom =>
