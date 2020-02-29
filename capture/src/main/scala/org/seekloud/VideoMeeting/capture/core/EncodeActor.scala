@@ -33,6 +33,8 @@ object EncodeActor {
 
   private val noSoundImg = ImageIO.read(Boot.getClass.getResourceAsStream("/img/noSound.png"))
 
+  private val speakImg = ImageIO.read(Boot.getClass.getResourceAsStream("/img/speak.png"))
+
   private val noImageImg = ImageIO.read(Boot.getClass.getResourceAsStream("/img/noImage.png"))
 
   private val imageConverter = new Java2DFrameConverter()
@@ -144,12 +146,13 @@ object EncodeActor {
               val latestImage = imageCache.peek()
               if (latestImage != null){
                 encoder.setTimestamp((frameNumber * (1000.0 / encoder.getFrameRate) * 1000).toLong)
+                val iw = latestImage.frame.imageWidth
+                val ih = latestImage.frame.imageHeight
+                val bImg = imageConverter.convert(latestImage.frame)
                 if(needSound) {
-                  encoder.record(latestImage.frame)
+                  bImg.getGraphics.drawImage(speakImg, iw * 7/8, ih * 7/8, iw/8, ih/8, null)
+                  encoder.record(imageConverter.convert(bImg))
                 }else {
-                  val iw = latestImage.frame.imageWidth
-                  val ih = latestImage.frame.imageHeight
-                  val bImg = imageConverter.convert(latestImage.frame)
                   bImg.getGraphics.drawImage(noSoundImg, iw * 7/8, ih * 7/8, iw/8, ih/8, null)
                   encoder.record(imageConverter.convert(bImg))
                 }
