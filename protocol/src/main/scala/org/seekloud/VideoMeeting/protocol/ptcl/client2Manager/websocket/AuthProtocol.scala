@@ -155,8 +155,6 @@ object AuthProtocol {
 
   case class AudienceShutJoin(roomId: Long, userId: Long) extends WsMsgAudience //某个用户退出会议
 
-  case class HostDisconnect(hostLiveId: String) extends WsMsgRm2Audience //房主断开连线通知 (之后rm断开ws连接)
-
   case class HostCloseRoom() extends WsMsgRm2Audience //房主关闭房间通知房间所有用户
 
   case class UpdateRoomInfo2Client(
@@ -169,6 +167,8 @@ object AuthProtocol {
   case class BanOnMemberRsp(userId: Long, image: Boolean, sound: Boolean) extends WsMsgRm2Audience//用户被主持人屏蔽声音或者图像
 
   case class CancelBanOnMemberRsp(userId: Long, image: Boolean, sound: Boolean) extends WsMsgRm2Audience//用户被主持人取消屏蔽声音或者图像
+
+  case class SpeakerRightRsp(userId: Long) extends WsMsgRm2Audience //用户被主持人指定为发言者
 
   /**
     * 所有用户

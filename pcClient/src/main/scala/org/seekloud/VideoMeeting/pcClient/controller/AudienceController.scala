@@ -217,12 +217,23 @@ class AudienceController(
             }
           }
 
-        case HostDisconnect(hostLiveId) =>
-          Boot.addToPlatform {
-            WarningDialog.initWarningDialog("主持人连接断开，互动功能已关闭！")
+        case msg: SpeakerRightRsp=>
+          assert(RmManager.userInfo.nonEmpty)
+          val userId = RmManager.userInfo.get.userId
+          if(msg.userId == userId){
+            Boot.addToPlatform{
+              WarningDialog.initWarningDialog(s"主持人指定你为发言人")
+            }
+
+          } else{
+              Boot.addToPlatform{
+                WarningDialog.initWarningDialog(s"主持人指定用户${msg.userId}为发言人")
+              }
+              audienceScene.soundToggleBtn.setDisable(true)
+              audienceScene.soundToggleBtn.setSelected(false)
+              rmManager ! RmManager.HostBan4Rm(true, false)
           }
-          audienceScene.isLive = false
-          rmManager ! RmManager.StopJoinAndWatch
+
 
 
         case msg: HostCloseRoom =>
