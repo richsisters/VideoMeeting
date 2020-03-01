@@ -206,16 +206,16 @@ class AudienceController(
             }
             rmManager ! RmManager.HostBan4Rm(msg.image, msg.sound)
           } else{
-            if(msg.image){
+//            if(msg.image){
               Boot.addToPlatform{
-                WarningDialog.initWarningDialog(s"主持人取消屏蔽用户${msg.userId}的画面")
+                WarningDialog.initWarningDialog(s"主持人取消对用户${msg.userId}的屏蔽")
               }
-            }
-            if(msg.sound){
-              Boot.addToPlatform{
-                WarningDialog.initWarningDialog(s"主持人取消屏蔽用户${msg.userId}的声音")
-              }
-            }
+//            }
+//            if(msg.sound){
+//              Boot.addToPlatform{
+//                WarningDialog.initWarningDialog(s"主持人取消屏蔽用户${msg.userId}的声音")
+//              }
+//            }
           }
 
         case msg: SpeakerRightRsp=>
