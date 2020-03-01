@@ -177,7 +177,8 @@ object LiveManager {
             log.info(s"waiting for old puller-${msg.liveId} stop.")
             ctx.self ! StopPull(msg.liveId)
             timer.startSingleTimer(PULL_RETRY_TIMER_KEY, msg, 100.millis)
-            Behaviors.same
+            streamPuller.remove(msg.liveId)
+            idle(parent, mediaPlayer, streamPuller, captureActor, streamPusher, isStart = true, isRegular = isRegular, beforeSound = beforeSound)
           }
 
         case msg: StopPull =>
