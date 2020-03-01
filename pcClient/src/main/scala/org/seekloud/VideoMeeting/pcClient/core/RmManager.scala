@@ -498,7 +498,7 @@ object RmManager {
 
         case CancelSpeak(userId4Member) =>
           log.info(s"主持人取消用户$userId4Member 发言")
-          sender.foreach(_ ! AuthProtocol.CancelSpeakerRight(userId4Member))
+          sender.foreach(_ ! AuthProtocol.CancelSpeakerRight)
           Behavior.same
 
         case x =>

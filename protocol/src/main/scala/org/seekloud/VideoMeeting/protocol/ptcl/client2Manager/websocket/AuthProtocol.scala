@@ -119,7 +119,7 @@ object AuthProtocol {
 
   case class SpeakerRight(userId4Member: Long) extends WsMsgHost //指定某人发言
 
-  case class CancelSpeakerRight(userId4Member: Long) extends WsMsgHost //取消指定某人发言
+  case object CancelSpeakerRight extends WsMsgHost //取消指定某人发言
 
 
   /**
@@ -172,7 +172,7 @@ object AuthProtocol {
 
   case class SpeakerRightRsp(userId: Long) extends WsMsgRm2Audience //用户被主持人指定为发言者
 
-  case class CancelSpeakerRightRsp(userId: Long) extends WsMsgRm2Audience //用户被主持人取消指定为发言者
+  case object CancelSpeakerRightRsp extends WsMsgRm2Audience //用户被主持人取消指定为发言者
 
   /**
     * 所有用户
