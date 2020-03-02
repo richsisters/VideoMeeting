@@ -195,7 +195,10 @@ object ImageActor {
           gc.drawImage(img, (sW - w * sH / h) / 2 + sW / 2, 0, (w * sH / h) / 2, sH / 2)
         }
 
-      } else { //普通观看
+      } else if(id.contains("---")){ //四人连线状态
+        gc.drawImage(img, sW / 2, sH / 2, sW / 2, sH / 2)
+      }
+      else { //普通观看
         if (w / sW > h / sH) {
           gc.drawImage(img, 0, (sH - h * sW / w) / 2, sW, h * sW / w)
         } else {

@@ -130,7 +130,7 @@ object StreamPuller {
           val inputStream = Channels.newInputStream(source)
           audienceScene.foreach(_.resetBack())
           hostScene.foreach(_.resetBack())
-          val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
+          val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else if( index == 2) Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Fourth, roomId = pullInfo.roomId)
           mediaPlayer.setTimeGetter(playId, pullClient.get.getServerTimestamp)
           val videoPlayer = ctx.spawn(VideoPlayer.create(playId, audienceScene, None, None), s"videoPlayer$playId")
           mediaPlayer.start(playId, videoPlayer, Right(inputStream), Some(pullInfo.gc), None)
@@ -157,7 +157,7 @@ object StreamPuller {
 
         case StopPull =>
           log.info(s"StreamPuller-$liveId stopped in init.")
-          val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
+          val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else if( index == 2) Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Fourth, roomId = pullInfo.roomId)
           if(audienceScene.nonEmpty){
             mediaPlayer.stop(playId, audienceScene.get.resetBack)
           } else if(hostScene.nonEmpty){
@@ -210,7 +210,7 @@ object StreamPuller {
 
         case StopPull =>
           log.info(s"StreamPuller-$liveId is stopping while pulling.")
-          val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
+          val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else if( index == 2) Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Fourth, roomId = pullInfo.roomId)
           if(hostScene.nonEmpty){
             mediaPlayer.stop(playId, hostScene.get.resetBack)
           } else if(audienceScene.nonEmpty){
@@ -268,7 +268,7 @@ object StreamPuller {
 
         case StopPull =>
           log.info(s"StreamPuller-$liveId is stopping while busy.")
-          val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId)
+          val playId = if(index == 1) Ids.getPlayId(AudienceStatus.CONNECT, roomId = pullInfo.roomId) else if( index == 2) Ids.getPlayId(AudienceStatus.CONNECT2Third, roomId = pullInfo.roomId) else Ids.getPlayId(AudienceStatus.CONNECT2Fourth, roomId = pullInfo.roomId)
           if(audienceScene.nonEmpty){
             mediaPlayer.stop(playId, audienceScene.get.resetBack)
           } else if(hostScene.nonEmpty){

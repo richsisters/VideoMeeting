@@ -19,6 +19,7 @@ object Ids {
       case AudienceStatus.LIVE => s"room$roomId"
       case AudienceStatus.CONNECT => s"room$roomId-connect" // 第二个人进入时拉流
       case AudienceStatus.CONNECT2Third => s"room$roomId--connect" // 第三个人进入时
+      case AudienceStatus.CONNECT2Fourth => s"room$roomId---connect" //第四个人进入时
       case _ =>
         //do nothing
         ""

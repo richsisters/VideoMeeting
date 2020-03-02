@@ -705,6 +705,10 @@ object RmManager {
           val playId1 = Ids.getPlayId(AudienceStatus.CONNECT, roomId = audienceScene.getRoomInfo.roomId)
           mediaPlayer.stop(playId1, audienceScene.resetBack)
 
+          val playId2 = Ids.getPlayId(AudienceStatus.CONNECT2Fourth, roomId = audienceScene.getRoomInfo.roomId)
+          mediaPlayer.stop(playId2, audienceScene.resetBack)
+
+
           liveManager ! LiveManager.SwitchMediaMode(isJoin = false, audienceScene.loadingBack)
           liveManager ! LiveManager.StopPullAll
           liveManager ! LiveManager.StopPush

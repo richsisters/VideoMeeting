@@ -65,6 +65,7 @@ object Constants {
     val LIVE = 0
     val CONNECT = 1
     val CONNECT2Third = 2
+    val CONNECT2Fourth = 3
   }
 
   object WindowStatus{
