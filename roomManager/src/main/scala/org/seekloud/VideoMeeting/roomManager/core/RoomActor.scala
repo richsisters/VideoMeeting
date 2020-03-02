@@ -160,8 +160,6 @@ object RoomActor {
           handleWebSocketMsg(roomInfo, subscribe, liveInfoMap, startTime, roomState, dispatch(subscribe), dispatchTo(subscribe))(ctx, userId, roomId, wsMsg)
 
         case ActorProtocol.UpdateSubscriber(join, roomId, userId, temporary, userActorOpt) =>
-          //虽然房间存在，但其实主播已经关闭房间，这时的startTime=-1
-          //向所有人发送主播已经关闭房间的消息
           log.info(s"-----roomActor get UpdateSubscriber id: $roomId")
           if (startTime == -1) {
             dispatchTo(subscribe)(List((userId, temporary)), NoAuthor)
@@ -279,12 +277,12 @@ object RoomActor {
                 if(rsp.errCode == 0){
                   log.info(s"user$userId4Audience 申请liveInfo成功" + rsp.liveInfo)
                   if (userInfoOpt.nonEmpty) {
-                    liveInfoMap.put(userId4Audience, rsp.liveInfo)
                     val audienceInfo = AudienceInfo(userId4Audience, userInfoOpt.get.userName, userInfoOpt.get.headImg, rsp.liveInfo.liveId)
                     log.debug("向除该用户以外的参会者群发该用户信息....")
-                    dispatchTo(subscribers.filter(_._1._1 != userId4Audience).keys.toList, AudienceJoinRsp(Some(audienceInfo)))
+                    dispatchTo(subscribers.filter(u => liveInfoMap.keys.toList.contains(u._1._1)).keys.toList, AudienceJoinRsp(Some(audienceInfo)))
                     log.debug("向该用户发送JoinRsp...")
                     dispatchTo(List((userId4Audience, false)), JoinRsp(roomInfo.rtmp, Some(rsp.liveInfo), liveInfoMap.map(_._2.liveId).toList))
+                    liveInfoMap.put(userId4Audience, rsp.liveInfo)
                   } else {
                     log.debug(s"${ctx.self.path} 错误的userId,可能是数据库里没有用户,userId=$userId4Audience")
                     dispatchTo(List((roomInfo.userId, false)), AudienceJoinError)
@@ -349,11 +347,11 @@ object RoomActor {
         if(liveInfoMap.contains(userId4Member)){
           log.debug(s"user-$userId4Member can't ${if(image) "show up" else ""} ${if(sound) "and speak" else ""}")
           dispatchTo(subscribers.filter(_._1._1 != userId).keys.toList, BanOnMemberRsp(userId4Member, image, sound))
-          if(roomState){
-            ProcessorClient.banOnClient(roomId, liveInfoMap(userId4Member).liveId, image, sound)
-          } else{
-            log.debug(s"room-$roomId has not started record...")
-          }
+//          if(roomState){
+//            ProcessorClient.banOnClient(roomId, liveInfoMap(userId4Member).liveId, image, sound)
+//          } else{
+//            log.debug(s"room-$roomId has not started record...")
+//          }
         } else{
           log.debug(s"host ban user-$userId4Member, but there is no user!")
         }
@@ -363,11 +361,11 @@ object RoomActor {
         if(liveInfoMap.contains(userId4Member)){
           log.debug(s"user-$userId4Member begin to ${if(image) "show up" else ""} ${if(sound) "and speak" else ""}")
           dispatchTo(subscribers.filter(_._1._1 != userId).keys.toList, CancelBanOnMemberRsp(userId4Member, image, sound))
-          if(roomState){
-            ProcessorClient.cancelBan(roomId, liveInfoMap(userId4Member).liveId, image, sound)
-          } else{
-            log.debug(s"room-$roomId has not started record...")
-          }
+//          if(roomState){
+//            ProcessorClient.cancelBan(roomId, liveInfoMap(userId4Member).liveId, image, sound)
+//          } else{
+//            log.debug(s"room-$roomId has not started record...")
+//          }
         } else{
           log.debug(s"host cancel banning user-$userId4Member, but there is no user!")
         }
@@ -377,11 +375,10 @@ object RoomActor {
         if(liveInfoMap.contains(userId4Member)){
           log.debug(s"host specify user-$userId4Member to speak")
           dispatchTo(subscribers.filter(_._1._1 != userId).keys.toList, SpeakerRightRsp(userId4Member))
-          if(roomState){
-            //todo processor
-          } else{
-            log.debug(s"room-$roomId has not started record...")
-          }
+//          if(roomState){
+//          } else{
+//            log.debug(s"room-$roomId has not started record...")
+//          }
         } else{
           log.debug(s"host specify user-$userId4Member to speak, but there is no user!")
         }
@@ -391,11 +388,10 @@ object RoomActor {
 //        if(liveInfoMap.contains(userId4Member)){
           log.debug(s"host cancel user to speak")
           dispatchTo(subscribers.filter(_._1._1 != userId).keys.toList, CancelSpeakerRightRsp)
-          if(roomState){
-            //todo processor
-          } else{
-            log.debug(s"room-$roomId has not started record...")
-          }
+//          if(roomState){
+//          } else{
+//            log.debug(s"room-$roomId has not started record...")
+//          }
 //        } else{
 //          log.debug(s"host cancel user-$userId4Member to speak, but there is no user!")
 //        }
