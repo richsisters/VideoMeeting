@@ -639,7 +639,7 @@ object RmManager {
           audienceScene.audienceStatus = AudienceStatus.CONNECT
           audienceScene.resetBack()
           timer.startSingleTimer(PullDelay4Host, PullStream4Host(msg.hostLiveId), 1.seconds)
-          timer.startSingleTimer(PullDelay4Audience, PullStream4Others(msg.attendLiveId.filter(_ != msg.audienceLiveInfo.liveId)), 2.seconds)
+          timer.startSingleTimer(PullDelay4Audience, PullStream4Others(msg.attendLiveId), 2.seconds)
           audienceBehavior(stageCtx, homeController, roomController, audienceScene, audienceController, liveManager, mediaPlayer, sender, isStop, AudienceStatus.CONNECT)
 
         case msg: PullStream4Host =>
