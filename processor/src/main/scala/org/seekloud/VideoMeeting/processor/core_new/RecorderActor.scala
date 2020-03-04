@@ -238,7 +238,6 @@ object RecorderActor {
               val f = ffFilter.pullSamples().clone()
               if (f != null) {
                 recorder4ts.recordSamples(f.sampleRate, f.audioChannels, f.samples: _*)
-
               }
             } catch {
               case ex: Exception =>

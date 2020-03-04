@@ -77,7 +77,7 @@ object StreamRecordPipe {
           dataBuf.flip()
           if (r > 0) {
             val data = dataBuf.array().clone()
-            out.write(data)
+            out.write(data.take(r))
             ctx.self ! SendData
             dataBuf.clear()
           } else {
